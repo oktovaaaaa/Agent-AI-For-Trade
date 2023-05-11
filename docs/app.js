@@ -1424,8 +1424,29 @@ function attachSparklineHoverEvents(sparkBox, trendPoints, isBullish) {
     // Tampilkan Floating Tooltip
     if (tooltip && tDateEl && tCountEl) {
       tDateEl.innerText = closest.date;
-      tCountEl.innerText = `${closest.val} Saham Lolos`;
-      tooltip.style.left = `${closest.pctX}%`;
+      tCountEl.innerText = `${closest.val} Saham`;
+
+      tooltip.classList.remove("align-right", "align-left");
+
+      if (closest.pctX > 60) {
+        // Berada di sisi kanan, posisikan tooltip ke dalam agar tidak kepotong di mobile
+        tooltip.style.left = "auto";
+        tooltip.style.right = "0px";
+        tooltip.style.transform = "translate(0, -100%)";
+        tooltip.classList.add("align-right");
+      } else if (closest.pctX < 25) {
+        // Berada di sisi kiri
+        tooltip.style.left = "0px";
+        tooltip.style.right = "auto";
+        tooltip.style.transform = "translate(0, -100%)";
+        tooltip.classList.add("align-left");
+      } else {
+        // Berada di tengah
+        tooltip.style.left = `${closest.pctX}%`;
+        tooltip.style.right = "auto";
+        tooltip.style.transform = "translate(-50%, -100%)";
+      }
+
       tooltip.classList.add("visible");
     }
 
@@ -1446,6 +1467,7 @@ function attachSparklineHoverEvents(sparkBox, trendPoints, isBullish) {
 
   overlay.addEventListener("mousemove", handlePointerMove);
   overlay.addEventListener("mouseleave", handlePointerLeave);
+  overlay.addEventListener("touchstart", handlePointerMove, { passive: true });
   overlay.addEventListener("touchmove", handlePointerMove, { passive: true });
   overlay.addEventListener("touchend", handlePointerLeave);
 }

@@ -1094,6 +1094,17 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
   border-top: 4px solid #111827;
 }
 
+.spark-floating-tooltip.align-right::after {
+  left: auto;
+  right: 14px;
+  transform: none;
+}
+
+.spark-floating-tooltip.align-left::after {
+  left: 14px;
+  transform: none;
+}
+
 .spark-tooltip-date {
   color: #9CA3AF;
   font-size: 10.5px;
@@ -2053,6 +2064,7 @@ body.dark-theme .btn-chart {
     border-right: none !important;
     border-bottom: none !important;
     box-sizing: border-box !important;
+    overflow: visible !important;
   }
 
   /* Mode 4 Cards: Golden Cross dan Saham Pilihan membentuk grid 2x2 rapi & persis 50%:50% sejajar */
@@ -2139,6 +2151,7 @@ body.dark-theme .btn-chart {
     min-height: 42px !important;
     height: 42px !important;
     position: relative !important;
+    overflow: visible !important;
   }
 
   .metric-sparkline-box svg {
