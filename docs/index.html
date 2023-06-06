@@ -2729,6 +2729,63 @@ body.dark-theme .perf-toggle-btn {
   font-weight: 600;
 }
 
+/* Mini KPI Summary Bar di Bawah Sinyal Card Section 1 */
+.mini-kpi-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mini-kpi-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mini-kpi-item:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.mini-kpi-item.highlight {
+  background: rgba(16, 185, 129, 0.07);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.mini-kpi-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-kpi-val {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  line-height: 1.25;
+}
+
+.mini-kpi-sub {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 /* Professional Chart Box */
 .perf-chart-box {
   background: var(--bg-app);
@@ -2755,33 +2812,138 @@ body.dark-theme .perf-toggle-btn {
   gap: 6px;
 }
 
+.perf-chart-hint-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: rgba(16, 185, 129, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 .perf-chart-dates {
   color: var(--text-muted);
   font-size: 11px;
 }
 
+/* Live Inspector Bar di Atas Chart */
+.perf-chart-inspector {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 7px 11px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.perf-insp-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perf-insp-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--status-green);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  letter-spacing: 0.3px;
+}
+
+.perf-insp-date {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.perf-insp-metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.perf-insp-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 11.5px;
+}
+
+.perf-insp-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.perf-insp-val {
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-primary);
+}
+
+.perf-insp-sub {
+  font-size: 10.5px;
+}
+
+/* Scrollable Chart Viewport */
 .perf-chart-svg-wrap {
   width: 100%;
-  height: 140px;
+  height: 155px;
   position: relative;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+
+.perf-chart-svg-wrap::-webkit-scrollbar {
+  height: 5px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-track {
+  background: var(--border-light);
+  border-radius: 4px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-primary);
 }
 
 .perf-chart-svg-wrap svg {
-  width: 100%;
   height: 100%;
   display: block;
-  overflow: visible;
 }
 
-.perf-chart-dot {
+.perf-chart-node {
   cursor: pointer;
-  transition: transform 0.15s ease, r 0.15s ease;
+  transition: r 0.15s ease, stroke-width 0.15s ease;
 }
 
-.perf-chart-dot:hover {
-  r: 5px !important;
-  opacity: 1 !important;
+.perf-chart-node.active {
+  r: 5.5px !important;
+  stroke-width: 3px !important;
+  stroke: var(--brand-primary) !important;
+  filter: drop-shadow(0 0 6px var(--brand-primary));
+}
+
+.chart-crosshair {
+  transition: opacity 0.15s ease;
+  pointer-events: none;
 }
 
 /* Tabel Riwayat Harian */
@@ -2946,8 +3108,35 @@ body.dark-theme .stock-card.track-luxury-card {
   .perf-kpi-val {
     font-size: 14px !important;
   }
+  .mini-kpi-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+  .mini-kpi-item {
+    padding: 6px 8px !important;
+  }
+  .mini-kpi-lbl {
+    font-size: 8.5px !important;
+  }
+  .mini-kpi-val {
+    font-size: 12.5px !important;
+  }
+  .mini-kpi-sub {
+    font-size: 10px !important;
+  }
+  .perf-chart-inspector {
+    padding: 6px 8px !important;
+    gap: 6px !important;
+  }
+  .perf-insp-metrics {
+    gap: 8px !important;
+  }
+  .perf-insp-item {
+    font-size: 10.5px !important;
+  }
   .perf-chart-svg-wrap {
-    height: 115px !important;
+    height: 145px !important;
   }
   .perf-table th, .perf-table td {
     padding: 7px 9px;
@@ -5598,8 +5787,10 @@ function openStockDetail(symbol) {
   // RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - KHUSUS SAHAM 3 RALLY GOOD / VIP
   // --------------------------------------------------------------------------
   const vipEntry = (appData.vip_3dot_history || []).find(h => h.symbol === stock.symbol || h.data?.symbol === stock.symbol);
-  const isVipTracked = Boolean(vipEntry) || stock.count_green === 3;
+  const isVipTracked = Boolean(vipEntry) || stock.count_green === 3 || currentMode === "trackrecord";
   let perfSectionHtml = '';
+  let miniKpiHtml = '';
+  let activePerfHistory = [];
 
   if (isVipTracked) {
     const currentClose = Number(stock.close) || 0;
@@ -5633,13 +5824,14 @@ function openStockDetail(symbol) {
       const scan = dailyScans[dKey];
       const sFound = (scan.stocks || []).find(st => st.symbol === stock.symbol);
       if (sFound) {
+        const c = Number(sFound.close) || 0;
         scanHistory.push({
           date: dKey,
           date_display: scan.date_display ? scan.date_display.split(' ').slice(0, 2).join(' ') : dKey,
           full_date_display: scan.date_display || dKey,
-          close: Number(sFound.close) || 0,
-          high: Number(sFound.high) || Number(sFound.close) || 0,
-          low: Number(sFound.low) || Number(sFound.close) || 0,
+          close: c,
+          high: Math.max(Number(sFound.high || c) || c, c),
+          low: Math.min(Number(sFound.low || c) || c, c),
           change: Number(sFound.change) || 0,
           count_green: sFound.count_green || 0
         });
@@ -5676,22 +5868,27 @@ function openStockDetail(symbol) {
     if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
       basePrice = Number(vipEntry.base_price) || (Number(vipEntry.performance_history[0]?.close) || currentClose);
       firstDetectedDate = vipEntry.scan_date_display || vipEntry.performance_history[0]?.date_display;
-      perfHistory = vipEntry.performance_history.map(item => ({
-        ...item,
-        high: Number(item.high) || Number(item.close) || 0,
-        low: Number(item.low) || Number(item.close) || 0
-      }));
+      perfHistory = vipEntry.performance_history.map(item => {
+        const c = Number(item.close) || 0;
+        return {
+          ...item,
+          close: c,
+          high: Math.max(Number(item.high || c) || c, c),
+          low: Math.min(Number(item.low || c) || c, c)
+        };
+      });
     } else if (scanHistory.length > 0) {
       basePrice = recEntryClose || scanHistory[0].close;
       firstDetectedDate = recEntryDateDisplay || scanHistory[0].full_date_display;
       perfHistory = scanHistory.map((sh, idx) => {
-        const cum = basePrice > 0 ? ((sh.close - basePrice) / basePrice) * 100 : 0;
+        const c = Number(sh.close) || 0;
+        const cum = basePrice > 0 ? ((c - basePrice) / basePrice) * 100 : 0;
         return {
           date: sh.date,
           date_display: sh.date_display,
-          close: sh.close,
-          high: sh.high,
-          low: sh.low,
+          close: c,
+          high: Math.max(Number(sh.high || c) || c, c),
+          low: Math.min(Number(sh.low || c) || c, c),
           daily_change_pct: idx === 0 ? 0.0 : sh.change,
           cumulative_gain_pct: Number(cum.toFixed(2)),
           count_green: sh.count_green
@@ -5715,6 +5912,8 @@ function openStockDetail(symbol) {
       }];
     }
 
+    activePerfHistory = perfHistory;
+
     // Ringkasan Performa
     const latestPerf = perfHistory[perfHistory.length - 1];
     const totalCumGain = latestPerf ? Number(latestPerf.cumulative_gain_pct || 0) : 0;
@@ -5723,92 +5922,168 @@ function openStockDetail(symbol) {
     const cumFormatted = `${cumSign}${totalCumGain.toFixed(2)}%`;
     const basePriceFormatted = basePrice ? "Rp " + Number(basePrice).toLocaleString("id-ID") : priceFormatted;
     const allPrices = perfHistory.map(item => Number(item.close) || 0);
-    const allHighs = perfHistory.map(item => Number(item.high || item.close) || 0);
-    const allLows = perfHistory.map(item => Number(item.low || item.close) || 0);
-    const minPriceVal = allLows.length > 0 ? Math.min(...allLows) : 0;
-    const maxPriceVal = allHighs.length > 0 ? Math.max(...allHighs) : 0;
     const entryPriceVal = Number(basePrice) || (allPrices[0] || 0);
+    const allHighs = perfHistory.map(item => Math.max(Number(item.high || item.close) || 0, Number(item.close) || 0));
+    const allLows = perfHistory.map(item => Math.min(Number(item.low || item.close) || 0, Number(item.close) || 0));
+    const minPriceVal = allLows.length > 0 ? Math.min(entryPriceVal, ...allLows) : entryPriceVal;
+    const maxPriceVal = allHighs.length > 0 ? Math.max(entryPriceVal, ...allHighs) : entryPriceVal;
     const latestPriceVal = latestPerf ? Number(latestPerf.close) : entryPriceVal;
-    const minGainPct = entryPriceVal > 0 ? (((minPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
-    const maxGainPct = entryPriceVal > 0 ? (((maxPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
+    const minGainPct = entryPriceVal > 0 ? Math.min(0, (((minPriceVal - entryPriceVal) / entryPriceVal) * 100)) : 0;
+    const maxGainPct = entryPriceVal > 0 ? Math.max(0, (((maxPriceVal - entryPriceVal) / entryPriceVal) * 100)) : 0;
 
-  // Generator Chart Area Trendline Halus (Smooth Spline Curve)
+  // Live Interactive Inspector Bar di Atas Chart
+  function generatePerfInspectorHtml(hist) {
+    if (!hist || hist.length === 0) return '';
+    const lastIdx = hist.length - 1;
+    const item = hist[lastIdx];
+    const dayChg = Number(item.daily_change_pct || 0);
+    const daySign = dayChg > 0 ? "+" : "";
+    const dayColor = dayChg > 0 ? "var(--status-green)" : (dayChg < 0 ? "var(--status-red)" : "var(--text-muted)");
+
+    const cumGain = Number(item.cumulative_gain_pct || 0);
+    const cumSign = cumGain > 0 ? "+" : "";
+    const cumColor = cumGain > 0 ? "var(--status-green)" : (cumGain < 0 ? "var(--status-red)" : "var(--text-muted)");
+
+    const hVal = Number(item.high || item.close || 0);
+    const lVal = Number(item.low || item.close || 0);
+
+    return `
+      <div class="perf-chart-inspector" id="perfChartInspector">
+        <div class="perf-insp-left">
+          <span class="perf-insp-badge" id="inspDayBadge">${lastIdx === 0 ? (currentMode === 'trackrecord' ? 'ENTRY SCREENER' : 'MODAL ENTRY') : 'HARI TERAKHIR'}</span>
+          <span class="perf-insp-date" id="inspDate">${item.date_display || item.date}</span>
+        </div>
+        <div class="perf-insp-metrics">
+          <div class="perf-insp-item">
+            <span class="perf-insp-lbl">CLOSE:</span>
+            <span class="perf-insp-val" id="inspClose">Rp ${Number(item.close || 0).toLocaleString('id-ID')}</span>
+            <span class="perf-insp-sub" id="inspDailyChg" style="color:${dayColor}; font-weight:700;">${daySign}${dayChg.toFixed(2)}%</span>
+          </div>
+          <div class="perf-insp-item">
+            <span class="perf-insp-lbl">HIGH:</span>
+            <span class="perf-insp-val" id="inspHigh" style="color:var(--status-green);">Rp ${hVal.toLocaleString('id-ID')}</span>
+          </div>
+          <div class="perf-insp-item">
+            <span class="perf-insp-lbl">LOW:</span>
+            <span class="perf-insp-val" id="inspLow" style="color:var(--status-red);">Rp ${lVal.toLocaleString('id-ID')}</span>
+          </div>
+          <div class="perf-insp-item">
+            <span class="perf-insp-lbl">KUMULATIF:</span>
+            <span class="perf-insp-val" id="inspCumGain" style="color:${cumColor};">${cumSign}${cumGain.toFixed(2)}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Generator Chart Area Trendline Halus (Smooth Spline Curve) + High-Low Whisker
   function generatePerfChartSvg(hist) {
     if (!hist || hist.length === 0) return '';
-    const w = 600;
-    const h = 135;
-    const padL = 16;
+    const h = 150;
+    const padL = 20;
     const padR = 64; // space for price text on right
-    const padT = 16;
-    const padB = 22; // space for date text on bottom
+    const padT = 20;
+    const padB = 26; // space for date text on bottom
 
-    const chartW = w - padL - padR;
     const chartH = h - padT - padB;
+    const isSingle = (hist.length === 1);
+    const isMultiScroll = (hist.length > 6);
+    const stepW = 54; // comfortable breathing room per candle
+    const w = isSingle ? 560 : (isMultiScroll ? Math.max(560, padL + padR + hist.length * stepW) : 560);
+    const chartW = w - padL - padR;
     const centerX = padL + chartW / 2;
-    const centerY = padT + chartH / 2;
 
     const prices = hist.map(item => Number(item.close) || 0);
+    const allLows = hist.map(item => Math.min(Number(item.low || item.close) || 0, Number(item.close) || 0));
+    const allHighs = hist.map(item => Math.max(Number(item.high || item.close) || 0, Number(item.close) || 0));
+    const rawMinP = Math.min(...allLows);
+    const rawMaxP = Math.max(...allHighs);
+    const pMargin = Math.max(1, Math.round((rawMaxP - rawMinP) * 0.12));
+    const minP = Math.max(1, rawMinP - pMargin);
+    const maxP = rawMaxP + pMargin;
+    const rangeP = (maxP - minP) || 1;
+    const midP = Math.round((maxP + minP) / 2);
 
-    // KONDISI KHUSUS: MASIH 1 HARI BURSA (Titik & Label Cukup di Tengah)
-    if (hist.length === 1) {
+    const gradId = 'perfGradArea_' + (stock.symbol || 'sym').replace(/[^a-zA-Z0-9]/g, '');
+
+    // KONDISI KHUSUS: 1 HARI BURSA
+    if (isSingle) {
       const pVal = prices[0];
+      const hVal = allHighs[0];
+      const lVal = allLows[0];
       const dateText = hist[0].date_display || 'Hari ke-1';
+      
+      const yClose = padT + chartH / 2;
+      const yHigh = hVal > lVal ? padT + 8 : yClose - 15;
+      const yLow = hVal > lVal ? padT + chartH - 8 : yClose + 15;
+
       return `
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-          <!-- Garis Referensi Horizontal Tunggal di Tengah -->
-          <line x1="${padL}" y1="${centerY.toFixed(1)}" x2="${(padL + chartW).toFixed(1)}" y2="${centerY.toFixed(1)}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
-          <text x="${(padL + chartW + 6).toFixed(1)}" y="${(centerY + 3.5).toFixed(1)}" font-size="9.5" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${pVal.toLocaleString('id-ID')}</text>
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" style="min-width:${w}px;">
+          <!-- Reference Gridlines -->
+          <line x1="${padL}" y1="${padT}" x2="${padL + chartW}" y2="${padT}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
+          <text x="${padL + chartW + 6}" y="${padT + 3.5}" font-size="9" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${hVal.toLocaleString('id-ID')}</text>
 
-          <!-- Titik Tunggal di Tengah Canvas dengan Pulse Indicator -->
-          <circle cx="${centerX.toFixed(1)}" cy="${centerY.toFixed(1)}" r="10" fill="rgba(16, 185, 129, 0.15)" stroke="var(--status-green)" stroke-width="1.2" opacity="0.7" />
-          <circle cx="${centerX.toFixed(1)}" cy="${centerY.toFixed(1)}" r="5" fill="#ffffff" stroke="var(--status-green)" stroke-width="2.5">
-            <title>${dateText}: Rp ${pVal.toLocaleString('id-ID')} (${hist[0].daily_change_pct > 0 ? '+' : ''}${hist[0].daily_change_pct}% hari ini • Modal Entry)</title>
-          </circle>
+          <line x1="${padL}" y1="${yClose}" x2="${padL + chartW}" y2="${yClose}" stroke="var(--border-light)" stroke-dasharray="2 4" opacity="0.4" />
+          <text x="${padL + chartW + 6}" y="${yClose + 3.5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">Rp ${pVal.toLocaleString('id-ID')}</text>
 
-          <!-- Sumbu X: CUKUP LABEL TANGGAL DI TENGAH -->
-          <text x="${centerX.toFixed(1)}" y="${h - 5}" font-size="9" font-weight="700" fill="var(--text-secondary)" text-anchor="middle">${dateText}</text>
+          <line x1="${padL}" y1="${padT + chartH}" x2="${padL + chartW}" y2="${padT + chartH}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
+          <text x="${padL + chartW + 6}" y="${padT + chartH + 3.5}" font-size="9" font-weight="700" fill="var(--status-red)" text-anchor="start">Rp ${lVal.toLocaleString('id-ID')}</text>
+
+          <!-- Jarum High - Low di Tengah -->
+          <line x1="${centerX}" y1="${yHigh}" x2="${centerX}" y2="${yLow}" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round" opacity="0.75" />
+          <line x1="${centerX - 6}" y1="${yHigh}" x2="${centerX + 6}" y2="${yHigh}" stroke="var(--status-green)" stroke-width="2.5" stroke-linecap="round" />
+          <line x1="${centerX - 6}" y1="${yLow}" x2="${centerX + 6}" y2="${yLow}" stroke="var(--status-red)" stroke-width="2.5" stroke-linecap="round" />
+          
+          <text x="${centerX + 14}" y="${yHigh + 3.5}" font-size="9" font-weight="700" fill="var(--status-green)">High: Rp ${hVal.toLocaleString('id-ID')}</text>
+          <text x="${centerX + 14}" y="${yLow + 3.5}" font-size="9" font-weight="700" fill="var(--status-red)">Low: Rp ${lVal.toLocaleString('id-ID')}</text>
+
+          <!-- Titik Close di Tengah -->
+          <circle cx="${centerX}" cy="${yClose}" r="5" fill="#ffffff" stroke="var(--status-green)" stroke-width="2.5" id="chartNode_0" class="perf-chart-node active" />
+          <text x="${centerX + 14}" y="${yClose + 3.5}" font-size="9.5" font-weight="800" fill="var(--text-primary)">Close: Rp ${pVal.toLocaleString('id-ID')}</text>
+
+          <!-- Sumbu X Label -->
+          <text x="${centerX}" y="${h - 6}" font-size="9" font-weight="700" fill="var(--text-secondary)" text-anchor="middle">${dateText}</text>
         </svg>
       `;
     }
 
-    // KONDISI MULTI-HARI (> 1 HARI BURSA)
-    const minP = Math.min(...prices);
-    const maxP = Math.max(...prices);
-    const rangeP = (maxP - minP) || 1;
-    const midP = Math.round((maxP + minP) / 2);
-
+    // KONDISI MULTI-HARI
     const points = hist.map((item, idx) => {
       const x = padL + (idx / (hist.length - 1)) * chartW;
-      const y = padT + chartH - ((item.close - minP) / rangeP) * chartH;
-      return { x, y, item, idx };
+      const c = Number(item.close) || 0;
+      const hVal = Math.max(Number(item.high || c) || c, c);
+      const lVal = Math.min(Number(item.low || c) || c, c);
+      
+      const yClose = padT + chartH - ((c - minP) / rangeP) * chartH;
+      const yHigh = padT + chartH - ((hVal - minP) / rangeP) * chartH;
+      const yLow = padT + chartH - ((lVal - minP) / rangeP) * chartH;
+      
+      return { x, yClose, yHigh, yLow, item, idx, close: c, high: hVal, low: lVal };
     });
 
     const isUp = (hist[hist.length - 1].close >= hist[0].close);
     const strokeColor = isUp ? '#10B981' : '#EF4444';
     const gradStart = isUp ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)';
-    const gradId = 'perfGradArea_' + (stock.symbol || 'sym').replace(/[^a-zA-Z0-9]/g, '');
 
-    // Algoritma Smooth Spline Bezier Curve (Cubic Catmull-Rom)
-    let splineD = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+    // Spline Curve Path untuk Close
+    let splineD = `M ${points[0].x.toFixed(1)} ${points[0].yClose.toFixed(1)}`;
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i === 0 ? i : i - 1];
       const p1 = points[i];
       const p2 = points[i + 1];
       const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
       const cp1x = p1.x + (p2.x - p0.x) / 6;
-      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp1y = p1.yClose + (p2.yClose - p0.yClose) / 6;
       const cp2x = p2.x - (p3.x - p1.x) / 6;
-      const cp2y = p2.y - (p3.y - p1.y) / 6;
-      splineD += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+      const cp2y = p2.yClose + (p3.yClose - p1.yClose) / 6;
+      splineD += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.yClose.toFixed(1)}`;
     }
     const areaD = `${splineD} L ${(padL + chartW).toFixed(1)} ${(padT + chartH).toFixed(1)} L ${padL.toFixed(1)} ${(padT + chartH).toFixed(1)} Z`;
-
     const midY = (padT + padT + chartH) / 2;
-    const startPt = points[0];
-    const endPt = points[points.length - 1];
+    const lastIdx = points.length - 1;
 
     return `
-      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <svg viewBox="0 0 ${w} ${h}" width="${w}px" height="${h}px" style="min-width:${w}px; display:block;">
         <defs>
           <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="${gradStart}" />
@@ -5821,36 +6096,61 @@ function openStockDetail(symbol) {
 
         <!-- Horizontal Reference Gridlines & Price Tags -->
         <line x1="${padL}" y1="${padT}" x2="${padL + chartW}" y2="${padT}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
-        <text x="${padL + chartW + 6}" y="${padT + 3.5}" font-size="9" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${maxP.toLocaleString('id-ID')}</text>
+        <text x="${padL + chartW + 6}" y="${padT + 3.5}" font-size="9" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${rawMaxP.toLocaleString('id-ID')}</text>
 
         <line x1="${padL}" y1="${midY.toFixed(1)}" x2="${padL + chartW}" y2="${midY.toFixed(1)}" stroke="var(--border-light)" stroke-dasharray="2 4" opacity="0.4" />
         <text x="${padL + chartW + 6}" y="${(midY + 3.5).toFixed(1)}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">Rp ${midP.toLocaleString('id-ID')}</text>
 
         <line x1="${padL}" y1="${padT + chartH}" x2="${padL + chartW}" y2="${padT + chartH}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
-        <text x="${padL + chartW + 6}" y="${padT + chartH + 3.5}" font-size="9" font-weight="700" fill="var(--status-red)" text-anchor="start">Rp ${minP.toLocaleString('id-ID')}</text>
+        <text x="${padL + chartW + 6}" y="${padT + chartH + 3.5}" font-size="9" font-weight="700" fill="var(--status-red)" text-anchor="start">Rp ${rawMinP.toLocaleString('id-ID')}</text>
 
-        <!-- Shaded Area & Glowing Curve Line -->
+        <!-- Shaded Area & Glowing Curve Line untuk Close -->
         <path d="${areaD}" fill="url(#${gradId})" />
         <path d="${splineD}" fill="none" stroke="${strokeColor}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow_${gradId})" />
 
-        <!-- Interactive Micro-Dots on All Points with Native Tooltips -->
+        <!-- Vertical Crosshair Lines per Day (Toggling on click/hover) -->
         ${points.map(p => `
-          <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="${strokeColor}" opacity="0.85" class="perf-chart-dot">
-            <title>${p.item.date_display}: Rp ${Number(p.item.close).toLocaleString('id-ID')} (${p.item.daily_change_pct > 0 ? '+' : ''}${p.item.daily_change_pct}% hari ini • ${p.item.cumulative_gain_pct > 0 ? '+' : ''}${p.item.cumulative_gain_pct}% kumulatif)</title>
-          </circle>
+          <line id="chartCrosshair_${p.idx}" x1="${p.x.toFixed(1)}" y1="${padT}" x2="${p.x.toFixed(1)}" y2="${padT + chartH}" stroke="var(--brand-primary)" stroke-dasharray="3 3" stroke-width="1.3" opacity="${p.idx === lastIdx ? '0.75' : '0'}" class="chart-crosshair" />
         `).join('')}
 
-        <!-- Entry Dot Indicator (Day 1) -->
-        <circle cx="${startPt.x.toFixed(1)}" cy="${startPt.y.toFixed(1)}" r="4" fill="#ffffff" stroke="${strokeColor}" stroke-width="2.2" />
+        <!-- High - Low Whiskers (Jarum Rentang Harga) di Tiap Hari -->
+        ${points.map(p => {
+          const hasSpread = (p.yLow - p.yHigh) > 1.5;
+          if (!hasSpread) return '';
+          return `
+            <g class="perf-whisker-group" style="pointer-events:none;">
+              <line x1="${p.x.toFixed(1)}" y1="${p.yHigh.toFixed(1)}" x2="${p.x.toFixed(1)}" y2="${p.yLow.toFixed(1)}" stroke="var(--text-muted)" stroke-width="1.8" stroke-linecap="round" opacity="0.6" />
+              <line x1="${(p.x - 3.5).toFixed(1)}" y1="${p.yHigh.toFixed(1)}" x2="${(p.x + 3.5).toFixed(1)}" y2="${p.yHigh.toFixed(1)}" stroke="var(--status-green)" stroke-width="2" stroke-linecap="round" />
+              <line x1="${(p.x - 3.5).toFixed(1)}" y1="${p.yLow.toFixed(1)}" x2="${(p.x + 3.5).toFixed(1)}" y2="${p.yLow.toFixed(1)}" stroke="var(--status-red)" stroke-width="2" stroke-linecap="round" />
+            </g>
+          `;
+        }).join('')}
 
-        <!-- Current/Now Dot Indicator (Day 31) with Pulse Ring -->
-        <circle cx="${endPt.x.toFixed(1)}" cy="${endPt.y.toFixed(1)}" r="4.5" fill="#ffffff" stroke="${strokeColor}" stroke-width="2.5" />
-        <circle cx="${endPt.x.toFixed(1)}" cy="${endPt.y.toFixed(1)}" r="8" fill="none" stroke="${strokeColor}" stroke-width="1.5" opacity="0.5" />
+        <!-- Interactive Close Nodes on All Points -->
+        ${points.map(p => {
+          const isSelected = (p.idx === lastIdx);
+          return `
+            <circle id="chartNode_${p.idx}" cx="${p.x.toFixed(1)}" cy="${p.yClose.toFixed(1)}" r="${isSelected ? '5' : '3.5'}" fill="#ffffff" stroke="${strokeColor}" stroke-width="${isSelected ? '2.8' : '2'}" class="perf-chart-node ${isSelected ? 'active' : ''}">
+              <title>${p.item.date_display}: Close Rp ${p.close.toLocaleString('id-ID')} • High Rp ${p.high.toLocaleString('id-ID')} • Low Rp ${p.low.toLocaleString('id-ID')} (${p.item.daily_change_pct > 0 ? '+' : ''}${p.item.daily_change_pct}% hari ini)</title>
+            </circle>
+          `;
+        }).join('')}
 
         <!-- X-Axis Dates -->
-        <text x="${padL}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">${hist[0].date_display.split(' ').slice(0, 2).join(' ')} (Entry)</text>
-        ${hist.length >= 3 ? `<text x="${(padL + chartW / 2).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${hist[Math.floor(hist.length / 2)].date_display.split(' ').slice(0, 2).join(' ')}</text>` : ''}
-        <text x="${(padL + chartW).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="end">${hist[hist.length - 1].date_display.split(' ').slice(0, 2).join(' ')} (Hari ${hist.length})</text>
+        ${points.map((p, idx) => {
+          const showText = isMultiScroll ? true : (points.length <= 8 ? true : (idx === 0 || idx === points.length - 1 || idx === Math.floor(points.length / 2)));
+          if (!showText) return '';
+          const parts = p.item.date_display ? p.item.date_display.split(' ').slice(0, 2).join(' ') : p.item.date;
+          return `
+            <text x="${p.x.toFixed(1)}" y="${h - 6}" font-size="8" font-weight="600" fill="var(--text-muted)" text-anchor="middle" style="pointer-events:none;">${parts}</text>
+          `;
+        }).join('')}
+
+        <!-- Invisible Hitbox Trigger Columns for Click & Hover -->
+        ${points.map(p => `
+          <rect x="${(p.x - 22).toFixed(1)}" y="0" width="44" height="${h}" fill="transparent" class="perf-chart-hitbox" onclick="selectPerfDay(${p.idx})" onmouseenter="selectPerfDay(${p.idx})" style="cursor:pointer;" />
+        `).join('')}
+
       </svg>
     `;
   }
@@ -5898,7 +6198,32 @@ function openStockDetail(symbol) {
   const minGainSign = minGainPct > 0 ? "+" : "";
   const maxGainSign = maxGainPct > 0 ? "+" : "";
 
-    const isDefaultPerfOpen = currentMode === "trackrecord";
+  miniKpiHtml = `
+    <div class="mini-kpi-summary-grid">
+      <div class="mini-kpi-item">
+        <span class="mini-kpi-lbl">${currentMode === 'trackrecord' ? 'CLOSE ENTRY (SCREENER)' : 'MODAL ENTRY (DOT GREEN)'}</span>
+        <span class="mini-kpi-val">Rp ${entryPriceVal.toLocaleString('id-ID')}</span>
+        <span class="mini-kpi-sub">${perfHistory[0]?.date_display || 'Awal'}</span>
+      </div>
+      <div class="mini-kpi-item">
+        <span class="mini-kpi-lbl">TERENDAH (LOW)</span>
+        <span class="mini-kpi-val" style="color:var(--status-red);">Rp ${minPriceVal.toLocaleString('id-ID')}</span>
+        <span class="mini-kpi-sub" style="color:var(--status-red);">${minGainSign}${minGainPct.toFixed(2)}%</span>
+      </div>
+      <div class="mini-kpi-item">
+        <span class="mini-kpi-lbl">TERTINGGI (PEAK HIGH)</span>
+        <span class="mini-kpi-val" style="color:var(--status-green);">Rp ${maxPriceVal.toLocaleString('id-ID')}</span>
+        <span class="mini-kpi-sub" style="color:var(--status-green);">${maxGainSign}${maxGainPct.toFixed(2)}%</span>
+      </div>
+      <div class="mini-kpi-item highlight">
+        <span class="mini-kpi-lbl">HARGA TERAKHIR</span>
+        <span class="mini-kpi-val" style="color:var(--brand-primary);">Rp ${latestPriceVal.toLocaleString('id-ID')}</span>
+        <span class="mini-kpi-sub" style="color:${cumClass === 'positive' ? 'var(--status-green)' : (cumClass === 'negative' ? 'var(--status-red)' : 'var(--text-muted)')}; font-weight:700;">${cumFormatted} Kumulatif</span>
+      </div>
+    </div>
+  `;
+
+  const isDefaultPerfOpen = currentMode === "trackrecord";
 
     perfSectionHtml = `
     <!-- SECTION 6: RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - COLLAPSIBLE ACCORDION -->
@@ -5975,11 +6300,19 @@ function openStockDetail(symbol) {
           <div class="perf-chart-header">
             <span class="perf-chart-title" style="display:inline-flex; align-items:center; gap:6px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
-              Kurva Pergerakan Harga Penutupan (Close)
+              Kurva & Rentang Harga (High • Low • Close)
             </span>
-            <span class="perf-chart-dates">${perfHistory[0]?.date_display || ''} s/d ${perfHistory[perfHistory.length - 1]?.date_display || ''} (${perfHistory.length} Hari Bursa)</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="perf-chart-hint-badge">↔ Geser & Klik Titik</span>
+              <span class="perf-chart-dates">${perfHistory[0]?.date_display || ''} s/d ${perfHistory[perfHistory.length - 1]?.date_display || ''} (${perfHistory.length} Hari Bursa)</span>
+            </div>
           </div>
-          <div class="perf-chart-svg-wrap">
+
+          <!-- Live Interactive Inspector Bar -->
+          ${generatePerfInspectorHtml(perfHistory)}
+
+          <!-- Scrollable SVG Chart Viewport -->
+          <div class="perf-chart-svg-wrap" id="perfChartScrollWrap">
             ${generatePerfChartSvg(perfHistory)}
           </div>
         </div>
@@ -6085,6 +6418,7 @@ function openStockDetail(symbol) {
             ${renderTfDetailCard("1H", tf60)}
             ${renderTfDetailCard("15M", tf15)}
           </div>
+          ${miniKpiHtml}
         </div>
 
         <!-- SECTION 2 & 3: DONALT EMA + SCALPING SIGNAL -->
@@ -6230,7 +6564,69 @@ function openStockDetail(symbol) {
   modalContainer.innerHTML = modalHtml;
   modalContainer.classList.add("open");
   document.body.style.overflow = "hidden"; // lock background scroll
+
+  // Attach global reference for interactive chart click inspection
+  window.currentPerfHistory = activePerfHistory;
+  if (activePerfHistory && activePerfHistory.length > 0) {
+    setTimeout(() => {
+      const wrap = document.getElementById("perfChartScrollWrap");
+      if (wrap) wrap.scrollLeft = wrap.scrollWidth;
+    }, 100);
+  }
 }
+
+function selectPerfDay(idx) {
+  const hist = window.currentPerfHistory;
+  if (!hist || !hist[idx]) return;
+  const item = hist[idx];
+
+  const b = document.getElementById("inspDayBadge");
+  const d = document.getElementById("inspDate");
+  const c = document.getElementById("inspClose");
+  const chg = document.getElementById("inspDailyChg");
+  const h = document.getElementById("inspHigh");
+  const l = document.getElementById("inspLow");
+  const cum = document.getElementById("inspCumGain");
+
+  const dayChg = Number(item.daily_change_pct || 0);
+  const daySign = dayChg > 0 ? "+" : "";
+  const dayColor = dayChg > 0 ? "var(--status-green)" : (dayChg < 0 ? "var(--status-red)" : "var(--text-muted)");
+
+  const cumGain = Number(item.cumulative_gain_pct || 0);
+  const cumSign = cumGain > 0 ? "+" : "";
+  const cumColor = cumGain > 0 ? "var(--status-green)" : (cumGain < 0 ? "var(--status-red)" : "var(--text-muted)");
+
+  if (b) {
+    if (idx === 0) b.innerText = (currentMode === "trackrecord" ? "ENTRY SCREENER" : "MODAL ENTRY");
+    else if (idx === hist.length - 1) b.innerText = "HARI TERAKHIR";
+    else b.innerText = `HARI KE-${idx + 1}`;
+  }
+  if (d) d.innerText = item.date_display || item.date;
+  if (c) c.innerText = "Rp " + Number(item.close || 0).toLocaleString("id-ID");
+  if (chg) {
+    chg.innerText = `${daySign}${dayChg.toFixed(2)}%`;
+    chg.style.color = dayColor;
+  }
+  const hVal = Number(item.high || item.close || 0);
+  const lVal = Number(item.low || item.close || 0);
+  if (h) h.innerText = "Rp " + hVal.toLocaleString("id-ID");
+  if (l) l.innerText = "Rp " + lVal.toLocaleString("id-ID");
+  if (cum) {
+    cum.innerText = `${cumSign}${cumGain.toFixed(2)}%`;
+    cum.style.color = cumColor;
+  }
+
+  // Crosshairs
+  document.querySelectorAll(".chart-crosshair").forEach(el => el.style.opacity = "0");
+  const activeLine = document.getElementById(`chartCrosshair_${idx}`);
+  if (activeLine) activeLine.style.opacity = "0.75";
+
+  // Nodes
+  document.querySelectorAll(".perf-chart-node").forEach(el => el.classList.remove("active"));
+  const activeDot = document.getElementById(`chartNode_${idx}`);
+  if (activeDot) activeDot.classList.add("active");
+}
+window.selectPerfDay = selectPerfDay;
 
 function closeModal() {
   const modalContainer = document.getElementById("detailModal");

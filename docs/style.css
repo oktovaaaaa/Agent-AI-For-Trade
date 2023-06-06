@@ -2714,6 +2714,63 @@ body.dark-theme .perf-toggle-btn {
   font-weight: 600;
 }
 
+/* Mini KPI Summary Bar di Bawah Sinyal Card Section 1 */
+.mini-kpi-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mini-kpi-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mini-kpi-item:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+.mini-kpi-item.highlight {
+  background: rgba(16, 185, 129, 0.07);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.mini-kpi-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-kpi-val {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  line-height: 1.25;
+}
+
+.mini-kpi-sub {
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 /* Professional Chart Box */
 .perf-chart-box {
   background: var(--bg-app);
@@ -2740,33 +2797,138 @@ body.dark-theme .perf-toggle-btn {
   gap: 6px;
 }
 
+.perf-chart-hint-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--brand-primary);
+  background: rgba(16, 185, 129, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
 .perf-chart-dates {
   color: var(--text-muted);
   font-size: 11px;
 }
 
+/* Live Inspector Bar di Atas Chart */
+.perf-chart-inspector {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 7px 11px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.perf-insp-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perf-insp-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--status-green);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  letter-spacing: 0.3px;
+}
+
+.perf-insp-date {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.perf-insp-metrics {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.perf-insp-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 11.5px;
+}
+
+.perf-insp-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.perf-insp-val {
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: var(--text-primary);
+}
+
+.perf-insp-sub {
+  font-size: 10.5px;
+}
+
+/* Scrollable Chart Viewport */
 .perf-chart-svg-wrap {
   width: 100%;
-  height: 140px;
+  height: 155px;
   position: relative;
-  overflow: visible;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+
+.perf-chart-svg-wrap::-webkit-scrollbar {
+  height: 5px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-track {
+  background: var(--border-light);
+  border-radius: 4px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+.perf-chart-svg-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-primary);
 }
 
 .perf-chart-svg-wrap svg {
-  width: 100%;
   height: 100%;
   display: block;
-  overflow: visible;
 }
 
-.perf-chart-dot {
+.perf-chart-node {
   cursor: pointer;
-  transition: transform 0.15s ease, r 0.15s ease;
+  transition: r 0.15s ease, stroke-width 0.15s ease;
 }
 
-.perf-chart-dot:hover {
-  r: 5px !important;
-  opacity: 1 !important;
+.perf-chart-node.active {
+  r: 5.5px !important;
+  stroke-width: 3px !important;
+  stroke: var(--brand-primary) !important;
+  filter: drop-shadow(0 0 6px var(--brand-primary));
+}
+
+.chart-crosshair {
+  transition: opacity 0.15s ease;
+  pointer-events: none;
 }
 
 /* Tabel Riwayat Harian */
@@ -2931,8 +3093,35 @@ body.dark-theme .stock-card.track-luxury-card {
   .perf-kpi-val {
     font-size: 14px !important;
   }
+  .mini-kpi-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+  .mini-kpi-item {
+    padding: 6px 8px !important;
+  }
+  .mini-kpi-lbl {
+    font-size: 8.5px !important;
+  }
+  .mini-kpi-val {
+    font-size: 12.5px !important;
+  }
+  .mini-kpi-sub {
+    font-size: 10px !important;
+  }
+  .perf-chart-inspector {
+    padding: 6px 8px !important;
+    gap: 6px !important;
+  }
+  .perf-insp-metrics {
+    gap: 8px !important;
+  }
+  .perf-insp-item {
+    font-size: 10.5px !important;
+  }
   .perf-chart-svg-wrap {
-    height: 115px !important;
+    height: 145px !important;
   }
   .perf-table th, .perf-table td {
     padding: 7px 9px;

@@ -555,12 +555,14 @@ def get_hunter_stocks():
             ticker_name = str(row['ticker'])
             symbol = ticker_name.split(':')[-1] if ':' in ticker_name else ticker_name
             c_val = float(row['close'])
+            h_raw = float(row.get('high', c_val))
+            l_raw = float(row.get('low', c_val))
             tickers.append({
                 'symbol': symbol,
                 'tv_symbol': f"IDX:{symbol}",
                 'close': c_val,
-                'high': float(row.get('high', c_val)),
-                'low': float(row.get('low', c_val)),
+                'high': max(h_raw, c_val),
+                'low': min(l_raw, c_val),
                 'volume': float(row['volume']),
                 'vol_10d': float(row['average_volume_10d_calc']),
                 'change': float(row['change'])
@@ -1278,12 +1280,14 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     for _, row in df_miss.iterrows():
                         tk = str(row['ticker']).split(':')[-1]
                         c_val = float(row['close'])
+                        h_raw = float(row.get('high', c_val))
+                        l_raw = float(row.get('low', c_val))
                         stock_lookup[tk] = {
                             "symbol": tk,
                             "name": tk,
                             "close": c_val,
-                            "high": float(row.get('high', c_val)),
-                            "low": float(row.get('low', c_val)),
+                            "high": max(h_raw, c_val),
+                            "low": min(l_raw, c_val),
                             "change": float(row['change']),
                             "volume": float(row['volume']),
                             "count_green": 0,
@@ -1305,8 +1309,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if sym in saham_3_dot_lookup and h.get("scan_date") != date_key:
                 s3 = saham_3_dot_lookup[sym]
                 c_val = float(s3.get("close", 0))
-                h_val = float(s3.get("high", c_val))
-                l_val = float(s3.get("low", c_val))
+                h_val = max(float(s3.get("high", c_val)), c_val)
+                l_val = min(float(s3.get("low", c_val)), c_val)
                 chg_val = round(float(s3.get("change", 0.0)), 2)
                 h["scan_date"] = date_key
                 h["scan_date_display"] = tgl_id
@@ -1328,8 +1332,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if sym in stock_lookup:
                 cur_s = stock_lookup[sym]
                 c_val = float(cur_s.get("close", 0))
-                h_val = float(cur_s.get("high", c_val))
-                l_val = float(cur_s.get("low", c_val))
+                h_val = max(float(cur_s.get("high", c_val)), c_val)
+                l_val = min(float(cur_s.get("low", c_val)), c_val)
                 chg_val = round(float(cur_s.get("change", 0.0)), 2)
                 base_p = float(h.get("base_price") or c_val)
                 if not h.get("base_price"):
@@ -1380,8 +1384,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             sym = s3["symbol"]
             if sym not in existing_symbols:
                 c_val = float(s3.get("close", 0))
-                h_val = float(s3.get("high", c_val))
-                l_val = float(s3.get("low", c_val))
+                h_val = max(float(s3.get("high", c_val)), c_val)
+                l_val = min(float(s3.get("low", c_val)), c_val)
                 chg_val = round(float(s3.get("change", 0.0)), 2)
                 record_item = {
                     "symbol": sym,
