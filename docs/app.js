@@ -233,6 +233,14 @@ function selectHistoryDate(dateKey) {
   document.getElementById("menuVipBtn").classList.remove("active");
   const recBtn = document.getElementById("menuRecBtn");
   if (recBtn) recBtn.classList.remove("active");
+  const trackBtn = document.getElementById("menuTrackRecordBtn");
+  if (trackBtn) trackBtn.classList.remove("active");
+  const guideBtn = document.getElementById("menuGuideBtn");
+  if (guideBtn) guideBtn.classList.remove("active");
+  const guideHeaderBtn = document.getElementById("guideHeaderBtn");
+  if (guideHeaderBtn) guideHeaderBtn.classList.remove("active");
+  const mobileGuideBtn = document.getElementById("mobileGuideBtn");
+  if (mobileGuideBtn) mobileGuideBtn.classList.remove("active");
   
   closeHistoryDropdown();
   renderSidebarHistory();
@@ -240,7 +248,7 @@ function selectHistoryDate(dateKey) {
   toggleSidebar(false); // Close sidebar on mobile
 }
 
-// Handler Ganti Mode Utama (Daily vs Rekomendasi Aranter vs VIP 3-Dot)
+// Handler Ganti Mode Utama (Daily vs Rekomendasi Aranter vs VIP 3-Dot vs Track Record vs Guide)
 function switchMainMode(mode) {
   currentMode = mode;
   applyGridCardMode(mode);
@@ -250,6 +258,17 @@ function switchMainMode(mode) {
   if (recBtn) recBtn.classList.toggle("active", mode === "recommendation");
   const trackBtn = document.getElementById("menuTrackRecordBtn");
   if (trackBtn) trackBtn.classList.toggle("active", mode === "trackrecord");
+  const guideBtn = document.getElementById("menuGuideBtn");
+  if (guideBtn) guideBtn.classList.toggle("active", mode === "guide");
+  const guideHeaderBtn = document.getElementById("guideHeaderBtn");
+  if (guideHeaderBtn) guideHeaderBtn.classList.toggle("active", mode === "guide");
+  const mobileGuideBtn = document.getElementById("mobileGuideBtn");
+  if (mobileGuideBtn) mobileGuideBtn.classList.toggle("active", mode === "guide");
+
+  if (mode === "guide") {
+    toggleSidebar(false);
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
 
   // Atur default sort sesuai mode
   if (mode === "recommendation") {
@@ -306,6 +325,14 @@ function handleSortChange(sortVal) {
 
 // Helper: Sinkronisasi opsi dropdown pengurutan sesuai mode yang aktif
 function syncSortDropdownOptions() {
+  const sortWrapper = document.querySelector(".sort-wrapper");
+  if (currentMode === "guide") {
+    if (sortWrapper) sortWrapper.style.display = "none";
+    return;
+  } else {
+    if (sortWrapper) sortWrapper.style.display = "flex";
+  }
+
   const sortSel = document.getElementById("sortSelector");
   if (!sortSel) return;
 
@@ -379,6 +406,8 @@ function renderMainView() {
     renderRecommendationView();
   } else if (currentMode === "trackrecord") {
     renderTrackRecordView();
+  } else if (currentMode === "guide") {
+    renderGuideView();
   } else {
     renderVipView();
   }
@@ -1310,6 +1339,613 @@ function renderTrackRecordView() {
   grid.innerHTML = cardsHtml;
 }
 
+
+// Render Panduan & Edukasi Mode
+function renderGuideView() {
+  applyGridCardMode('guide');
+  const grid = document.getElementById('stocksGrid');
+
+  document.getElementById('pageMainHeading').innerText = 'Panduan & Edukasi';
+  document.getElementById('pageSubHeading').innerText = 'Pahami Filosofi Aranter, Algoritma Hunter & Eksekusi Cuan!';
+
+  document.getElementById('activeDateDisplay').innerText = 'Dokumentasi Lengkap Platform';
+  document.getElementById('activeTimeDisplay').innerText = 'Aranter v2.4 (Terupdate)';
+
+  // Update 4 Kartu Metrik di atas
+  updateMetricCard(
+    0,
+    '4 MENU UTAMA',
+    'tag-blue',
+    'Navigasi',
+    'Screener s/d Track Record',
+    'Jelajahi alur lengkap dari scan harian hingga bukti realisasi cuan'
+  );
+
+  updateMetricCard(
+    1,
+    '5 KONFLUENSI',
+    'tag-green',
+    'Algoritma',
+    'Filter Berlapis Hunter AI',
+    'RallyGood 3 TF, DonAlt EMA, SMC Demand/Supply, Scalp/Swing, MACD Div'
+  );
+
+  updateMetricCard(
+    2,
+    'BOT 16:21 WIB',
+    'tag-cyan',
+    'Auto-Scan',
+    'Otomatis Pasca Tutup Bursa',
+    'Update rutin tiap hari bursa sore untuk persiapan trading esok pagi'
+  );
+
+  updateMetricCard(
+    3,
+    'TARGET ≥ 8%',
+    'tag-gold',
+    'Track Record',
+    'Standar Realisasi Kenaikan',
+    'Hanya saham yang mencapai peak kenaikan ≥ 8% masuk track record'
+  );
+
+  // Update Sidebar Filter Counters
+  const countAll = document.getElementById('countAllFilter');
+  if (countAll) countAll.innerText = '-';
+  const count3Dot = document.getElementById('count3DotFilter');
+  if (count3Dot) count3Dot.innerText = '-';
+  const count2Dot = document.getElementById('count2DotFilter');
+  if (count2Dot) count2Dot.innerText = '-';
+  const countGolden = document.getElementById('countGoldenFilter');
+  if (countGolden) countGolden.innerText = '-';
+  const countSmc = document.getElementById('countSmcFilter');
+  if (countSmc) countSmc.innerText = '-';
+  const countScalp = document.getElementById('countScalpFilter');
+  if (countScalp) countScalp.innerText = '-';
+
+  const filterResultCount = document.getElementById('filterResultCount');
+  if (filterResultCount) {
+    filterResultCount.innerText = 'Menampilkan Panduan Lengkap Platform & Kamus Indikator Aranter';
+  }
+
+  // Render Full Guide Content
+  grid.innerHTML = getGuidePageHTML();
+}
+
+
+function getGuidePageHTML() {
+  return `
+    <div class="guide-container">
+      
+      <!-- Quick Anchor Navigation Pills -->
+      <div class="guide-quick-nav">
+        <button type="button" class="guide-nav-pill active" onclick="document.getElementById('guide-about').scrollIntoView({behavior:'smooth'})">
+          <span>🚀</span>
+          <span>Tentang Aranter</span>
+        </button>
+        <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-menus').scrollIntoView({behavior:'smooth'})">
+          <span>📑</span>
+          <span>4 Menu Utama</span>
+        </button>
+        <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-indicators').scrollIntoView({behavior:'smooth'})">
+          <span>📊</span>
+          <span>Kamus Indikator</span>
+        </button>
+        <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-card').scrollIntoView({behavior:'smooth'})">
+          <span>🎴</span>
+          <span>Anatomi Kartu</span>
+        </button>
+        <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-sop').scrollIntoView({behavior:'smooth'})">
+          <span>🎯</span>
+          <span>Alur Trading (SOP)</span>
+        </button>
+        <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-faq').scrollIntoView({behavior:'smooth'})">
+          <span>💡</span>
+          <span>Tanya Jawab (FAQ)</span>
+        </button>
+      </div>
+
+      <!-- Hero Banner: Tentang Aranter & Bot Hunter AI -->
+      <section class="guide-hero-card" id="guide-about">
+        <div class="guide-hero-badge">PLATFORM OVERVIEW &amp; PHILOSOPHY</div>
+        <h2 class="guide-hero-title">Selamat Datang di Aranter (ARA Hunter AI)</h2>
+        <p class="guide-hero-desc">
+          <b>Aranter</b> adalah platform asisten trading kuantitatif berbasis kecerdasan buatan (AI) yang dirancang khusus untuk pasar saham <b>Bursa Efek Indonesia (IDX)</b>. Platform ini bertujuan membantu Anda mendeteksi saham-saham berpotensi ARA (Auto Reject Atas), pembalikan arah tren (<i>bullish reversal</i>), dan saham dengan momentum akumulasi <i>smart money</i> secara objektif, disiplin, dan bebas bias emosional.
+        </p>
+
+        <div class="guide-hero-highlights">
+          <div class="guide-highlight-item">
+            <div class="guide-hl-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--brand-accent);">⚡</div>
+            <div class="guide-hl-text">
+              <h4>Multi-Timeframe Alignment</h4>
+              <p>Mengonfirmasi tren bullish secara serempak di Daily (1D), 1 Jam (1H), dan 15 Menit (15M) untuk menghindari sinyal palsu (<i>fakeout</i>).</p>
+            </div>
+          </div>
+
+          <div class="guide-highlight-item">
+            <div class="guide-hl-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">🎯</div>
+            <div class="guide-hl-text">
+              <h4>Standar Emas 5 Konfluensi</h4>
+              <p>Menggabungkan 3-Dot Green, Golden Cross EMA, Area Demand SMC, Scalp/Swing Trend BUY, dan MACD Bullish Divergence.</p>
+            </div>
+          </div>
+
+          <div class="guide-highlight-item">
+            <div class="guide-hl-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--status-cyan);">🤖</div>
+            <div class="guide-hl-text">
+              <h4>Scan Otomatis Jam 16:21 WIB</h4>
+              <p>Bot Hunter AI otomatis aktif pasca penutupan bursa sesi 2 untuk memindai ratusan emiten dan memperbarui web setiap sore.</p>
+            </div>
+          </div>
+
+          <div class="guide-highlight-item">
+            <div class="guide-hl-icon" style="background:rgba(100, 116, 139, 0.15); color:var(--text-secondary);">🛡️</div>
+            <div class="guide-hl-text">
+              <h4>Next-Day Realization</h4>
+              <p>Perhitungan cuan realistis: Hari rilis sinyal adalah 0.00% (karena market tutup), kenaikan hanya dihitung mulai hari berikutnya.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: 4 Menu Utama -->
+      <section class="guide-section" id="guide-menus">
+        <div class="guide-section-head">
+          <div class="guide-section-title">
+            <span style="font-size:20px;">📑</span>
+            <span>Panduan Lengkap 4 Menu Utama</span>
+          </div>
+          <span class="guide-section-tag">NAVIGASI SISTEM</span>
+        </div>
+
+        <div class="guide-menu-grid">
+          
+          <!-- Menu 1: Screener -->
+          <div class="guide-menu-card">
+            <div class="guide-menu-header">
+              <div class="guide-menu-icon-title">
+                <div class="guide-menu-icon" style="background:rgba(16, 185, 129, 0.12); color:var(--brand-accent);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+                </div>
+                <h3>1. Screener ARA Hunter</h3>
+              </div>
+              <span class="guide-menu-badge" style="background:rgba(16, 185, 129, 0.12); color:var(--brand-accent);">SCAN HARIAN</span>
+            </div>
+            <p class="guide-menu-desc">
+              Menu utama untuk melihat hasil pemindaian pasar harian pada tanggal bursa tertentu setelah market tutup jam 16:10 WIB.
+            </p>
+            <ul class="guide-menu-points">
+              <li><span class="bullet">•</span> <b>Riwayat Tanggal (Sidebar):</b> Pilih tanggal bursa mana saja hingga 1 bulan terakhir untuk evaluasi dan analisis historis.</li>
+              <li><span class="bullet">•</span> <b>Filter Sinyal Cepat:</b> Saring saham berdasarkan Full Rally Good (3-Dot), 2-Dot, Golden Cross, Breakout SMC, atau Scalp BUY.</li>
+              <li><span class="bullet">•</span> <b>Grafik Tren Lolos Screener:</b> Pantau pergerakan jumlah emiten yang lolos seleksi harian (7 hari / 30 hari).</li>
+            </ul>
+            <div class="guide-menu-tip">
+              💡 <b>Tips Penggunaan:</b> Buka menu ini 2 jam setelah proses analisa bot selesai untuk melihat gambaran umum saham-saham yang ramai diakumulasi di bursa hari itu.
+            </div>
+          </div>
+
+          <!-- Menu 2: Rekomendasi Aranter -->
+          <div class="guide-menu-card">
+            <div class="guide-menu-header">
+              <div class="guide-menu-icon-title">
+                <div class="guide-menu-icon" style="background:rgba(16, 185, 129, 0.12); color:var(--brand-accent);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></svg>
+                </div>
+                <h3>2. Rekomendasi Aranter</h3>
+              </div>
+              <span class="guide-menu-badge" style="background:rgba(16, 185, 129, 0.15); color:var(--brand-accent); font-weight:800;">STANDAR EMAS</span>
+            </div>
+            <p class="guide-menu-desc">
+              Menu paling eksklusif di Aranter. Hanya saham yang memenuhi <b>5 Konfluensi Sinyal Emas sekaligus</b> yang berhak masuk ke menu ini.
+            </p>
+            <ul class="guide-menu-points">
+              <li><span class="bullet">•</span> <b>5 Syarat Konfluensi:</b> Wajib 3-Dot Green + Golden Cross EMA + Area Demand SMC + Scalp/Swing BUY + MACD Divergence.</li>
+              <li><span class="bullet">•</span> <b>Aranter Recency Score:</b> Saham dirangking otomatis berdasarkan skor kebaruan sinyal. Saham dengan sinyal paling segar berada di urutan teratas.</li>
+              <li><span class="bullet">•</span> <b>Probabilitas Tertinggi:</b> Menyaring saham dari ratusan menjadi segelintir saham berkualitas tinggi (biasanya 5–20 saham).</li>
+            </ul>
+            <div class="guide-menu-tip">
+              ⭐ <b>Tips Penggunaan:</b> Jadikan menu ini sebagai prioritas utama nomor 1 untuk menyusun *Watchlist* dan *Trading Plan* malam hari sebelum bursa buka besok.
+            </div>
+          </div>
+
+          <!-- Menu 3: 3 Rally Good 1 Bulan -->
+          <div class="guide-menu-card">
+            <div class="guide-menu-header">
+              <div class="guide-menu-icon-title">
+                <div class="guide-menu-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <h3>3. 3 Rally Good 1 Bulan</h3>
+              </div>
+              <span class="guide-menu-badge" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">VVIP 30 HARI</span>
+            </div>
+            <p class="guide-menu-desc">
+              Kolam pemantauan berkelanjutan (<i>rolling tracking pool</i>) selama 30 hari bursa untuk semua saham yang pernah memicu sinyal 3-Dot Green.
+            </p>
+            <ul class="guide-menu-points">
+              <li><span class="bullet">•</span> <b>Mengapa 30 Hari Bursa?</b> Saham pilihan bandar seringkali mengalami fase konsolidasi / *pullback* beberapa hari sebelum melanjutkan reli *wave* ke-2 atau ke-3.</li>
+              <li><span class="bullet">•</span> <b>Indikator Tetap Terjaga:</b> Parameter teknikal saham tetap diperbarui setiap hari meskipun volume saham sedang sepi di screener harian.</li>
+              <li><span class="bullet">•</span> <b>Re-Trigger Otomatis:</b> Jika saham kembali memicu 3-Dot Green di tanggal baru, masa pantau 30 hari diperpanjang tanpa menghapus riwayat sebelumnya.</li>
+            </ul>
+            <div class="guide-menu-tip">
+              🔥 <b>Tips Penggunaan:</b> Sangat ideal bagi *Swing Trader* yang mencari momentum *buy on pullback* saat saham menguji area support / demand.
+            </div>
+          </div>
+
+          <!-- Menu 4: Track Record -->
+          <div class="guide-menu-card">
+            <div class="guide-menu-header">
+              <div class="guide-menu-icon-title">
+                <div class="guide-menu-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+                </div>
+                <h3>4. Track Record</h3>
+              </div>
+              <span class="guide-menu-badge" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">TARGET CUAN &ge; 8%</span>
+            </div>
+            <p class="guide-menu-desc">
+              Etalase pembuktian transparansi dan akurasi (<i>proof of work</i>) dari saham-saham yang berhasil mencapai target kenaikan &ge; +8.0%.
+            </p>
+            <ul class="guide-menu-points">
+              <li><span class="bullet">•</span> <b>Aturan Ketat Hari Sinyal = 0.00%:</b> Karena scan rilis sore hari saat market tutup, belum ada yang beli. Hari kemunculan sinyal tercatat 0%.</li>
+              <li><span class="bullet">•</span> <b>Kenaikan Dihitung Mulai BESOKNYA:</b> Peak High hanya dihitung dari hari-hari setelahnya (<i>next-day execution</i>) dari harga Close hari kemunculan sinyal.</li>
+              <li><span class="bullet">•</span> <b>Kartu Kemewahan (&ge; +25%):</b> Saham dengan kenaikan puncak fantastis ditandai khusus dengan bintang emas <code>★ PEAK</code>.</li>
+            </ul>
+            <div class="guide-menu-tip">
+              🏆 <b>Tips Penggunaan:</b> Cek menu ini untuk melihat saham mana yang konsisten melompat tinggi dan pelajari karakteristik teknikal polanya.
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Section: Kamus Indikator & Anatomi Kartu -->
+      <section class="guide-section" id="guide-indicators">
+        <div class="guide-section-head">
+          <div class="guide-section-title">
+            <span style="font-size:20px;">📊</span>
+            <span>Kamus Indikator Teknikal &amp; Anatomi Kartu</span>
+          </div>
+          <span class="guide-section-tag">PENJELASAN SINYAL</span>
+        </div>
+
+        <div class="guide-ind-grid">
+          
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">RallyGood Dot Green</span>
+              <span class="badge-chip chip-golden" style="font-size:10px;">3-DOT &amp; 2-DOT</span>
+            </div>
+            <p class="guide-ind-desc">
+              Sinyal titik hijau konfirmasi tren bullish multi-timeframe. Jika 3/3 timeframe (Daily, 1H, 15M) aktif, saham diklasifikasikan sebagai <b>VVIP 3-DOT</b>. Jika 2/3 aktif, masuk <b>RADAR POTENSIAL</b>.
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">1D: Daily Trend</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">1H: Hourly Swing</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">15M: Intraday Momentum</span>
+            </div>
+          </div>
+
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">DonAlt EMA Cross</span>
+              <span class="badge-chip chip-golden" style="font-size:10px;">EMA TREND</span>
+            </div>
+            <p class="guide-ind-desc">
+              Deteksi persilangan rata-rata bergerak eksponensial (EMA). <b>Golden Cross</b> menandakan momentum pembalikan arah naik yang kuat. Persentase (+X.X%) menunjukkan keuntungan sejak titik persilangan terjadi.
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-golden" style="font-size:10.5px;">Golden Cross (+X.X%)</span>
+              <span class="badge-chip chip-death" style="font-size:10.5px;">Death Cross</span>
+            </div>
+          </div>
+
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">Smart Money Concepts (SMC)</span>
+              <span class="badge-chip chip-smc-break" style="font-size:10px;">STRUKTUR INSTITUSI</span>
+            </div>
+            <p class="guide-ind-desc">
+              Memetakan area institusional. <b>Area Demand</b> adalah support pembeli kuat (zona serok). <b>Area Supply</b> adalah resistensi penjual (zona take profit). Serta mendeteksi penembusan level kunci.
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-smc-break" style="font-size:10.5px;">Breakout Supply</span>
+              <span class="badge-chip chip-smc-break" style="font-size:10.5px;">BOS (Break of Structure)</span>
+              <span class="badge-chip chip-smc-break" style="font-size:10.5px;">CHoCH (Change of Character)</span>
+            </div>
+          </div>
+
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">Scalp &amp; Swing Trend</span>
+              <span class="badge-chip chip-scalp-buy" style="font-size:10px;">ACTION SIGNAL</span>
+            </div>
+            <p class="guide-ind-desc">
+              Indikator momentum aksi cepat. <b>BUY (Green)</b> memberi sinyal bahwa saham siap dieksekusi baik untuk trading kilat (scalping 15M) maupun swing mingguan (1H). Menampilkan harga beli acuan (@ Rp ...).
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-scalp-buy" style="font-size:10.5px;">BUY (1H) @ Rp ...</span>
+              <span class="badge-chip chip-scalp-sell" style="font-size:10.5px;">SELL (1H)</span>
+            </div>
+          </div>
+
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">MACD Bullish Divergence</span>
+              <span class="badge-chip chip-macd-buy" style="font-size:10px;">ACCUMULATION</span>
+            </div>
+            <p class="guide-ind-desc">
+              Pola divergensi bullish: Grafik harga saham membentuk titik terendah lebih rendah (<i>lower low</i>), tetapi osilator MACD justru membentuk titik terendah lebih tinggi (<i>higher low</i>). Tanda bandar sedang akumulasi di harga bawah!
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-macd-buy" style="font-size:10.5px;">Bullish Div (15M) @ Rp ...</span>
+              <span class="badge-chip chip-macd-buy" style="font-size:10.5px;">Bullish Div (1H)</span>
+            </div>
+          </div>
+
+          <div class="guide-ind-item">
+            <div class="guide-ind-title-row">
+              <span class="guide-ind-name">Modal Detail &amp; Chart TV</span>
+              <span class="badge-chip chip-neutral" style="font-size:10px;">FITUR INTERAKTIF</span>
+            </div>
+            <p class="guide-ind-desc">
+              Klik kartu saham mana saja untuk membuka <b>Modal Analisis Lengkap</b> (kurva harga Close, garis rentang High-Low harian / whiskers, horizontal scrolling, dan tabel kronologis bursa). Serta tombol <b>Chart TV</b> untuk membuka grafik TradingView IDX.
+            </p>
+            <div class="guide-ind-chips">
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">Kurva &amp; Whiskers</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">Tabel Kronologis</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">TradingView Link ↗</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- Section: Anatomi Kartu Saham & Chart Detail -->
+      <section class="guide-section" id="guide-card">
+        <div class="guide-section-head">
+          <div class="guide-section-title">
+            <span style="font-size:20px;">🎴</span>
+            <span>Anatomi Kartu Saham &amp; Fitur Chart Detail</span>
+          </div>
+          <span class="guide-section-tag">BEDAH TAMPILAN</span>
+        </div>
+
+        <div class="guide-anatomy-wrap">
+          
+          <!-- Mockup Kartu Saham Aranter -->
+          <div class="guide-card-annotated">
+            <div class="stock-card-header" style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                  <span style="font-size:18px; font-weight:800; color:var(--text-primary);">SOLA</span>
+                  <span class="guide-marker">1</span>
+                  <span class="badge-dot badge-3dot">3-DOT</span>
+                  <span class="badge-peak-luxury">★ +33.9% PEAK</span>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted);">SOLA (PT Xxx Tbk)</div>
+                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Entry Close: Rp 59 ➔ Peak High: Rp 79 (20 Okt 2026)</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:18px; font-weight:800; color:var(--text-primary);">Rp 79</div>
+                <div style="font-size:12px; font-weight:700; color:var(--brand-accent);">+33.90%</div>
+              </div>
+            </div>
+
+            <!-- Signal Box 3-DOT Matrix -->
+            <div style="position:relative; margin-bottom:12px;">
+              <span class="guide-marker" style="position:absolute; top:-8px; right:-6px; z-index:2;">2</span>
+              <div class="dot-matrix-box" style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px; padding:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span style="font-size:10.5px; font-weight:700; color:var(--brand-accent);">RALLYGOOD DOT GREEN</span>
+                  <span style="font-size:10.5px; font-weight:800; color:var(--brand-accent);">3 / 3 TF Aktif</span>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; text-align:center;">
+                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">1D 🟢</div>
+                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  </div>
+                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">1H 🟢</div>
+                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  </div>
+                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
+                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">15M 🟢</div>
+                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Konfluensi Sinyal Teknis -->
+            <div style="position:relative; display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+              <span class="guide-marker" style="position:absolute; top:-6px; right:-6px; z-index:2;">3</span>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed var(--border-light);">
+                <span style="color:var(--text-muted);">DonAlt EMA (15M):</span>
+                <span class="badge-chip chip-golden" style="font-size:10px;">Golden Cross (+4.0%)</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed var(--border-light);">
+                <span style="color:var(--text-muted);">Breakout (1H):</span>
+                <span class="badge-chip chip-smc-break" style="font-size:10px;">CHoCH @ Rp 77</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed var(--border-light);">
+                <span style="color:var(--text-muted);">Scalp/Swing (1H):</span>
+                <span class="badge-chip chip-scalp-buy" style="font-size:10px;">BUY (1H) @ Rp 60</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0;">
+                <span style="color:var(--text-muted);">MACD Div (15M):</span>
+                <span class="badge-chip chip-macd-buy" style="font-size:10px;">Bullish Div @ Rp 66</span>
+              </div>
+            </div>
+
+            <!-- Footer & Tombol Aksi -->
+            <div style="position:relative; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-light); padding-top:10px;">
+              <span class="guide-marker" style="position:absolute; top:-6px; right:-6px; z-index:2;">4</span>
+              <div>
+                <div style="font-size:9.5px; color:var(--text-dim); text-transform:uppercase;">Volume Transaksi</div>
+                <div style="font-size:12px; font-weight:700; color:var(--text-primary);">91.3 Juta lbr</div>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="btn-card-action" style="background:rgba(16,185,129,0.12); color:var(--brand-accent); border:1px solid rgba(16,185,129,0.3); border-radius:6px; padding:5px 9px; font-size:11px; font-weight:700;">Detail Analisa</button>
+                <button type="button" class="btn-card-action" style="background:rgba(245,158,11,0.12); color:var(--status-gold); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:5px 9px; font-size:11px; font-weight:700;">Chart TV ↗</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Penjelasan Titik Anatomi -->
+          <div class="guide-point-list">
+            
+            <div class="guide-point-item">
+              <span class="guide-marker">1</span>
+              <div class="guide-point-content">
+                <h4>Header Ticker, Badge &amp; Harga Real-Time</h4>
+                <p>Memuat kode saham (emiten), status klasifikasi (<b>3-DOT</b> untuk VVIP 3 Timeframe), lencana kenaikan puncak tertinggi (<b>★ PEAK</b>), harga penutupan terakhir, dan persentase perubahan hari ini.</p>
+              </div>
+            </div>
+
+            <div class="guide-point-item">
+              <span class="guide-marker">2</span>
+              <div class="guide-point-content">
+                <h4>RallyGood Multi-Timeframe Dot Matrix</h4>
+                <p>Menampilkan status titik hijau pada 3 timeframe penting: <b>Daily (1D)</b> untuk tren besar harian, <b>Hourly (1H)</b> untuk swing mingguan, dan <b>15 Menit (15M)</b> untuk momentum intraday. Dilengkapi tanggal deteksi sinyal.</p>
+              </div>
+            </div>
+
+            <div class="guide-point-item">
+              <span class="guide-marker">3</span>
+              <div class="guide-point-content">
+                <h4>Konfluensi Sinyal Teknis Berlapis</h4>
+                <p>Parameter kuantitatif pendukung: Konfirmasi Golden Cross EMA, struktur pasar institusi Smart Money Concepts (BOS / CHoCH Breakout &amp; Area Demand), sinyal eksekusi BUY Scalp/Swing, dan akumulasi Bullish Divergence MACD.</p>
+              </div>
+            </div>
+
+            <div class="guide-point-item">
+              <span class="guide-marker">4</span>
+              <div class="guide-point-content">
+                <h4>Volume Likuiditas &amp; Fitur Interaktif Modal</h4>
+                <p><b>Volume Transaksi:</b> Memastikan emiten memiliki likuiditas pasar yang sehat.<br>
+                <b>Tombol Detail Analisa:</b> Membuka grafik interaktif kurva harga Close, garis rentang <b>High-Low harian (whiskers)</b>, geser horizontal (drag &amp; scroll), dan tabel histori bursa.<br>
+                <b>Tombol Chart TV ↗:</b> Akses instan ke grafik TradingView resmi untuk analisa mandiri.</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Section: SOP Alur Trading -->
+      <section class="guide-section" id="guide-sop">
+        <div class="guide-section-head">
+          <div class="guide-section-title">
+            <span style="font-size:20px;">🎯</span>
+            <span>SOP &amp; Alur Praktis Trading Bagi Pemula</span>
+          </div>
+          <span class="guide-section-tag">STEP-BY-STEP WORKFLOW</span>
+        </div>
+
+        <div class="guide-sop-grid">
+          
+          <div class="guide-sop-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="guide-sop-step-badge">1</span>
+              <span class="guide-sop-time">16:21 WIB (Sore)</span>
+            </div>
+            <h4>Buka Hasil Scan Harian</h4>
+            <p>Buka web Aranter segera setelah bursa tutup sesi 2. Masuk ke menu <b>Rekomendasi Aranter</b> untuk melihat saham 5 konfluensi tertinggi, atau menu <b>Screener</b> untuk melihat seluruh emiten lolos filter.</p>
+          </div>
+
+          <div class="guide-sop-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="guide-sop-step-badge">2</span>
+              <span class="guide-sop-time">19:00 WIB (Malam)</span>
+            </div>
+            <h4>Analisis &amp; Pilih 2–3 Saham</h4>
+            <p>Pilih 2 sampai 3 saham dengan sinyal paling segar. Klik kartu untuk melihat modal detail: perhatikan posisi harga penutupan hari ini terhadap <b>Area Demand</b> (batas support beli) dan <b>Area Supply</b> (target jual).</p>
+          </div>
+
+          <div class="guide-sop-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="guide-sop-step-badge">3</span>
+              <span class="guide-sop-time">08:50 WIB (Pagi)</span>
+            </div>
+            <h4>Pasang Trading Plan &amp; Cut Loss</h4>
+            <p>Pada sesi pra-pembukaan bursa, pasang rencana beli pada harga pembukaan atau antre di area demand. Pasang batas <i>Stop Loss</i> ketat (misal 3% di bawah Area Demand) untuk membatasi risiko kerugian.</p>
+          </div>
+
+          <div class="guide-sop-card">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span class="guide-sop-step-badge">4</span>
+              <span class="guide-sop-time">Sesi Bursa &amp; Sore</span>
+            </div>
+            <h4>Kawal Trailing Stop &amp; Cuan</h4>
+            <p>Saat saham melompat naik, amankan cuan dengan menggeser <i>trailing stop</i> ke harga modal (BEP). Ambil profit bertahap (<i>take profit</i>) saat menyentuh target minimal &ge; +8% atau di dekat Area Supply.</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Section: FAQ -->
+      <section class="guide-section" id="guide-faq">
+        <div class="guide-section-head">
+          <div class="guide-section-title">
+            <span style="font-size:20px;">💡</span>
+            <span>Pertanyaan yang Sering Diajukan (FAQ)</span>
+          </div>
+          <span class="guide-section-tag">TANYA JAWAB UMUM</span>
+        </div>
+
+        <div class="guide-faq-grid">
+          
+          <div class="guide-faq-card">
+            <div class="guide-faq-q">
+              <span class="q-icon">Q:</span>
+              <span>Apakah semua saham di Aranter dijamin ARA atau pasti untung?</span>
+            </div>
+            <div class="guide-faq-a">
+              <b>Tidak ada sistem yang menjamin 100% untung di pasar saham.</b> Aranter adalah alat skrining kuantitatif berbasis statistik dan konfluensi probabilitas tinggi. Kedisiplinan <i>money management</i>, pembatasan risiko (<i>stop loss</i>), dan prinsip <i>Do Your Own Research (DYOR)</i> tetap menjadi penentu utama profit konsisten.
+            </div>
+          </div>
+
+          <div class="guide-faq-card">
+            <div class="guide-faq-q">
+              <span class="q-icon">Q:</span>
+              <span>Mengapa pada hari pertama kemunculan sinyal kenaikannya selalu 0.00%?</span>
+            </div>
+            <div class="guide-faq-a">
+              Karena bot memindai pasar pada sore hari pukul 16:11 WIB pasca penutupan bursa. Di sore hari tersebut, bursa sudah tutup dan belum ada transaksi beli yang bisa dieksekusi. Pembuktian cuan riil baru dimulai pada hari bursa berikutnya (besoknya).
+            </div>
+          </div>
+
+          <div class="guide-faq-card">
+            <div class="guide-faq-q">
+              <span class="q-icon">Q:</span>
+              <span>Apa perbedaan menu Screener harian dan 3 Rally Good 1 Bulan?</span>
+            </div>
+            <div class="guide-faq-a">
+              <b>Screener Harian</b> menampilkan potret saham yang lolos pada tanggal tertentu saja. Sedangkan <b>3 Rally Good 1 Bulan</b> melacak seluruh saham yang pernah memicu 3-Dot Green selama 30 hari bursa berjalan untuk menangkap gelombang kenaikan kedua atau ketiga pasca konsolidasi.
+            </div>
+          </div>
+
+          <div class="guide-faq-card">
+            <div class="guide-faq-q">
+              <span class="q-icon">Q:</span>
+              <span>Apa yang harus saya lakukan jika harga saham turun setelah dibeli?</span>
+            </div>
+            <div class="guide-faq-a">
+              Buka modal detail saham dan periksa level <b>Area Demand</b>. Selama harga masih bertahan di atas atau memantul dari Area Demand, setup teknikal masih sehat. Namun jika harga menembus ke bawah batas <i>stop loss</i> yang sudah Anda tetapkan, segera eksekusi cut loss tanpa ragu.
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  `;
+}
+
+
 // Helper Sorting Logic
 function sortStocks(stocks) {
   return [...stocks].sort((a, b) => {
@@ -1431,14 +2067,26 @@ function updateMetricCard(cardIndex, tagText, tagClass, numberText, titleText, d
   }
 }
 
-// Helper: Switch Grid Card Mode (3 cards for Screener & Track Record, 4 cards for Rekomendasi Aranter & VIP)
+// Helper: Switch Grid Card Mode (3 cards for Screener & Track Record, 4 cards for Rekomendasi Aranter & VIP, hidden for Guide)
 function applyGridCardMode(mode) {
   const gridSection = document.getElementById("metricsGridSection");
+  const actionBar = document.querySelector(".action-bar");
   const cardGolden = document.getElementById("metricCardGolden");
   const cardTotal = document.getElementById("metricCardTotal");
   const periodFilter = document.getElementById("screenerPeriodFilter");
   const totalIcon = document.getElementById("statTotalIcon");
   const sparkBox = document.getElementById("statTotalSparkline");
+
+  // Mode Panduan & Edukasi: Sembunyikan summary metrics dan action bar karena bukan data saham
+  if (mode === "guide") {
+    if (gridSection) gridSection.style.display = "none";
+    if (actionBar) actionBar.style.display = "none";
+    return;
+  }
+
+  // Tampilkan kembali metrics grid dan action bar untuk mode screener/vip/rekomendasi/track record
+  if (gridSection) gridSection.style.display = "grid";
+  if (actionBar) actionBar.style.display = "flex";
 
   if (mode === "daily" || mode === "trackrecord") {
     // 3 Cards Mode (Screener Harian & Track Record)
