@@ -858,6 +858,7 @@ function updateTrackRecordCount() {
 
 // Render Daily Mode (Data Harian)
 function renderDailyView() {
+  document.body.classList.remove("mode-guide");
   applyGridCardMode("daily");
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
@@ -986,6 +987,7 @@ function renderDailyView() {
 
 // Render VIP View (1 Bulan 3-Dot Green)
 function renderVipView() {
+  document.body.classList.remove("mode-guide");
   applyGridCardMode("vip");
   const grid = document.getElementById("stocksGrid");
   const vipList = appData.vip_3dot_history || [];
@@ -1085,6 +1087,7 @@ function renderVipView() {
 
 // Render Rekomendasi Aranter View (5 Konfluensi Indikator)
 function renderRecommendationView() {
+  document.body.classList.remove("mode-guide");
   const grid = document.getElementById("stocksGrid");
   const recList = getAranterRecommendations();
 
@@ -1189,6 +1192,7 @@ function renderRecommendationView() {
 
 // Render Track Record Mode (Bukti Saham 3 Rally Good Kenaikan >= +20%)
 function renderTrackRecordView() {
+  document.body.classList.remove("mode-guide");
   applyGridCardMode("trackrecord");
   const grid = document.getElementById("stocksGrid");
   const trackList = getTrackRecordStocks();
@@ -1342,6 +1346,7 @@ function renderTrackRecordView() {
 
 // Render Panduan & Edukasi Mode
 function renderGuideView() {
+  document.body.classList.add("mode-guide");
   applyGridCardMode('guide');
   const grid = document.getElementById('stocksGrid');
 
@@ -1351,42 +1356,6 @@ function renderGuideView() {
   document.getElementById('activeDateDisplay').innerText = 'Dokumentasi Lengkap Platform';
   document.getElementById('activeTimeDisplay').innerText = 'Aranter v2.4 (Terupdate)';
 
-  // Update 4 Kartu Metrik di atas
-  updateMetricCard(
-    0,
-    '4 MENU UTAMA',
-    'tag-blue',
-    'Navigasi',
-    'Screener s/d Track Record',
-    'Jelajahi alur lengkap dari scan harian hingga bukti realisasi cuan'
-  );
-
-  updateMetricCard(
-    1,
-    '5 KONFLUENSI',
-    'tag-green',
-    'Algoritma',
-    'Filter Berlapis Hunter AI',
-    'RallyGood 3 TF, DonAlt EMA, SMC Demand/Supply, Scalp/Swing, MACD Div'
-  );
-
-  updateMetricCard(
-    2,
-    'BOT 16:21 WIB',
-    'tag-cyan',
-    'Auto-Scan',
-    'Otomatis Pasca Tutup Bursa',
-    'Update rutin tiap hari bursa sore untuk persiapan trading esok pagi'
-  );
-
-  updateMetricCard(
-    3,
-    'TARGET ≥ 8%',
-    'tag-gold',
-    'Track Record',
-    'Standar Realisasi Kenaikan',
-    'Hanya saham yang mencapai peak kenaikan ≥ 8% masuk track record'
-  );
 
   // Update Sidebar Filter Counters
   const countAll = document.getElementById('countAllFilter');
@@ -1419,27 +1388,27 @@ function getGuidePageHTML() {
       <!-- Quick Anchor Navigation Pills -->
       <div class="guide-quick-nav">
         <button type="button" class="guide-nav-pill active" onclick="document.getElementById('guide-about').scrollIntoView({behavior:'smooth'})">
-          <span>🚀</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>
           <span>Tentang Aranter</span>
         </button>
         <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-menus').scrollIntoView({behavior:'smooth'})">
-          <span>📑</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg></span>
           <span>4 Menu Utama</span>
         </button>
         <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-indicators').scrollIntoView({behavior:'smooth'})">
-          <span>📊</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
           <span>Kamus Indikator</span>
         </button>
         <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-card').scrollIntoView({behavior:'smooth'})">
-          <span>🎴</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></span>
           <span>Anatomi Kartu</span>
         </button>
         <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-sop').scrollIntoView({behavior:'smooth'})">
-          <span>🎯</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span>
           <span>Alur Trading (SOP)</span>
         </button>
         <button type="button" class="guide-nav-pill" onclick="document.getElementById('guide-faq').scrollIntoView({behavior:'smooth'})">
-          <span>💡</span>
+          <span class="guide-nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
           <span>Tanya Jawab (FAQ)</span>
         </button>
       </div>
@@ -1454,7 +1423,9 @@ function getGuidePageHTML() {
 
         <div class="guide-hero-highlights">
           <div class="guide-highlight-item">
-            <div class="guide-hl-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--brand-accent);">⚡</div>
+            <div class="guide-hl-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--brand-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
             <div class="guide-hl-text">
               <h4>Multi-Timeframe Alignment</h4>
               <p>Mengonfirmasi tren bullish secara serempak di Daily (1D), 1 Jam (1H), dan 15 Menit (15M) untuk menghindari sinyal palsu (<i>fakeout</i>).</p>
@@ -1462,7 +1433,9 @@ function getGuidePageHTML() {
           </div>
 
           <div class="guide-highlight-item">
-            <div class="guide-hl-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">🎯</div>
+            <div class="guide-hl-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+            </div>
             <div class="guide-hl-text">
               <h4>Standar Emas 5 Konfluensi</h4>
               <p>Menggabungkan 3-Dot Green, Golden Cross EMA, Area Demand SMC, Scalp/Swing Trend BUY, dan MACD Bullish Divergence.</p>
@@ -1470,7 +1443,9 @@ function getGuidePageHTML() {
           </div>
 
           <div class="guide-highlight-item">
-            <div class="guide-hl-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--status-cyan);">🤖</div>
+            <div class="guide-hl-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--status-cyan);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
             <div class="guide-hl-text">
               <h4>Scan Otomatis Jam 16:21 WIB</h4>
               <p>Bot Hunter AI otomatis aktif pasca penutupan bursa sesi 2 untuk memindai ratusan emiten dan memperbarui web setiap sore.</p>
@@ -1478,7 +1453,9 @@ function getGuidePageHTML() {
           </div>
 
           <div class="guide-highlight-item">
-            <div class="guide-hl-icon" style="background:rgba(100, 116, 139, 0.15); color:var(--text-secondary);">🛡️</div>
+            <div class="guide-hl-icon" style="background:rgba(100, 116, 139, 0.15); color:var(--text-secondary);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            </div>
             <div class="guide-hl-text">
               <h4>Next-Day Realization</h4>
               <p>Perhitungan cuan realistis: Hari rilis sinyal adalah 0.00% (karena market tutup), kenaikan hanya dihitung mulai hari berikutnya.</p>
@@ -1491,7 +1468,9 @@ function getGuidePageHTML() {
       <section class="guide-section" id="guide-menus">
         <div class="guide-section-head">
           <div class="guide-section-title">
-            <span style="font-size:20px;">📑</span>
+            <span class="guide-section-icon" style="color:var(--brand-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+            </span>
             <span>Panduan Lengkap 4 Menu Utama</span>
           </div>
           <span class="guide-section-tag">NAVIGASI SISTEM</span>
@@ -1519,7 +1498,8 @@ function getGuidePageHTML() {
               <li><span class="bullet">•</span> <b>Grafik Tren Lolos Screener:</b> Pantau pergerakan jumlah emiten yang lolos seleksi harian (7 hari / 30 hari).</li>
             </ul>
             <div class="guide-menu-tip">
-              💡 <b>Tips Penggunaan:</b> Buka menu ini 2 jam setelah proses analisa bot selesai untuk melihat gambaran umum saham-saham yang ramai diakumulasi di bursa hari itu.
+              <svg class="tip-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px; color:var(--brand-accent);"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              <b>Tips Penggunaan:</b> Buka menu ini 2 jam setelah proses analisa bot selesai untuk melihat gambaran umum saham-saham yang ramai diakumulasi di bursa hari itu.
             </div>
           </div>
 
@@ -1543,7 +1523,8 @@ function getGuidePageHTML() {
               <li><span class="bullet">•</span> <b>Probabilitas Tertinggi:</b> Menyaring saham dari ratusan menjadi segelintir saham berkualitas tinggi (biasanya 5–20 saham).</li>
             </ul>
             <div class="guide-menu-tip">
-              ⭐ <b>Tips Penggunaan:</b> Jadikan menu ini sebagai prioritas utama nomor 1 untuk menyusun *Watchlist* dan *Trading Plan* malam hari sebelum bursa buka besok.
+              <svg class="tip-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px; color:var(--status-gold);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <b>Tips Penggunaan:</b> Jadikan menu ini sebagai prioritas utama nomor 1 untuk menyusun *Watchlist* dan *Trading Plan* malam hari sebelum bursa buka besok.
             </div>
           </div>
 
@@ -1567,7 +1548,8 @@ function getGuidePageHTML() {
               <li><span class="bullet">•</span> <b>Re-Trigger Otomatis:</b> Jika saham kembali memicu 3-Dot Green di tanggal baru, masa pantau 30 hari diperpanjang tanpa menghapus riwayat sebelumnya.</li>
             </ul>
             <div class="guide-menu-tip">
-              🔥 <b>Tips Penggunaan:</b> Sangat ideal bagi *Swing Trader* yang mencari momentum *buy on pullback* saat saham menguji area support / demand.
+              <svg class="tip-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px; color:#EF4444;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+              <b>Tips Penggunaan:</b> Sangat ideal bagi *Swing Trader* yang mencari momentum *buy on pullback* saat saham menguji area support / demand.
             </div>
           </div>
 
@@ -1588,10 +1570,11 @@ function getGuidePageHTML() {
             <ul class="guide-menu-points">
               <li><span class="bullet">•</span> <b>Aturan Ketat Hari Sinyal = 0.00%:</b> Karena scan rilis sore hari saat market tutup, belum ada yang beli. Hari kemunculan sinyal tercatat 0%.</li>
               <li><span class="bullet">•</span> <b>Kenaikan Dihitung Mulai BESOKNYA:</b> Peak High hanya dihitung dari hari-hari setelahnya (<i>next-day execution</i>) dari harga Close hari kemunculan sinyal.</li>
-              <li><span class="bullet">•</span> <b>Kartu Kemewahan (&ge; +25%):</b> Saham dengan kenaikan puncak fantastis ditandai khusus dengan bintang emas <code>★ PEAK</code>.</li>
+              <li><span class="bullet">•</span> <b>Kartu Kemewahan (&ge; +25%):</b> Saham dengan kenaikan puncak fantastis ditandai khusus dengan lencana emas <span class="badge-peak-luxury" style="display:inline-flex; align-items:center; padding:2px 6px; font-size:10px;"><svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor" style="margin-right:3px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>PEAK</span>.</li>
             </ul>
             <div class="guide-menu-tip">
-              🏆 <b>Tips Penggunaan:</b> Cek menu ini untuk melihat saham mana yang konsisten melompat tinggi dan pelajari karakteristik teknikal polanya.
+              <svg class="tip-icon" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:4px; color:var(--status-gold);"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+              <b>Tips Penggunaan:</b> Cek menu ini untuk melihat saham mana yang konsisten melompat tinggi dan pelajari karakteristik teknikal polanya.
             </div>
           </div>
 
@@ -1602,7 +1585,9 @@ function getGuidePageHTML() {
       <section class="guide-section" id="guide-indicators">
         <div class="guide-section-head">
           <div class="guide-section-title">
-            <span style="font-size:20px;">📊</span>
+            <span class="guide-section-icon" style="color:var(--status-cyan);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </span>
             <span>Kamus Indikator Teknikal &amp; Anatomi Kartu</span>
           </div>
           <span class="guide-section-tag">PENJELASAN SINYAL</span>
@@ -1693,19 +1678,20 @@ function getGuidePageHTML() {
             <div class="guide-ind-chips">
               <span class="badge-chip chip-neutral" style="font-size:10.5px;">Kurva &amp; Whiskers</span>
               <span class="badge-chip chip-neutral" style="font-size:10.5px;">Tabel Kronologis</span>
-              <span class="badge-chip chip-neutral" style="font-size:10.5px;">TradingView Link ↗</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">TradingView Link</span>
             </div>
           </div>
 
         </div>
       </section>
 
-
       <!-- Section: Anatomi Kartu Saham & Chart Detail -->
       <section class="guide-section" id="guide-card">
         <div class="guide-section-head">
           <div class="guide-section-title">
-            <span style="font-size:20px;">🎴</span>
+            <span class="guide-section-icon" style="color:var(--status-gold);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </span>
             <span>Anatomi Kartu Saham &amp; Fitur Chart Detail</span>
           </div>
           <span class="guide-section-tag">BEDAH TAMPILAN</span>
@@ -1721,10 +1707,10 @@ function getGuidePageHTML() {
                   <span style="font-size:18px; font-weight:800; color:var(--text-primary);">SOLA</span>
                   <span class="guide-marker">1</span>
                   <span class="badge-dot badge-3dot">3-DOT</span>
-                  <span class="badge-peak-luxury">★ +33.9% PEAK</span>
+                  <span class="badge-peak-luxury"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px; margin-right:3px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>PEAK +33.9%</span>
                 </div>
                 <div style="font-size:11px; color:var(--text-muted);">SOLA (PT Xxx Tbk)</div>
-                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Entry Close: Rp 59 ➔ Peak High: Rp 79 (20 Okt 2026)</div>
+                <div style="font-size:10px; color:var(--text-dim); margin-top:2px;">Entry Close: Rp 59 &rarr; Peak High: Rp 79 (20 Okt 2026)</div>
               </div>
               <div style="text-align:right;">
                 <div style="font-size:18px; font-weight:800; color:var(--text-primary);">Rp 79</div>
@@ -1741,17 +1727,17 @@ function getGuidePageHTML() {
                   <span style="font-size:10.5px; font-weight:800; color:var(--brand-accent);">3 / 3 TF Aktif</span>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; text-align:center;">
-                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
-                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">1D 🟢</div>
-                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  <div style="background:rgba(16,185,129,0.12); padding:5px; border-radius:6px;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; font-weight:700; color:var(--text-primary);"><span>1D</span><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981;"></span></div>
+                    <div style="font-size:8.5px; color:var(--text-muted); margin-top:2px;">20 Okt 2026</div>
                   </div>
-                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
-                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">1H 🟢</div>
-                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  <div style="background:rgba(16,185,129,0.12); padding:5px; border-radius:6px;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; font-weight:700; color:var(--text-primary);"><span>1H</span><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981;"></span></div>
+                    <div style="font-size:8.5px; color:var(--text-muted); margin-top:2px;">20 Okt 2026</div>
                   </div>
-                  <div style="background:rgba(16,185,129,0.12); padding:4px; border-radius:6px;">
-                    <div style="font-size:10px; font-weight:700; color:var(--text-primary);">15M 🟢</div>
-                    <div style="font-size:8.5px; color:var(--text-muted);">20 Okt 2026</div>
+                  <div style="background:rgba(16,185,129,0.12); padding:5px; border-radius:6px;">
+                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; font-weight:700; color:var(--text-primary);"><span>15M</span><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981;"></span></div>
+                    <div style="font-size:8.5px; color:var(--text-muted); margin-top:2px;">20 Okt 2026</div>
                   </div>
                 </div>
               </div>
@@ -1787,7 +1773,7 @@ function getGuidePageHTML() {
               </div>
               <div style="display:flex; gap:6px;">
                 <button type="button" class="btn-card-action" style="background:rgba(16,185,129,0.12); color:var(--brand-accent); border:1px solid rgba(16,185,129,0.3); border-radius:6px; padding:5px 9px; font-size:11px; font-weight:700;">Detail Analisa</button>
-                <button type="button" class="btn-card-action" style="background:rgba(245,158,11,0.12); color:var(--status-gold); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:5px 9px; font-size:11px; font-weight:700;">Chart TV ↗</button>
+                <button type="button" class="btn-card-action" style="background:rgba(245,158,11,0.12); color:var(--status-gold); border:1px solid rgba(245,158,11,0.3); border-radius:6px; padding:5px 9px; font-size:11px; font-weight:700;">Chart TV <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-left:2px;"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></button>
               </div>
             </div>
 
@@ -1800,7 +1786,7 @@ function getGuidePageHTML() {
               <span class="guide-marker">1</span>
               <div class="guide-point-content">
                 <h4>Header Ticker, Badge &amp; Harga Real-Time</h4>
-                <p>Memuat kode saham (emiten), status klasifikasi (<b>3-DOT</b> untuk VVIP 3 Timeframe), lencana kenaikan puncak tertinggi (<b>★ PEAK</b>), harga penutupan terakhir, dan persentase perubahan hari ini.</p>
+                <p>Memuat kode saham (emiten), status klasifikasi (<b>3-DOT</b> untuk VVIP 3 Timeframe), lencana kenaikan puncak tertinggi (<b>PEAK</b>), harga penutupan terakhir, dan persentase perubahan hari ini.</p>
               </div>
             </div>
 
@@ -1826,7 +1812,7 @@ function getGuidePageHTML() {
                 <h4>Volume Likuiditas &amp; Fitur Interaktif Modal</h4>
                 <p><b>Volume Transaksi:</b> Memastikan emiten memiliki likuiditas pasar yang sehat.<br>
                 <b>Tombol Detail Analisa:</b> Membuka grafik interaktif kurva harga Close, garis rentang <b>High-Low harian (whiskers)</b>, geser horizontal (drag &amp; scroll), dan tabel histori bursa.<br>
-                <b>Tombol Chart TV ↗:</b> Akses instan ke grafik TradingView resmi untuk analisa mandiri.</p>
+                <b>Tombol Chart TV:</b> Akses instan ke grafik TradingView resmi untuk analisa mandiri.</p>
               </div>
             </div>
 
@@ -1839,7 +1825,9 @@ function getGuidePageHTML() {
       <section class="guide-section" id="guide-sop">
         <div class="guide-section-head">
           <div class="guide-section-title">
-            <span style="font-size:20px;">🎯</span>
+            <span class="guide-section-icon" style="color:var(--brand-accent);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            </span>
             <span>SOP &amp; Alur Praktis Trading Bagi Pemula</span>
           </div>
           <span class="guide-section-tag">STEP-BY-STEP WORKFLOW</span>
@@ -1890,7 +1878,9 @@ function getGuidePageHTML() {
       <section class="guide-section" id="guide-faq">
         <div class="guide-section-head">
           <div class="guide-section-title">
-            <span style="font-size:20px;">💡</span>
+            <span class="guide-section-icon" style="color:var(--status-cyan);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </span>
             <span>Pertanyaan yang Sering Diajukan (FAQ)</span>
           </div>
           <span class="guide-section-tag">TANYA JAWAB UMUM</span>
@@ -1900,7 +1890,9 @@ function getGuidePageHTML() {
           
           <div class="guide-faq-card">
             <div class="guide-faq-q">
-              <span class="q-icon">Q:</span>
+              <span class="q-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </span>
               <span>Apakah semua saham di Aranter dijamin ARA atau pasti untung?</span>
             </div>
             <div class="guide-faq-a">
@@ -1910,7 +1902,9 @@ function getGuidePageHTML() {
 
           <div class="guide-faq-card">
             <div class="guide-faq-q">
-              <span class="q-icon">Q:</span>
+              <span class="q-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </span>
               <span>Mengapa pada hari pertama kemunculan sinyal kenaikannya selalu 0.00%?</span>
             </div>
             <div class="guide-faq-a">
@@ -1920,7 +1914,9 @@ function getGuidePageHTML() {
 
           <div class="guide-faq-card">
             <div class="guide-faq-q">
-              <span class="q-icon">Q:</span>
+              <span class="q-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </span>
               <span>Apa perbedaan menu Screener harian dan 3 Rally Good 1 Bulan?</span>
             </div>
             <div class="guide-faq-a">
@@ -1930,7 +1926,9 @@ function getGuidePageHTML() {
 
           <div class="guide-faq-card">
             <div class="guide-faq-q">
-              <span class="q-icon">Q:</span>
+              <span class="q-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </span>
               <span>Apa yang harus saya lakukan jika harga saham turun setelah dibeli?</span>
             </div>
             <div class="guide-faq-a">
@@ -2079,10 +2077,13 @@ function applyGridCardMode(mode) {
 
   // Mode Panduan & Edukasi: Sembunyikan summary metrics dan action bar karena bukan data saham
   if (mode === "guide") {
+    document.body.classList.add("mode-guide");
     if (gridSection) gridSection.style.display = "none";
     if (actionBar) actionBar.style.display = "none";
     return;
   }
+
+  document.body.classList.remove("mode-guide");
 
   // Tampilkan kembali metrics grid dan action bar untuk mode screener/vip/rekomendasi/track record
   if (gridSection) gridSection.style.display = "grid";

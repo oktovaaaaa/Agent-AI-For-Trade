@@ -571,6 +571,179 @@ body.dark-theme .nav-subitem.active {
 .dot-smc { background: #0284C7; }
 .dot-buy { background: var(--status-green); }
 
+/* Sidebar Track Record Card (Testimoni & Bukti Realisasi Kenaikan) */
+.sidebar-track-group {
+  margin-top: 6px;
+  padding-top: 0;
+}
+
+.sidebar-track-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(217, 119, 6, 0.03) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.sidebar-track-card:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border-color: rgba(245, 158, 11, 0.55);
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.16);
+}
+
+.sidebar-track-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.12) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #D97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.12);
+  transition: all 0.22s ease;
+}
+
+.sidebar-track-card:hover .sidebar-track-icon-box {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #FFFFFF;
+  border-color: #F59E0B;
+  transform: scale(1.05);
+  box-shadow: 0 3px 8px rgba(245, 158, 11, 0.35);
+}
+
+.sidebar-track-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+  gap: 1.5px;
+}
+
+.sidebar-track-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+}
+
+.sidebar-track-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #B45309;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+}
+
+body.dark-theme .sidebar-track-sub {
+  color: #FBBF24;
+}
+
+.sidebar-track-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sidebar-track-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: #B45309;
+  transition: all 0.2s ease;
+}
+
+body.dark-theme .sidebar-track-count {
+  background: rgba(245, 158, 11, 0.22);
+  color: #FDE68A;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.sidebar-track-arrow {
+  color: var(--status-gold);
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.sidebar-track-card:hover .sidebar-track-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+/* Active State: Saat Halaman Track Record Sedang Dibuka */
+.sidebar-track-card.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.12) 100%) !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 1.5px rgba(245, 158, 11, 0.35), 0 4px 14px rgba(245, 158, 11, 0.18) !important;
+}
+
+.sidebar-track-card.active .sidebar-track-icon-box {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important;
+}
+
+.sidebar-track-card.active .sidebar-track-title {
+  color: #B45309 !important;
+}
+
+body.dark-theme .sidebar-track-card.active .sidebar-track-title {
+  color: #FBBF24 !important;
+}
+
+.sidebar-track-card.active .sidebar-track-count {
+  background: #F59E0B !important;
+  color: #FFFFFF !important;
+  border-color: #F59E0B !important;
+}
+
+.sidebar-track-card.active .sidebar-track-arrow {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+/* Dark Theme Adjustments for Sidebar Track Card */
+body.dark-theme .sidebar-track-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%);
+  border-color: rgba(245, 158, 11, 0.32);
+}
+
+body.dark-theme .sidebar-track-card:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.1) 100%);
+  border-color: rgba(245, 158, 11, 0.65);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.22);
+}
+
+body.dark-theme .sidebar-track-icon-box {
+  color: #FBBF24;
+}
+
 /* Sidebar WhatsApp Community Card */
 .sidebar-community-group {
   margin-top: 10px;
@@ -3639,14 +3812,7 @@ body.dark-theme .guide-icon-btn.active {
   }
 }
 
-/* Track Record Active State in Sidebar */
-#menuTrackRecordBtn.active {
-  background: rgba(245, 158, 11, 0.14);
-  color: var(--status-gold);
-}
-body.dark-theme #menuTrackRecordBtn.active {
-  color: #FBBF24;
-}
+
 
 /* ==========================================================================
    MOBILE RESPONSIVE FIXES (ACTION BAR & GUIDE VIEW)
@@ -3814,5 +3980,27 @@ body.dark-theme #menuTrackRecordBtn.active {
     box-sizing: border-box !important;
     padding: 12px 14px !important;
   }
+}
+
+/* Mode Guide: HIDE metrics grid, graphs & action bar completely on all devices */
+body.mode-guide #metricsGridSection,
+body.mode-guide .action-bar {
+  display: none !important;
+}
+
+.guide-nav-icon, .guide-section-icon, .q-icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.guide-nav-icon svg {
+  display: block;
+}
+.guide-section-icon svg {
+  display: block;
+}
+.tip-icon {
+  display: inline-block;
+  vertical-align: -2px;
 }
 
