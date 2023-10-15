@@ -5667,75 +5667,36 @@ function openStockDetail(symbol) {
     const recGainSign = (recGainVal !== null && recGainVal > 0) ? "+" : "";
     const recGainClass = recGainVal > 0 ? "positive" : (recGainVal < 0 ? "negative" : "neutral");
 
-    // TENTUKAN DATA GRAFIK & TABEL PERFORMA SESUAI MODE
-    // Khusus mode "trackrecord": gunakan Opsi 2 (Close hari pertama masuk screener)
-    // Mode lainnya (3 Rally Good / Rekomendasi Aranter / Daily): gunakan Opsi 1 (Dot Green)
+    // TENTUKAN DATA GRAFIK & TABEL PERFORMA (KRONOLOGIS BURSA)
+    // Menggunakan riwayat scan bursa berurutan dari hari pertama saham masuk screener
     let perfHistory = [];
     let basePrice = null;
     let firstDetectedDate = null;
 
-    if (currentMode === "trackrecord") {
-      basePrice = recEntryClose || currentClose;
-      firstDetectedDate = recEntryDateDisplay || selectedDate;
-      if (scanHistory.length > 0) {
-        perfHistory = scanHistory.map((sh, idx) => {
-          const cum = basePrice > 0 ? ((sh.close - basePrice) / basePrice) * 100 : 0;
-          return {
-            date: sh.date,
-            date_display: sh.date_display,
-            close: sh.close,
-            high: sh.high,
-            low: sh.low,
-            daily_change_pct: idx === 0 ? 0.0 : sh.change,
-            cumulative_gain_pct: Number(cum.toFixed(2)),
-            count_green: sh.count_green
-          };
-        });
-      }
-    } else {
-      // Opsi 1: Prioritaskan Dot Close
-      basePrice = dotClosePrice;
-      firstDetectedDate = dotDateDisplay;
-
-      if (!basePrice) {
-        basePrice = vipEntry?.base_price || (scanHistory.length > 0 ? scanHistory[0].close : currentClose);
-        firstDetectedDate = vipEntry?.scan_date_display || (scanHistory.length > 0 ? scanHistory[0].full_date_display : selectedDate);
-      }
-
-      if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
-        perfHistory = vipEntry.performance_history.map(item => ({
-          ...item,
-          high: Number(item.high) || Number(item.close) || 0,
-          low: Number(item.low) || Number(item.close) || 0
-        }));
-      } else if (scanHistory.length > 0) {
-        perfHistory = scanHistory.map((sh) => {
-          const cum = (basePrice && basePrice > 0) ? ((sh.close - basePrice) / basePrice) * 100 : 0;
-          return {
-            date: sh.date,
-            date_display: sh.date_display,
-            close: sh.close,
-            high: sh.high,
-            low: sh.low,
-            daily_change_pct: sh.change,
-            cumulative_gain_pct: Number(cum.toFixed(2)),
-            count_green: sh.count_green
-          };
-        });
-        // Pastikan titik entry dot green ada di awal jika berbeda dari scan pertama
-        if (basePrice && basePrice > 0 && perfHistory.length > 0 && Number(perfHistory[0].close) !== Number(basePrice)) {
-          perfHistory.unshift({
-            date: firstDetectedDate || "Dot Green",
-            date_display: firstDetectedDate || "Dot Green",
-            close: basePrice,
-            high: basePrice,
-            low: basePrice,
-            daily_change_pct: 0.0,
-            cumulative_gain_pct: 0.0,
-            count_green: 3
-          });
-        }
-      }
+    if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
+      basePrice = Number(vipEntry.base_price) || (Number(vipEntry.performance_history[0]?.close) || currentClose);
+      firstDetectedDate = vipEntry.scan_date_display || vipEntry.performance_history[0]?.date_display;
+      perfHistory = vipEntry.performance_history.map(item => ({
+        ...item,
+        high: Number(item.high) || Number(item.close) || 0,
+        low: Number(item.low) || Number(item.close) || 0
+      }));
+    } else if (scanHistory.length > 0) {
+      basePrice = recEntryClose || scanHistory[0].close;
+      firstDetectedDate = recEntryDateDisplay || scanHistory[0].full_date_display;
+      perfHistory = scanHistory.map((sh, idx) => {
+        const cum = basePrice > 0 ? ((sh.close - basePrice) / basePrice) * 100 : 0;
+        return {
+          date: sh.date,
+          date_display: sh.date_display,
+          close: sh.close,
+          high: sh.high,
+          low: sh.low,
+          daily_change_pct: idx === 0 ? 0.0 : sh.change,
+          cumulative_gain_pct: Number(cum.toFixed(2)),
+          count_green: sh.count_green
+        };
+      });
     }
 
     // Fallback jika perfHistory masih kosong
