@@ -751,6 +751,8 @@ function getTrackRecordStocks() {
           date: dKey,
           date_display: scan.date_display || dKey,
           close: Number(sFound.close) || 0,
+          high: Number(sFound.high) || Number(sFound.close) || 0,
+          low: Number(sFound.low) || Number(sFound.close) || 0,
           count_green: sFound.count_green || 0,
           stock: sFound
         });
@@ -765,24 +767,32 @@ function getTrackRecordStocks() {
 
     const entryClose = scanHistory[0].close;
     const entryDateDisplay = scanHistory[0].date_display;
+
+    // Subsequent days (Day >= 2):
+    // Puncak kenaikan tertinggi dihitung dari harga HIGH (terbang tertinggi) hari-hari berikutnya
+    const subsequentHighs = scanHistory.slice(1).map(p => p.high).filter(h => h > 0);
     const subsequentCloses = scanHistory.slice(1).map(p => p.close).filter(c => c > 0);
 
-    if (entryClose <= 0 || subsequentCloses.length === 0) return;
+    if (entryClose <= 0 || subsequentHighs.length === 0) return;
 
-    const peakClose = Math.max(...subsequentCloses);
-    const peakGain = ((peakClose - entryClose) / entryClose) * 100;
+    const peakHighPrice = Math.max(...subsequentHighs);
+    const peakGain = ((peakHighPrice - entryClose) / entryClose) * 100;
+    const peakClosePrice = Math.max(...subsequentCloses);
+    const peakCloseGain = ((peakClosePrice - entryClose) / entryClose) * 100;
 
-    // Syarat Kriteria Track Record: Minimal kenaikan >= +8% dari harga close rekomendasi
+    // Syarat Kriteria Track Record: Minimal kenaikan peak high >= +8% dari harga close rekomendasi
     if (peakGain >= 8.0) {
       results.push({
         stock: s,
         vipItem: item,
         symbol: sym,
         name: s.name || sym,
-        close: Number(s.close) || peakClose,
+        close: Number(s.close) || peakClosePrice,
         basePrice: entryClose,
-        peakPrice: peakClose,
+        peakPrice: peakHighPrice, // Puncak Kenaikan Tertinggi (High)
         peakGain: Number(peakGain.toFixed(2)),
+        peakClosePrice: peakClosePrice,
+        peakCloseGain: Number(peakCloseGain.toFixed(2)),
         isLuxury: peakGain >= 25.0,
         detectedDate: entryDateDisplay || "Hari Pertama Sinyal"
       });
@@ -1176,11 +1186,11 @@ function renderTrackRecordView() {
       "REKOR PEAK CUAN",
       "tag-green",
       `+${maxGain.toFixed(1)}% (${topStock.symbol})`,
-      "Rekor Cuan Tertinggi (Peak)",
-      `Close: Rp ${Number(topStock.close).toLocaleString('id-ID')} \u2022 Entry: Rp ${Number(topStock.basePrice).toLocaleString('id-ID')} \u2794 Peak: Rp ${Number(topStock.peakPrice).toLocaleString('id-ID')}`
+      "Rekor Cuan Tertinggi (Peak High)",
+      `Close: Rp ${Number(topStock.close).toLocaleString('id-ID')} \u2022 Entry: Rp ${Number(topStock.basePrice).toLocaleString('id-ID')} \u2794 Peak High: Rp ${Number(topStock.peakPrice).toLocaleString('id-ID')}`
     );
   } else {
-    updateMetricCard(1, "REKOR PEAK CUAN", "tag-green", "-", "Rekor Cuan Tertinggi (Peak)", "Belum ada rekor");
+    updateMetricCard(1, "REKOR PEAK CUAN", "tag-green", "-", "Rekor Cuan Tertinggi (Peak High)", "Belum ada rekor");
   }
 
   // Card 2 (metricCardGolden): Hidden by applyGridCardMode("trackrecord")
@@ -1905,7 +1915,7 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
     const peakStr = trackRecordInfo.peakPrice ? `Rp ${Number(trackRecordInfo.peakPrice).toLocaleString('id-ID')}` : '-';
     vipDateRow = `
       <div style="font-size:11px; font-weight:600; color:var(--text-secondary); margin-top:3px; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-        <span>Entry Close: <b>${entryStr}</b> \u2794 Peak: <b>${peakStr}</b></span>
+        <span>Entry Close: <b>${entryStr}</b> \u2794 Peak High: <b>${peakStr}</b></span>
         <span style="opacity:0.8;">(${trackRecordInfo.detectedDate})</span>
       </div>
     `;
@@ -2003,7 +2013,7 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
         <div class="indicator-row">
           <span class="indicator-title">Realisasi Cuan:</span>
           <div class="indicator-val">
-            <span class="badge-chip ${isLuxury ? 'chip-golden' : 'chip-scalp-buy'}">+${trackRecordInfo.peakGain.toFixed(1)}% Peak (@ Rp ${trackRecordInfo.peakPrice})</span>
+            <span class="badge-chip ${isLuxury ? 'chip-golden' : 'chip-scalp-buy'}">+${trackRecordInfo.peakGain.toFixed(1)}% Peak High (@ Rp ${trackRecordInfo.peakPrice})</span>
           </div>
         </div>
         ` : ''}
@@ -2357,6 +2367,8 @@ function openStockDetail(symbol) {
           date_display: scan.date_display ? scan.date_display.split(' ').slice(0, 2).join(' ') : dKey,
           full_date_display: scan.date_display || dKey,
           close: Number(sFound.close) || 0,
+          high: Number(sFound.high) || Number(sFound.close) || 0,
+          low: Number(sFound.low) || Number(sFound.close) || 0,
           change: Number(sFound.change) || 0,
           count_green: sFound.count_green || 0
         });
@@ -2365,7 +2377,7 @@ function openStockDetail(symbol) {
 
     let recEntryClose = null;
     let recEntryDateDisplay = null;
-    let recPeakClose = null;
+    let recPeakHigh = null;
     let recPeakGainVal = null;
     let recGainVal = null;
 
@@ -2375,8 +2387,8 @@ function openStockDetail(symbol) {
       if (recEntryClose > 0) {
         recGainVal = ((currentClose - recEntryClose) / recEntryClose) * 100;
         if (scanHistory.length > 1) {
-          recPeakClose = Math.max(...scanHistory.slice(1).map(h => h.close));
-          recPeakGainVal = ((recPeakClose - recEntryClose) / recEntryClose) * 100;
+          recPeakHigh = Math.max(...scanHistory.slice(1).map(h => h.high));
+          recPeakGainVal = ((recPeakHigh - recEntryClose) / recEntryClose) * 100;
         }
       }
     }
@@ -2401,6 +2413,8 @@ function openStockDetail(symbol) {
             date: sh.date,
             date_display: sh.date_display,
             close: sh.close,
+            high: sh.high,
+            low: sh.low,
             daily_change_pct: idx === 0 ? 0.0 : sh.change,
             cumulative_gain_pct: Number(cum.toFixed(2)),
             count_green: sh.count_green
@@ -2418,7 +2432,11 @@ function openStockDetail(symbol) {
       }
 
       if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
-        perfHistory = [...vipEntry.performance_history];
+        perfHistory = vipEntry.performance_history.map(item => ({
+          ...item,
+          high: Number(item.high) || Number(item.close) || 0,
+          low: Number(item.low) || Number(item.close) || 0
+        }));
       } else if (scanHistory.length > 0) {
         perfHistory = scanHistory.map((sh) => {
           const cum = (basePrice && basePrice > 0) ? ((sh.close - basePrice) / basePrice) * 100 : 0;
@@ -2426,6 +2444,8 @@ function openStockDetail(symbol) {
             date: sh.date,
             date_display: sh.date_display,
             close: sh.close,
+            high: sh.high,
+            low: sh.low,
             daily_change_pct: sh.change,
             cumulative_gain_pct: Number(cum.toFixed(2)),
             count_green: sh.count_green
@@ -2437,6 +2457,8 @@ function openStockDetail(symbol) {
             date: firstDetectedDate || "Dot Green",
             date_display: firstDetectedDate || "Dot Green",
             close: basePrice,
+            high: basePrice,
+            low: basePrice,
             daily_change_pct: 0.0,
             cumulative_gain_pct: 0.0,
             count_green: 3
@@ -2453,6 +2475,8 @@ function openStockDetail(symbol) {
         date: selectedDate || "today",
         date_display: "Hari Ini",
         close: basePrice,
+        high: basePrice,
+        low: basePrice,
         daily_change_pct: Number(changeVal.toFixed(2)),
         cumulative_gain_pct: 0.0,
         count_green: stock.count_green || 0
@@ -2467,8 +2491,10 @@ function openStockDetail(symbol) {
     const cumFormatted = `${cumSign}${totalCumGain.toFixed(2)}%`;
     const basePriceFormatted = basePrice ? "Rp " + Number(basePrice).toLocaleString("id-ID") : priceFormatted;
     const allPrices = perfHistory.map(item => Number(item.close) || 0);
-    const minPriceVal = allPrices.length > 0 ? Math.min(...allPrices) : 0;
-    const maxPriceVal = allPrices.length > 0 ? Math.max(...allPrices) : 0;
+    const allHighs = perfHistory.map(item => Number(item.high || item.close) || 0);
+    const allLows = perfHistory.map(item => Number(item.low || item.close) || 0);
+    const minPriceVal = allLows.length > 0 ? Math.min(...allLows) : 0;
+    const maxPriceVal = allHighs.length > 0 ? Math.max(...allHighs) : 0;
     const entryPriceVal = Number(basePrice) || (allPrices[0] || 0);
     const latestPriceVal = latestPerf ? Number(latestPerf.close) : entryPriceVal;
     const minGainPct = entryPriceVal > 0 ? (((minPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
@@ -2616,10 +2642,20 @@ function openStockDetail(symbol) {
       dotBadge = `<span class="perf-badge-dot dot-3">🟢 3-Dot Aktif</span>`;
     }
 
+    const itemHigh = Number(item.high) || 0;
+    const itemLow = Number(item.low) || 0;
+    const hasHighLow = itemHigh > 0 && itemLow > 0 && (itemHigh !== Number(item.close) || itemLow !== Number(item.close));
+    const hlSub = hasHighLow 
+      ? `<div style="font-size:10px; color:var(--text-muted); font-weight:500; margin-top:2px;">H: Rp ${itemHigh.toLocaleString('id-ID')} • L: Rp ${itemLow.toLocaleString('id-ID')}</div>`
+      : '';
+
     return `
       <tr>
         <td style="font-weight:600;">${item.date_display || item.date}</td>
-        <td style="font-weight:700;">Rp ${Number(item.close || 0).toLocaleString('id-ID')}</td>
+        <td>
+          <div style="font-weight:700;">Rp ${Number(item.close || 0).toLocaleString('id-ID')}</div>
+          ${hlSub}
+        </td>
         <td style="color:${dayColor}; font-weight:700;">${daySign}${dayChg.toFixed(2)}%</td>
         <td style="color:${cumGColor}; font-weight:800;">${cumGSign}${cumG.toFixed(2)}%</td>
         <td>${dotBadge}</td>
@@ -2673,7 +2709,7 @@ function openStockDetail(symbol) {
           ${recPeakGainVal !== null && recPeakGainVal > 0 ? `
           <div class="detail-info-row">
             <span class="detail-info-label">Peak Cuan Realisasi:</span>
-            <span class="detail-info-value" style="color:var(--status-green); font-weight:800; font-size:13px;">+${recPeakGainVal.toFixed(2)}%</span>
+            <span class="detail-info-value" style="color:var(--status-green); font-weight:800; font-size:13px;">+${recPeakGainVal.toFixed(2)}% (Peak High: Rp ${recPeakHigh ? recPeakHigh.toLocaleString('id-ID') : '-'})</span>
           </div>
           ` : ''}
         </div>
@@ -2691,7 +2727,7 @@ function openStockDetail(symbol) {
             <span class="perf-kpi-sub" style="color:var(--status-red);">${minGainSign}${minGainPct.toFixed(2)}%</span>
           </div>
           <div class="perf-kpi-card">
-            <span class="perf-kpi-label">TERTINGGI (PEAK)</span>
+            <span class="perf-kpi-label">TERTINGGI (PEAK HIGH)</span>
             <span class="perf-kpi-val" style="color:var(--status-green);">Rp ${maxPriceVal.toLocaleString('id-ID')}</span>
             <span class="perf-kpi-sub" style="color:var(--status-green);">${maxGainSign}${maxGainPct.toFixed(2)}%</span>
           </div>

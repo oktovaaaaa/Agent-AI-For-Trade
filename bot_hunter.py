@@ -532,7 +532,7 @@ def get_hunter_stocks():
     try:
         q = (Query()
              .set_markets('indonesia')
-             .select('name', 'close', 'volume', 'average_volume_10d_calc', 'change')
+             .select('name', 'close', 'high', 'low', 'volume', 'average_volume_10d_calc', 'change')
              .where(
                  Column('close').between(10, 1000),
                  Column('volume') > Column('average_volume_10d_calc'),
@@ -554,10 +554,13 @@ def get_hunter_stocks():
         for _, row in df_screener.iterrows():
             ticker_name = str(row['ticker'])
             symbol = ticker_name.split(':')[-1] if ':' in ticker_name else ticker_name
+            c_val = float(row['close'])
             tickers.append({
                 'symbol': symbol,
                 'tv_symbol': f"IDX:{symbol}",
-                'close': float(row['close']),
+                'close': c_val,
+                'high': float(row.get('high', c_val)),
+                'low': float(row.get('low', c_val)),
                 'volume': float(row['volume']),
                 'vol_10d': float(row['average_volume_10d_calc']),
                 'change': float(row['change'])
@@ -569,6 +572,8 @@ def get_hunter_stocks():
                 'symbol': 'DYAN',
                 'tv_symbol': 'IDX:DYAN',
                 'close': 81.0,
+                'high': 83.0,
+                'low': 78.0,
                 'volume': 210940000.0,
                 'vol_10d': 150000000.0,
                 'change': 3.85
@@ -1194,10 +1199,13 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     "macd": tf_v.get("macd")
                 }
             
+            c_val = float(st.get("close", 0))
             clean_stocks.append({
                 "symbol": st.get("symbol"),
                 "name": st.get("name", st.get("symbol")),
-                "close": st.get("close"),
+                "close": c_val,
+                "high": float(st.get("high", c_val)),
+                "low": float(st.get("low", c_val)),
                 "change": st.get("change"),
                 "volume": st.get("volume"),
                 "count_green": item.get("count_green", 0),
@@ -1263,16 +1271,19 @@ def simpan_database_json(hasil_deteksi, now_wib):
         if missing_tracked:
             try:
                 q_missing = (Query().set_markets('indonesia')
-                             .select('name', 'close', 'change', 'volume')
+                             .select('name', 'close', 'high', 'low', 'change', 'volume')
                              .where(Column('name').isin(missing_tracked)))
                 df_miss = q_missing.get_scanner_data()[1]
                 if not df_miss.empty:
                     for _, row in df_miss.iterrows():
                         tk = str(row['ticker']).split(':')[-1]
+                        c_val = float(row['close'])
                         stock_lookup[tk] = {
                             "symbol": tk,
                             "name": tk,
-                            "close": float(row['close']),
+                            "close": c_val,
+                            "high": float(row.get('high', c_val)),
+                            "low": float(row.get('low', c_val)),
                             "change": float(row['change']),
                             "volume": float(row['volume']),
                             "count_green": 0,
@@ -1294,6 +1305,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if sym in saham_3_dot_lookup and h.get("scan_date") != date_key:
                 s3 = saham_3_dot_lookup[sym]
                 c_val = float(s3.get("close", 0))
+                h_val = float(s3.get("high", c_val))
+                l_val = float(s3.get("low", c_val))
                 chg_val = round(float(s3.get("change", 0.0)), 2)
                 h["scan_date"] = date_key
                 h["scan_date_display"] = tgl_id
@@ -1303,6 +1316,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     "date": date_key,
                     "date_display": tgl_id_short,
                     "close": c_val,
+                    "high": h_val,
+                    "low": l_val,
                     "daily_change_pct": chg_val,
                     "cumulative_gain_pct": 0.0,
                     "count_green": 3
@@ -1313,6 +1328,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if sym in stock_lookup:
                 cur_s = stock_lookup[sym]
                 c_val = float(cur_s.get("close", 0))
+                h_val = float(cur_s.get("high", c_val))
+                l_val = float(cur_s.get("low", c_val))
                 chg_val = round(float(cur_s.get("change", 0.0)), 2)
                 base_p = float(h.get("base_price") or c_val)
                 if not h.get("base_price"):
@@ -1324,10 +1341,12 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     h["data"] = cur_s
                     cg_status = cur_s.get("count_green", 0)
                 else:
-                    # Saham sepi/tidak masuk screener hari ini: update harga close, change, volume
+                    # Saham sepi/tidak masuk screener hari ini: update harga close, high, low, change, volume
                     # Data indikator sinyal 3-Dot (RallyGood, SMC, EMA) tetap utuh terjaga!
                     if "data" in h and isinstance(h["data"], dict):
                         h["data"]["close"] = c_val
+                        h["data"]["high"] = h_val
+                        h["data"]["low"] = l_val
                         h["data"]["change"] = chg_val
                         h["data"]["volume"] = float(cur_s.get("volume", 0))
                     else:
@@ -1338,6 +1357,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
                 existing_entry = next((item for item in h["performance_history"] if item.get("date") == date_key), None)
                 if existing_entry:
                     existing_entry["close"] = c_val
+                    existing_entry["high"] = h_val
+                    existing_entry["low"] = l_val
                     existing_entry["daily_change_pct"] = chg_val
                     existing_entry["cumulative_gain_pct"] = cum_gain
                     existing_entry["count_green"] = cg_status
@@ -1346,6 +1367,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
                         "date": date_key,
                         "date_display": tgl_id_short,
                         "close": c_val,
+                        "high": h_val,
+                        "low": l_val,
                         "daily_change_pct": chg_val,
                         "cumulative_gain_pct": cum_gain,
                         "count_green": cg_status
@@ -1357,6 +1380,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
             sym = s3["symbol"]
             if sym not in existing_symbols:
                 c_val = float(s3.get("close", 0))
+                h_val = float(s3.get("high", c_val))
+                l_val = float(s3.get("low", c_val))
                 chg_val = round(float(s3.get("change", 0.0)), 2)
                 record_item = {
                     "symbol": sym,
@@ -1368,6 +1393,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
                         "date": date_key,
                         "date_display": tgl_id_short,
                         "close": c_val,
+                        "high": h_val,
+                        "low": l_val,
                         "daily_change_pct": chg_val,
                         "cumulative_gain_pct": 0.0,
                         "count_green": 3
