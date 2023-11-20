@@ -759,42 +759,60 @@ function getTrackRecordStocks() {
       }
     });
 
-    // Opsi 2 (Track Record): Entry adalah harga CLOSE pada hari pertama saham resmi masuk screener
+    // Track Record: Entry adalah harga CLOSE pada hari saham resmi masuk screener / terkonfirmasi sinyal
+    // Kenaikan HANYA dihitung mulai BESOKNYA (hari bursa berikutnya setelah sinyal keluar pas market tutup)
     if (scanHistory.length < 2) {
       // Belum ada hari bursa berikutnya setelah terdeteksi di screener (Day 1)
       return;
     }
 
-    const entryClose = scanHistory[0].close;
-    const entryDateDisplay = scanHistory[0].date_display;
+    const entryDay0 = scanHistory[0];
+    const subsFrom0 = scanHistory.slice(1);
+    const highs0 = subsFrom0.map(p => p.high).filter(h => h > 0);
+    const closes0 = subsFrom0.map(p => p.close).filter(c => c > 0);
+    if (entryDay0.close <= 0 || highs0.length === 0) return;
 
-    // Subsequent days (Day >= 2):
-    // Puncak kenaikan tertinggi dihitung dari harga HIGH (terbang tertinggi) hari-hari berikutnya
-    const subsequentHighs = scanHistory.slice(1).map(p => p.high).filter(h => h > 0);
-    const subsequentCloses = scanHistory.slice(1).map(p => p.close).filter(c => c > 0);
+    let bestEntry = entryDay0;
+    let bestPeakHigh = Math.max(...highs0);
+    let bestGain = ((bestPeakHigh - entryDay0.close) / entryDay0.close) * 100;
+    let bestPeakClose = Math.max(...closes0);
 
-    if (entryClose <= 0 || subsequentHighs.length === 0) return;
+    // Cek jika saham terkonfirmasi ulang sinyal 3-Dot di tanggal scan berikutnya (misal SOLA tgl 20 Okt @ 59)
+    // dan memiliki hari bursa berikutnya lagi (misal tgl 21 Okt)
+    for (let idx = 1; idx < scanHistory.length - 1; idx++) {
+      const cand = scanHistory[idx];
+      const candSubs = scanHistory.slice(idx + 1);
+      const candHighs = candSubs.map(p => p.high).filter(h => h > 0);
+      const candCloses = candSubs.map(p => p.close).filter(c => c > 0);
+      if (candHighs.length > 0 && cand.close > 0) {
+        const candPeak = Math.max(...candHighs);
+        const candGain = ((candPeak - cand.close) / cand.close) * 100;
+        if (candGain > bestGain) {
+          bestEntry = cand;
+          bestPeakHigh = candPeak;
+          bestGain = candGain;
+          bestPeakClose = Math.max(...candCloses);
+        }
+      }
+    }
 
-    const peakHighPrice = Math.max(...subsequentHighs);
-    const peakGain = ((peakHighPrice - entryClose) / entryClose) * 100;
-    const peakClosePrice = Math.max(...subsequentCloses);
-    const peakCloseGain = ((peakClosePrice - entryClose) / entryClose) * 100;
-
-    // Syarat Kriteria Track Record: Minimal kenaikan peak high >= +8% dari harga close rekomendasi
-    if (peakGain >= 8.0) {
+    // Syarat Kriteria Track Record: Minimal kenaikan peak high >= +8% dari harga close hari kemunculan sinyal
+    if (bestGain >= 8.0) {
       results.push({
         stock: s,
         vipItem: item,
         symbol: sym,
         name: s.name || sym,
-        close: Number(s.close) || peakClosePrice,
-        basePrice: entryClose,
-        peakPrice: peakHighPrice, // Puncak Kenaikan Tertinggi (High)
-        peakGain: Number(peakGain.toFixed(2)),
-        peakClosePrice: peakClosePrice,
-        peakCloseGain: Number(peakCloseGain.toFixed(2)),
-        isLuxury: peakGain >= 25.0,
-        detectedDate: entryDateDisplay || "Hari Pertama Sinyal"
+        close: Number(s.close) || bestPeakClose,
+        basePrice: bestEntry.close,
+        peakPrice: bestPeakHigh, // Puncak Kenaikan Tertinggi (High) besoknya
+        peakGain: Number(bestGain.toFixed(2)),
+        peakClosePrice: bestPeakClose,
+        peakCloseGain: Number((((bestPeakClose - bestEntry.close) / bestEntry.close) * 100).toFixed(2)),
+        isLuxury: bestGain >= 25.0,
+        detectedDate: bestEntry.date_display || "Hari Pertama Sinyal",
+        screenerPrice: entryDay0.close,
+        screenerGain: Number((((Math.max(...highs0) - entryDay0.close) / entryDay0.close) * 100).toFixed(2))
       });
     }
   });
@@ -1283,7 +1301,9 @@ function renderTrackRecordView() {
       isLuxury: item.isLuxury,
       basePrice: item.basePrice,
       peakPrice: item.peakPrice,
-      detectedDate: item.detectedDate
+      detectedDate: item.detectedDate,
+      screenerPrice: item.screenerPrice,
+      screenerGain: item.screenerGain
     });
   }).join("");
 
@@ -1913,10 +1933,14 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   if (trackRecordInfo) {
     const entryStr = trackRecordInfo.basePrice ? `Rp ${Number(trackRecordInfo.basePrice).toLocaleString('id-ID')}` : '-';
     const peakStr = trackRecordInfo.peakPrice ? `Rp ${Number(trackRecordInfo.peakPrice).toLocaleString('id-ID')}` : '-';
+    const screenerExtra = (trackRecordInfo.screenerPrice && trackRecordInfo.screenerPrice !== trackRecordInfo.basePrice)
+      ? `<span style="opacity:0.8; font-size:10px;">(Awal Screener: Rp ${Number(trackRecordInfo.screenerPrice).toLocaleString('id-ID')} / +${trackRecordInfo.screenerGain.toFixed(1)}%)</span>`
+      : '';
     vipDateRow = `
       <div style="font-size:11px; font-weight:600; color:var(--text-secondary); margin-top:3px; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
         <span>Entry Close: <b>${entryStr}</b> \u2794 Peak High: <b>${peakStr}</b></span>
         <span style="opacity:0.8;">(${trackRecordInfo.detectedDate})</span>
+        ${screenerExtra}
       </div>
     `;
   } else if (vipDateLabel) {
@@ -2405,16 +2429,20 @@ function openStockDetail(symbol) {
     let basePrice = null;
     let firstDetectedDate = null;
 
-    if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
-      basePrice = Number(vipEntry.base_price) || (Number(vipEntry.performance_history[0]?.close) || currentClose);
-      firstDetectedDate = vipEntry.scan_date_display || vipEntry.performance_history[0]?.date_display;
-      perfHistory = vipEntry.performance_history.map(item => {
+    const vipPerf = (vipEntry && Array.isArray(vipEntry.performance_history)) ? vipEntry.performance_history : [];
+    if (vipPerf.length >= scanHistory.length && vipPerf.length > 0) {
+      basePrice = Number(vipEntry.base_price) || (scanHistory[0]?.close) || (Number(vipPerf[0]?.close) || currentClose);
+      firstDetectedDate = vipEntry.scan_date_display || (scanHistory[0]?.full_date_display) || vipPerf[0]?.date_display;
+      perfHistory = vipPerf.map((item, idx) => {
         const c = Number(item.close) || 0;
+        const cum = basePrice > 0 ? ((c - basePrice) / basePrice) * 100 : 0;
         return {
           ...item,
           close: c,
           high: Math.max(Number(item.high || c) || c, c),
-          low: Math.min(Number(item.low || c) || c, c)
+          low: Math.min(Number(item.low || c) || c, c),
+          daily_change_pct: idx === 0 ? 0.0 : Number(item.daily_change_pct || 0),
+          cumulative_gain_pct: idx === 0 ? 0.0 : Number(cum.toFixed(2))
         };
       });
     } else if (scanHistory.length > 0) {

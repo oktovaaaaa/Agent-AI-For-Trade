@@ -1304,29 +1304,16 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if "performance_history" not in h or not isinstance(h["performance_history"], list):
                 h["performance_history"] = []
 
-            # Re-Trigger Sinyal Baru:
-            # Jika saham ter-trigger 3-Dot Green lagi di tanggal baru yang berbeda, reset siklus 30 hari baru
-            if sym in saham_3_dot_lookup and h.get("scan_date") != date_key:
+            # Konfirmasi Ulang Sinyal (Re-Trigger 3-Dot Green):
+            # Jika saham ter-trigger 3-Dot Green lagi di tanggal baru, perbarui data indikator & tanggal sinyal terakhir
+            # Catatan: TIDAK me-reset performance_history agar seluruh riwayat hari bursa sebelumnya tetap tersimpan utuh!
+            if sym in saham_3_dot_lookup:
                 s3 = saham_3_dot_lookup[sym]
-                c_val = float(s3.get("close", 0))
-                h_val = max(float(s3.get("high", c_val)), c_val)
-                l_val = min(float(s3.get("low", c_val)), c_val)
-                chg_val = round(float(s3.get("change", 0.0)), 2)
-                h["scan_date"] = date_key
-                h["scan_date_display"] = tgl_id
-                h["base_price"] = c_val
                 h["data"] = s3
-                h["performance_history"] = [{
-                    "date": date_key,
-                    "date_display": tgl_id_short,
-                    "close": c_val,
-                    "high": h_val,
-                    "low": l_val,
-                    "daily_change_pct": chg_val,
-                    "cumulative_gain_pct": 0.0,
-                    "count_green": 3
-                }]
-                continue
+                h["last_trigger_date"] = date_key
+                h["last_trigger_date_display"] = tgl_id
+                if not h.get("base_price"):
+                    h["base_price"] = float(s3.get("close", 0))
 
             # Update data harian berjalan (Tracking harian 30 hari bursa)
             if sym in stock_lookup:
@@ -1399,7 +1386,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
                         "close": c_val,
                         "high": h_val,
                         "low": l_val,
-                        "daily_change_pct": chg_val,
+                        "daily_change_pct": 0.0,
                         "cumulative_gain_pct": 0.0,
                         "count_green": 3
                     }]
@@ -1410,11 +1397,11 @@ def simpan_database_json(hasil_deteksi, now_wib):
         # c. Pangkas saham yang masa pantau 30 hari bursa-nya sudah kedaluwarsa (tanpa re-trigger baru)
         history["vip_3dot_history"] = [
             h for h in history["vip_3dot_history"]
-            if h.get("scan_date", "") >= oldest_retained_date
+            if max(h.get("last_trigger_date", ""), h.get("scan_date", "")) >= oldest_retained_date
         ]
 
-        # Urutkan vip_3dot_history berdasarkan tanggal terbaru
-        history["vip_3dot_history"].sort(key=lambda x: (x.get("scan_date", ""), x.get("data", {}).get("volume", 0)), reverse=True)
+        # Urutkan vip_3dot_history berdasarkan tanggal sinyal terbaru
+        history["vip_3dot_history"].sort(key=lambda x: (max(x.get("last_trigger_date", ""), x.get("scan_date", "")), x.get("data", {}).get("volume", 0)), reverse=True)
         
         # Tulis ke file JSON history.json
         with open(history_file, "w", encoding="utf-8") as f:

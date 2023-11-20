@@ -66573,9 +66573,9 @@
   "vip_3dot_history": [
     {
       "symbol": "KPIG",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 31.0,
+      "base_price": 32.0,
       "data": {
         "symbol": "KPIG",
         "name": "KPIG",
@@ -66700,22 +66700,32 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 32.0,
+          "high": 32.0,
+          "low": 32.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 31.0,
           "high": 32.0,
           "low": 27.0,
           "daily_change_pct": 10.71,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -3.12,
           "count_green": 3
         }
       ]
     },
     {
       "symbol": "MNCN",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 89.0,
+      "base_price": 97.0,
       "data": {
         "symbol": "MNCN",
         "name": "MNCN",
@@ -66841,13 +66851,23 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 97.0,
+          "high": 97.0,
+          "low": 97.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 89.0,
           "high": 93.0,
           "low": 80.0,
           "daily_change_pct": 4.71,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -8.25,
           "count_green": 3
         }
       ]
@@ -67008,11 +67028,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 137.0,
           "high": 137.0,
           "low": 99.0,
-          "daily_change_pct": 34.31,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -67020,7 +67040,7 @@
     },
     {
       "symbol": "ATLA",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "ATLA",
@@ -67146,23 +67166,33 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 24.0,
+          "high": 30.0,
+          "low": 24.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 26.0,
           "high": 30.0,
           "low": 25.0,
           "daily_change_pct": 8.33,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 8.33,
           "count_green": 3
         }
       ],
-      "base_price": 26.0
+      "base_price": 24.0
     },
     {
       "symbol": "BMTR",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 60.0,
+      "base_price": 59.0,
       "data": {
         "symbol": "BMTR",
         "name": "BMTR",
@@ -67283,20 +67313,30 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 59.0,
+          "high": 61.0,
+          "low": 55.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 60.0,
           "high": 62.0,
           "low": 55.0,
           "daily_change_pct": 1.69,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 1.69,
           "count_green": 3
         }
       ]
     },
     {
       "symbol": "SOLA",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "SOLA",
@@ -67434,21 +67474,41 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 62.0,
+          "high": 62.0,
+          "low": 62.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 59.0,
+          "high": 76.0,
+          "low": 59.0,
+          "daily_change_pct": 1.72,
+          "cumulative_gain_pct": -4.84,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 79.0,
           "high": 79.0,
           "low": 60.0,
           "daily_change_pct": 33.9,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 27.42,
           "count_green": 3
         }
       ],
-      "base_price": 79.0
+      "base_price": 62.0
     },
     {
       "symbol": "BHIT",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "BHIT",
@@ -67586,21 +67646,41 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 17.0,
+          "high": 17.0,
+          "low": 17.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 18.0,
+          "high": 19.0,
+          "low": 17.0,
+          "daily_change_pct": 12.5,
+          "cumulative_gain_pct": 5.88,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 20.0,
           "high": 20.0,
           "low": 17.0,
           "daily_change_pct": 11.11,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 17.65,
           "count_green": 3
         }
       ],
-      "base_price": 20.0
+      "base_price": 17.0
     },
     {
       "symbol": "IPTV",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "IPTV",
@@ -67742,23 +67822,43 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 19.0,
+          "high": 19.0,
+          "low": 19.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 19.0,
+          "high": 20.0,
+          "low": 18.0,
+          "daily_change_pct": 5.56,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 24.0,
           "high": 25.0,
           "low": 18.0,
           "daily_change_pct": 26.32,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 26.32,
           "count_green": 3
         }
       ],
-      "base_price": 24.0
+      "base_price": 19.0
     },
     {
       "symbol": "CYBR",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 410.0,
+      "base_price": 402.0,
       "data": {
         "symbol": "CYBR",
         "name": "CYBR",
@@ -67874,20 +67974,30 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 402.0,
+          "high": 432.0,
+          "low": 398.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 410.0,
           "high": 432.0,
           "low": 398.0,
           "daily_change_pct": 1.99,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 1.99,
           "count_green": 3
         }
       ]
     },
     {
       "symbol": "WIRG",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "WIRG",
@@ -68017,23 +68127,33 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 46.0,
+          "high": 48.0,
+          "low": 44.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 45.0,
           "high": 48.0,
           "low": 43.0,
           "daily_change_pct": -2.17,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -2.17,
           "count_green": 3
         }
       ],
-      "base_price": 45.0
+      "base_price": 46.0
     },
     {
       "symbol": "RMKE",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 306.0,
+      "base_price": 276.0,
       "data": {
         "symbol": "RMKE",
         "name": "RMKE",
@@ -68164,13 +68284,43 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 276.0,
+          "high": 276.0,
+          "low": 276.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 282.0,
+          "high": 282.0,
+          "low": 282.0,
+          "daily_change_pct": 2.17,
+          "cumulative_gain_pct": 2.17,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 298.0,
+          "high": 302.0,
+          "low": 290.0,
+          "daily_change_pct": 5.67,
+          "cumulative_gain_pct": 7.97,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 306.0,
           "high": 310.0,
           "low": 290.0,
           "daily_change_pct": 2.68,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 10.87,
           "count_green": 3
         }
       ]
@@ -68321,11 +68471,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 57.0,
           "high": 60.0,
           "low": 47.0,
-          "daily_change_pct": 14.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -68333,9 +68483,9 @@
     },
     {
       "symbol": "BCAP",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 24.0,
+      "base_price": 23.0,
       "data": {
         "symbol": "BCAP",
         "name": "BCAP",
@@ -68465,20 +68615,30 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 23.0,
+          "high": 23.0,
+          "low": 23.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 24.0,
           "high": 24.0,
           "low": 22.0,
           "daily_change_pct": 4.35,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 4.35,
           "count_green": 3
         }
       ]
     },
     {
       "symbol": "BABP",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "BABP",
@@ -68614,8 +68774,18 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 26.0,
+          "high": 26.0,
+          "low": 25.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 26.0,
           "high": 27.0,
           "low": 25.0,
@@ -68628,7 +68798,7 @@
     },
     {
       "symbol": "VTNY",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-20",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "VTNY",
@@ -68758,17 +68928,27 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 45.0,
+          "high": 46.0,
+          "low": 42.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 43.0,
           "high": 46.0,
           "low": 42.0,
           "daily_change_pct": -4.44,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -4.44,
           "count_green": 3
         }
       ],
-      "base_price": 43.0
+      "base_price": 45.0
     },
     {
       "symbol": "ARTO",
@@ -68901,11 +69081,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 600.0,
           "high": 610.0,
           "low": 575.0,
-          "daily_change_pct": 1.69,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -68913,7 +69093,7 @@
     },
     {
       "symbol": "MSKY",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
       "base_price": 37.0,
       "data": {
@@ -69054,8 +69234,18 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 37.0,
+          "high": 37.0,
+          "low": 37.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 37.0,
           "high": 40.0,
           "low": 34.0,
@@ -69067,9 +69257,9 @@
     },
     {
       "symbol": "JIHD",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 322.0,
+      "base_price": 326.0,
       "data": {
         "symbol": "JIHD",
         "name": "JIHD",
@@ -69194,13 +69384,33 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 326.0,
+          "high": 326.0,
+          "low": 326.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 318.0,
+          "high": 320.0,
+          "low": 312.0,
+          "daily_change_pct": 4.61,
+          "cumulative_gain_pct": -2.45,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 322.0,
           "high": 322.0,
           "low": 312.0,
           "daily_change_pct": 1.26,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -1.23,
           "count_green": 3
         }
       ]
@@ -69342,11 +69552,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 129.0,
           "high": 129.0,
           "low": 113.0,
-          "daily_change_pct": 11.21,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -69462,11 +69672,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 282.0,
           "high": 286.0,
           "low": 258.0,
-          "daily_change_pct": 2.17,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -69623,11 +69833,11 @@
       "performance_history": [
         {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 795.0,
           "high": 820.0,
           "low": 750.0,
-          "daily_change_pct": -0.62,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
@@ -69635,7 +69845,7 @@
     },
     {
       "symbol": "LION",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-19",
       "scan_date_display": "21 Oktober 2026",
       "data": {
         "symbol": "LION",
@@ -69765,23 +69975,33 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 230.0,
+          "high": 230.0,
+          "low": 230.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 244.0,
           "high": 266.0,
           "low": 242.0,
           "daily_change_pct": 1.67,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 6.09,
           "count_green": 3
         }
       ],
-      "base_price": 244.0
+      "base_price": 230.0
     },
     {
       "symbol": "SMDM",
-      "scan_date": "2026-10-21",
+      "scan_date": "2026-10-17",
       "scan_date_display": "21 Oktober 2026",
-      "base_price": 418.0,
+      "base_price": 384.0,
       "data": {
         "symbol": "SMDM",
         "name": "SMDM",
@@ -69902,13 +70122,43 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 384.0,
+          "high": 384.0,
+          "low": 384.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 370.0,
+          "high": 370.0,
+          "low": 370.0,
+          "daily_change_pct": -3.65,
+          "cumulative_gain_pct": -3.65,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 368.0,
+          "high": 390.0,
+          "low": 368.0,
+          "daily_change_pct": -0.54,
+          "cumulative_gain_pct": -4.17,
+          "count_green": 2
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 418.0,
           "high": 420.0,
           "low": 372.0,
           "daily_change_pct": 13.59,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": 8.85,
           "count_green": 3
         }
       ]
@@ -70042,17 +70292,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 46.0,
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 45.0,
           "high": 47.0,
           "low": 42.0,
-          "daily_change_pct": 2.22,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 46.0
+      "base_price": 45.0
     },
     {
       "symbol": "BBKP",
@@ -70194,8 +70444,8 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
           "close": 36.0,
           "high": 37.0,
           "low": 34.0,
@@ -70208,7 +70458,7 @@
     },
     {
       "symbol": "CPRO",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "CPRO",
@@ -70328,17 +70578,37 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 36.0,
-          "high": 37.0,
-          "low": 34.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 33.0,
+          "high": 33.0,
+          "low": 33.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 33.0,
+          "high": 33.0,
+          "low": 33.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 36.0,
+          "high": 36.0,
+          "low": 34.0,
+          "daily_change_pct": 9.09,
+          "cumulative_gain_pct": 9.09,
+          "count_green": 3
         }
       ],
-      "base_price": 36.0
+      "base_price": 33.0
     },
     {
       "symbol": "DADA",
@@ -70470,21 +70740,21 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 18.0,
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 19.0,
           "high": 20.0,
           "low": 18.0,
-          "daily_change_pct": -5.26,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 18.0
+      "base_price": 19.0
     },
     {
       "symbol": "CDIA",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "CDIA",
@@ -70606,17 +70876,37 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 420.0,
-          "high": 434.0,
-          "low": 402.0,
-          "daily_change_pct": -1.41,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 404.0,
+          "high": 404.0,
+          "low": 404.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 376.0,
+          "high": 376.0,
+          "low": 376.0,
+          "daily_change_pct": -6.93,
+          "cumulative_gain_pct": -6.93,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 426.0,
+          "high": 434.0,
+          "low": 404.0,
+          "daily_change_pct": 13.3,
+          "cumulative_gain_pct": 5.45,
           "count_green": 3
         }
       ],
-      "base_price": 420.0
+      "base_price": 404.0
     },
     {
       "symbol": "COIN",
@@ -70755,21 +71045,31 @@
       },
       "performance_history": [
         {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 450.0,
+          "high": 498.0,
+          "low": 420.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
           "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date_display": "21 Okt",
           "close": 420.0,
           "high": 498.0,
           "low": 420.0,
           "daily_change_pct": -6.67,
-          "cumulative_gain_pct": 0.0,
+          "cumulative_gain_pct": -6.67,
           "count_green": 2
         }
       ],
-      "base_price": 420.0
+      "base_price": 450.0
     },
     {
       "symbol": "BBYB",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "BBYB",
@@ -70891,21 +71191,41 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 163.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 162.0,
+          "high": 162.0,
+          "low": 162.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 153.0,
+          "high": 153.0,
+          "low": 153.0,
+          "daily_change_pct": -5.56,
+          "cumulative_gain_pct": -5.56,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 165.0,
           "high": 169.0,
           "low": 157.0,
-          "daily_change_pct": -1.21,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 7.84,
+          "cumulative_gain_pct": 1.85,
           "count_green": 3
         }
       ],
-      "base_price": 163.0
+      "base_price": 162.0
     },
     {
       "symbol": "EMTK",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "EMTK",
@@ -71032,21 +71352,41 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 340.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 334.0,
+          "high": 334.0,
+          "low": 334.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 318.0,
+          "high": 318.0,
+          "low": 318.0,
+          "daily_change_pct": -4.79,
+          "cumulative_gain_pct": -4.79,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 342.0,
           "high": 348.0,
           "low": 332.0,
-          "daily_change_pct": -0.58,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 7.55,
+          "cumulative_gain_pct": 2.4,
           "count_green": 3
         }
       ],
-      "base_price": 340.0
+      "base_price": 334.0
     },
     {
       "symbol": "BSDE",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "BSDE",
@@ -71193,17 +71533,37 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 490.0,
-          "high": 492.0,
-          "low": 470.0,
-          "daily_change_pct": 3.38,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 468.0,
+          "high": 468.0,
+          "low": 468.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 442.0,
+          "high": 442.0,
+          "low": 442.0,
+          "daily_change_pct": -5.56,
+          "cumulative_gain_pct": -5.56,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 474.0,
+          "high": 482.0,
+          "low": 470.0,
+          "daily_change_pct": 7.24,
+          "cumulative_gain_pct": 1.28,
           "count_green": 3
         }
       ],
-      "base_price": 490.0
+      "base_price": 468.0
     },
     {
       "symbol": "PBRX",
@@ -71367,11 +71727,11 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
           "close": 23.0,
           "high": 24.0,
-          "low": 22.0,
+          "low": 23.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
@@ -71517,17 +71877,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 28.0,
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 30.0,
           "high": 30.0,
           "low": 28.0,
-          "daily_change_pct": -6.67,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 28.0
+      "base_price": 30.0
     },
     {
       "symbol": "BBSS",
@@ -71675,21 +72035,21 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 65.0,
-          "high": 68.0,
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 69.0,
+          "high": 69.0,
           "low": 65.0,
-          "daily_change_pct": -5.8,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 65.0
+      "base_price": 69.0
     },
     {
       "symbol": "HEAL",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "HEAL",
@@ -71826,13 +72186,33 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
           "close": 505.0,
+          "high": 505.0,
+          "low": 505.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 505.0,
+          "high": 505.0,
+          "low": 505.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 520.0,
           "high": 530.0,
           "low": 505.0,
-          "daily_change_pct": -2.88,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 2.97,
+          "cumulative_gain_pct": 2.97,
           "count_green": 3
         }
       ],
@@ -71840,7 +72220,7 @@
     },
     {
       "symbol": "AGRO",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-19",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "AGRO",
@@ -71982,21 +72362,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 112.0,
-          "high": 123.0,
-          "low": 109.0,
-          "daily_change_pct": -1.75,
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 104.0,
+          "high": 104.0,
+          "low": 104.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 2
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 114.0,
+          "high": 123.0,
+          "low": 112.0,
+          "daily_change_pct": 9.62,
+          "cumulative_gain_pct": 9.62,
           "count_green": 3
         }
       ],
-      "base_price": 112.0
+      "base_price": 104.0
     },
     {
       "symbol": "GPSO",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "GPSO",
@@ -72139,21 +72529,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 222.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 204.0,
+          "high": 204.0,
+          "low": 204.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 232.0,
           "high": 232.0,
           "low": 218.0,
-          "daily_change_pct": -4.31,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 8.41,
+          "cumulative_gain_pct": 13.73,
           "count_green": 3
         }
       ],
-      "base_price": 222.0
+      "base_price": 204.0
     },
     {
       "symbol": "IOTF",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "IOTF",
@@ -72283,17 +72683,27 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 41.0,
-          "high": 42.0,
-          "low": 40.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 39.0,
+          "high": 39.0,
+          "low": 39.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 41.0,
+          "high": 42.0,
+          "low": 40.0,
+          "daily_change_pct": 10.81,
+          "cumulative_gain_pct": 5.13,
+          "count_green": 3
         }
       ],
-      "base_price": 41.0
+      "base_price": 39.0
     },
     {
       "symbol": "WEGE",
@@ -72424,8 +72834,8 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
           "close": 34.0,
           "high": 34.0,
           "low": 32.0,
@@ -72438,7 +72848,7 @@
     },
     {
       "symbol": "WOWS",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "WOWS",
@@ -72565,21 +72975,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 46.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 48.0,
+          "high": 48.0,
+          "low": 48.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 47.0,
           "high": 49.0,
           "low": 45.0,
-          "daily_change_pct": -2.13,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 4.44,
+          "cumulative_gain_pct": -2.08,
           "count_green": 3
         }
       ],
-      "base_price": 46.0
+      "base_price": 48.0
     },
     {
       "symbol": "MDLN",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "MDLN",
@@ -72716,21 +73136,41 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 35.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 36.0,
           "high": 36.0,
-          "low": 34.0,
+          "low": 36.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 34.0,
+          "high": 34.0,
+          "low": 34.0,
+          "daily_change_pct": -5.56,
+          "cumulative_gain_pct": -5.56,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 35.0,
+          "high": 36.0,
+          "low": 34.0,
+          "daily_change_pct": 2.94,
+          "cumulative_gain_pct": -2.78,
+          "count_green": 3
         }
       ],
-      "base_price": 35.0
+      "base_price": 36.0
     },
     {
       "symbol": "WTON",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "WTON",
@@ -72872,17 +73312,37 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 64.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 60.0,
+          "high": 60.0,
+          "low": 60.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 59.0,
+          "high": 59.0,
+          "low": 59.0,
+          "daily_change_pct": -1.67,
+          "cumulative_gain_pct": -1.67,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 66.0,
           "high": 67.0,
           "low": 63.0,
-          "daily_change_pct": -3.03,
-          "cumulative_gain_pct": 0.0,
+          "daily_change_pct": 11.86,
+          "cumulative_gain_pct": 10.0,
           "count_green": 3
         }
       ],
-      "base_price": 64.0
+      "base_price": 60.0
     },
     {
       "symbol": "LPPS",
@@ -73016,10 +73476,10 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
           "close": 56.0,
-          "high": 59.0,
+          "high": 57.0,
           "low": 53.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
@@ -73030,7 +73490,7 @@
     },
     {
       "symbol": "SULI",
-      "scan_date": "2026-10-20",
+      "scan_date": "2026-10-17",
       "scan_date_display": "20 Oktober 2026",
       "data": {
         "symbol": "SULI",
@@ -73168,17 +73628,27 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 64.0,
-          "high": 64.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 63.0,
+          "high": 63.0,
+          "low": 63.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 63.0,
+          "high": 63.0,
           "low": 61.0,
-          "daily_change_pct": 1.59,
+          "daily_change_pct": 6.78,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 64.0
+      "base_price": 63.0
     },
     {
       "symbol": "PNSE",
@@ -73323,21 +73793,21 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 560.0,
+          "date": "2026-10-20",
+          "date_display": "20 Okt",
+          "close": 600.0,
           "high": 625.0,
           "low": 560.0,
-          "daily_change_pct": -6.67,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 560.0
+      "base_price": 600.0
     },
     {
       "symbol": "PADI",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "PADI",
@@ -73459,21 +73929,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 34.0,
-          "high": 36.0,
-          "low": 34.0,
-          "daily_change_pct": -5.56,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 32.0,
+          "high": 32.0,
+          "low": 32.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 33.0,
+          "high": 33.0,
+          "low": 33.0,
+          "daily_change_pct": 3.12,
+          "cumulative_gain_pct": 3.12,
           "count_green": 3
         }
       ],
-      "base_price": 34.0
+      "base_price": 32.0
     },
     {
       "symbol": "LPKR",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "LPKR",
@@ -73600,21 +74080,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 41.0,
-          "high": 42.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 39.0,
+          "high": 39.0,
           "low": 39.0,
-          "daily_change_pct": 2.5,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 38.0,
+          "high": 38.0,
+          "low": 38.0,
+          "daily_change_pct": -2.56,
+          "cumulative_gain_pct": -2.56,
           "count_green": 3
         }
       ],
-      "base_price": 41.0
+      "base_price": 39.0
     },
     {
       "symbol": "SMRA",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "SMRA",
@@ -73747,21 +74237,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 254.0,
-          "high": 254.0,
-          "low": 234.0,
-          "daily_change_pct": 4.1,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 230.0,
+          "high": 230.0,
+          "low": 230.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 220.0,
+          "high": 220.0,
+          "low": 220.0,
+          "daily_change_pct": -4.35,
+          "cumulative_gain_pct": -4.35,
           "count_green": 3
         }
       ],
-      "base_price": 254.0
+      "base_price": 230.0
     },
     {
       "symbol": "MLPL",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "MLPL",
@@ -73894,21 +74394,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 66.0,
-          "high": 68.0,
-          "low": 64.0,
-          "daily_change_pct": -1.49,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 63.0,
+          "high": 63.0,
+          "low": 63.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 59.0,
+          "high": 59.0,
+          "low": 59.0,
+          "daily_change_pct": -6.35,
+          "cumulative_gain_pct": -6.35,
           "count_green": 3
         }
       ],
-      "base_price": 66.0
+      "base_price": 63.0
     },
     {
       "symbol": "BSBK",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "BSBK",
@@ -74046,21 +74556,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 38.0,
-          "high": 39.0,
-          "low": 36.0,
-          "daily_change_pct": 2.7,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 34.0,
+          "high": 34.0,
+          "low": 34.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 33.0,
+          "high": 33.0,
+          "low": 33.0,
+          "daily_change_pct": -2.94,
+          "cumulative_gain_pct": -2.94,
           "count_green": 3
         }
       ],
-      "base_price": 38.0
+      "base_price": 34.0
     },
     {
       "symbol": "WOOD",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "WOOD",
@@ -74192,21 +74712,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 162.0,
-          "high": 164.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 154.0,
+          "high": 154.0,
           "low": 154.0,
-          "daily_change_pct": 0.62,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 150.0,
+          "high": 150.0,
+          "low": 150.0,
+          "daily_change_pct": -2.6,
+          "cumulative_gain_pct": -2.6,
           "count_green": 3
         }
       ],
-      "base_price": 162.0
+      "base_price": 154.0
     },
     {
       "symbol": "RISE",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "RISE",
@@ -74333,21 +74863,31 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 575.0,
-          "high": 580.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 550.0,
+          "high": 550.0,
+          "low": 550.0,
+          "daily_change_pct": 0.0,
+          "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 550.0,
+          "high": 550.0,
           "low": 550.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 575.0
+      "base_price": 550.0
     },
     {
       "symbol": "LPLI",
-      "scan_date": "2026-10-19",
+      "scan_date": "2026-10-17",
       "scan_date_display": "19 Oktober 2026",
       "data": {
         "symbol": "LPLI",
@@ -74474,17 +75014,27 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 200.0,
-          "high": 200.0,
-          "low": 181.0,
-          "daily_change_pct": 4.17,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 179.0,
+          "high": 179.0,
+          "low": 179.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 184.0,
+          "high": 184.0,
+          "low": 184.0,
+          "daily_change_pct": 2.79,
+          "cumulative_gain_pct": 2.79,
           "count_green": 3
         }
       ],
-      "base_price": 200.0
+      "base_price": 179.0
     },
     {
       "symbol": "GOTO",
@@ -74610,17 +75160,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 26.0,
-          "high": 26.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 25.0,
+          "high": 25.0,
           "low": 25.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 26.0
+      "base_price": 25.0
     },
     {
       "symbol": "HOKI",
@@ -74768,17 +75318,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 37.0,
-          "high": 37.0,
-          "low": 35.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 38.0,
+          "high": 38.0,
+          "low": 38.0,
           "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 37.0
+      "base_price": 38.0
     },
     {
       "symbol": "CTRA",
@@ -74859,17 +75409,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 570.0,
-          "high": 570.0,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 540.0,
+          "high": 540.0,
           "low": 540.0,
-          "daily_change_pct": 4.59,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
-          "count_green": 0
+          "count_green": 3
         }
       ],
-      "base_price": 570.0
+      "base_price": 540.0
     },
     {
       "symbol": "PTMP",
@@ -74999,17 +75549,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 43.0,
-          "high": 44.0,
-          "low": 39.0,
-          "daily_change_pct": 7.5,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 40.0,
+          "high": 40.0,
+          "low": 40.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
           "count_green": 3
         }
       ],
-      "base_price": 43.0
+      "base_price": 40.0
     },
     {
       "symbol": "SMBR",
@@ -75153,17 +75703,17 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 125.0,
-          "high": 128.0,
-          "low": 123.0,
-          "daily_change_pct": -1.57,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 124.0,
+          "high": 124.0,
+          "low": 124.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
-          "count_green": 1
+          "count_green": 3
         }
       ],
-      "base_price": 125.0
+      "base_price": 124.0
     },
     {
       "symbol": "ITIC",
@@ -75294,17 +75844,27 @@
       },
       "performance_history": [
         {
-          "date": "2026-10-21",
-          "date_display": "21 Oct 2026",
-          "close": 170.0,
-          "high": 179.0,
-          "low": 164.0,
-          "daily_change_pct": 0.59,
+          "date": "2026-10-17",
+          "date_display": "17 Okt",
+          "close": 166.0,
+          "high": 166.0,
+          "low": 166.0,
+          "daily_change_pct": 0.0,
           "cumulative_gain_pct": 0.0,
+          "count_green": 3
+        },
+        {
+          "date": "2026-10-19",
+          "date_display": "19 Okt",
+          "close": 155.0,
+          "high": 155.0,
+          "low": 155.0,
+          "daily_change_pct": -6.63,
+          "cumulative_gain_pct": -6.63,
           "count_green": 2
         }
       ],
-      "base_price": 170.0
+      "base_price": 166.0
     }
   ]
 }
