@@ -52,8 +52,8 @@ jobs:
       - name: Commit & Push Data Web Dashboard
         if: always()
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action Bot"
+          git config --local user.email "oktovaaaaa@gmail.com"
+          git config --local user.name "oktovaaaaa"
           git add docs/data/history.json
           if git diff --staged --quiet; then
             echo "Tidak ada perubahan data JSON."
