@@ -10,7 +10,7 @@ from tradingview_screener import Query, Column
 # KONFIGURASI BOT & TOKEN
 # ============================================================================
 # Ganti dengan Token Fonnte Anda (atau biarkan jika diset lewat Environment Variable FONNTE_TOKEN)
-FONNTE_TOKEN = "MASUKKAN_TOKEN_FONNTE_DI_SINI"
+FONNTE_TOKEN = "7ci6H1WRqTDsJUAoFzq5"
 NOMOR_WHATSAPP_TUJUAN = "6282111144710"  # Nomor WhatsApp penerima notifikasi
 
 INTERVAL_SCAN_MENIT = 15  # Durasi jeda scan (setiap 15 menit)
