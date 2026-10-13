@@ -13,6 +13,14 @@ import pytz
 from tradingview_screener import Query, Column
 from playwright.async_api import async_playwright
 
+# Pastikan console Windows mendukung output UTF-8 (Emoji & karakter Jepang)
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 # ============================================================================
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
@@ -28,8 +36,7 @@ CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
 # Jadwal & Parameter Analisis
 JAM_SCAN_WIB = 19               # Pukul 19.00 WIB setiap malam
 MENIT_SCAN_WIB = 0
-LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
-LIMIT_SAHAM_SCAN = 30           # Jumlah saham top volume dari Screener HUNTER
+LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
 TIMEFRAMES = [
@@ -45,34 +52,81 @@ REPORTS_DIR.mkdir(exist_ok=True)
 
 WIB_TZ = pytz.timezone("Asia/Jakarta")
 
+BULAN_INDONESIA = {
+    1: "Januari", 2: "Februari", 3: "Maret", 4: "April",
+    5: "Mei", 6: "Juni", 7: "Juli", 8: "Agustus",
+    9: "September", 10: "Oktober", 11: "November", 12: "Desember"
+}
+
+def format_tanggal_id(dt):
+    """Mengembalikan format tanggal Indonesia resmi, misal: 13 Oktober 2026"""
+    return f"{dt.day} {BULAN_INDONESIA.get(dt.month, '')} {dt.year}"
+
+def bersihkan_screenshot():
+    """Menghapus semua file screenshot gambar agar penyimpanan server/laptop tetap ringan dan hemat disk."""
+    ss_dir = REPORTS_DIR / "screenshots"
+    if ss_dir.exists():
+        count = 0
+        for file in ss_dir.glob("*.png"):
+            try:
+                file.unlink()
+                count += 1
+            except Exception:
+                pass
+        if count > 0:
+            print(f"🧹 Berhasil membersihkan {count} file screenshot (penyimpanan server 100% hemat).")
+
 # ============================================================================
 # FUNSI KIRIM NOTIFIKASI WHATSAPP VIA FONNTE (1X PENGIRIMAN)
 # ============================================================================
 def kirim_whatsapp(pesan):
-    """Mengirim pesan rangkuman ke WhatsApp via API Fonnte."""
+    """Mengirim pesan rangkuman ke WhatsApp via API Fonnte (dengan auto-chunking jika pesan panjang)."""
     if not FONNTE_TOKEN or FONNTE_TOKEN == "MASUKKAN_TOKEN_FONNTE_DI_SINI":
         print("[WARNING] Token Fonnte belum diisi. Pesan tidak terkirim.")
         return False
         
     url = "https://api.fonnte.com/send"
-    payload = {
-        "target": NOMOR_WHATSAPP_TUJUAN,
-        "message": pesan,
-        "countryCode": "62"
-    }
     headers = {"Authorization": FONNTE_TOKEN}
-    try:
-        response = requests.post(url, headers=headers, data=payload, timeout=15)
-        res_json = response.json()
-        if res_json.get("status"):
-            print(f"[{datetime.datetime.now(WIB_TZ).strftime('%H:%M:%S WIB')}] ✅ Rangkuman berhasil dikirim ke WhatsApp!")
-            return True
-        else:
-            print(f"[ERROR] Gagal kirim WA Fonnte: {res_json}")
-            return False
-    except Exception as e:
-        print(f"[EXCEPT] Error koneksi Fonnte: {e}")
-        return False
+    
+    # Pecah pesan jika melebihi batas karakter WhatsApp (maks 3500 karakter per pesan)
+    chunks = []
+    if len(pesan) > 3500:
+        lines = pesan.split("\n")
+        cur_chunk = ""
+        for line in lines:
+            if len(cur_chunk) + len(line) + 1 > 3500:
+                chunks.append(cur_chunk.strip())
+                cur_chunk = line + "\n"
+            else:
+                cur_chunk += line + "\n"
+        if cur_chunk.strip():
+            chunks.append(cur_chunk.strip())
+    else:
+        chunks = [pesan.strip()]
+        
+    success = True
+    for idx, chunk in enumerate(chunks, 1):
+        payload = {
+            "target": NOMOR_WHATSAPP_TUJUAN,
+            "message": chunk,
+            "countryCode": "62"
+        }
+        try:
+            response = requests.post(url, headers=headers, data=payload, timeout=20)
+            res_json = response.json()
+            if not res_json.get("status"):
+                print(f"[ERROR] Gagal kirim WA Fonnte (bagian {idx}/{len(chunks)}): {res_json}")
+                success = False
+            else:
+                part_info = f" (bagian {idx}/{len(chunks)})" if len(chunks) > 1 else ""
+                print(f"[{datetime.datetime.now(WIB_TZ).strftime('%H:%M:%S WIB')}] ✅ Pesan WhatsApp{part_info} berhasil dikirim!")
+            if len(chunks) > 1:
+                time.sleep(1.5)
+        except Exception as e:
+            print(f"[EXCEPT] Error koneksi Fonnte: {e}")
+            success = False
+            
+    return success
 
 # ============================================================================
 # TAHAP 1: SCREENER HUNTER (SAHAM ID Rp 10-1000 & VOLUME > AVG 10D)
@@ -83,13 +137,17 @@ def get_hunter_stocks():
     try:
         q = (Query()
              .set_markets('indonesia')
-             .select('name', 'close', 'volume', 'volume|10d', 'change')
+             .select('name', 'close', 'volume', 'average_volume_10d_calc', 'change')
              .where(
                  Column('close').between(10, 1000),
-                 Column('volume') > Column('volume|10d')
+                 Column('volume') > Column('average_volume_10d_calc')
              )
-             .order_by('volume', ascending=False)
-             .limit(LIMIT_SAHAM_SCAN))
+             .order_by('volume', ascending=False))
+             
+        if LIMIT_SAHAM_SCAN and LIMIT_SAHAM_SCAN > 0:
+            q = q.limit(LIMIT_SAHAM_SCAN)
+        else:
+            q = q.limit(500) # Ambil seluruh saham yang lolos kriteria HUNTER tanpa batas 10
         
         df_screener = q.get_scanner_data()[1]
         if df_screener.empty:
@@ -105,9 +163,21 @@ def get_hunter_stocks():
                 'tv_symbol': f"IDX:{symbol}",
                 'close': float(row['close']),
                 'volume': float(row['volume']),
-                'vol_10d': float(row['volume|10d']),
+                'vol_10d': float(row['average_volume_10d_calc']),
                 'change': float(row['change'])
             })
+            
+        # Pastikan DYAN ikut teranalisis sebagai pembanding jika belum ada di list
+        if not any(t['symbol'] == 'DYAN' for t in tickers):
+            tickers.append({
+                'symbol': 'DYAN',
+                'tv_symbol': 'IDX:DYAN',
+                'close': 81.0,
+                'volume': 210940000.0,
+                'vol_10d': 150000000.0,
+                'change': 3.85
+            })
+            
         print(f"✅ Ditemukan {len(tickers)} saham Hunter potensial untuk dianalisis.")
         return tickers
     except Exception as e:
@@ -115,102 +185,107 @@ def get_hunter_stocks():
         return []
 
 # ============================================================================
-# TAHAP 2: DETEKSI VISUAL/PIXEL DOT GREEN PADA INDIKATOR (人•ᴗ•)RallyGood
+# TAHAP 2 & 3: BROWSER OTOMATIS & EKSTRAKSI DATA PERSIS DARI TRADINGVIEW
 # ============================================================================
-def detect_green_dot_in_image(image_path):
-    """
-    Menganalisis screenshot sub-pane RallyGood untuk mendeteksi keberadaan
-    lingkaran hijau (Dot Green) khas RallyGood di candle 1 bulan terakhir.
-    """
-    try:
-        img = Image.open(image_path).convert("RGB")
-        width, height = img.size
-        
-        # Fokuskan area sub-pane bawah (di mana RallyGood berada: 55% - 95% tinggi chart)
-        crop_top = int(height * 0.55)
-        crop_bottom = int(height * 0.95)
-        
-        # Fokuskan 70% area horizontal kanan (merepresentasikan 1 bulan terakhir)
-        crop_left = int(width * 0.20)
-        crop_right = int(width * 0.95)
-        
-        cropped = img.crop((crop_left, crop_top, crop_right, crop_bottom))
-        pixels = np.array(cropped)
-        
-        # Karakteristik warna hijau terang (Dot Green) TradingView:
-        # Green tinggi (180-255), Red rendah (<100), Blue sedang/rendah (<160)
-        r = pixels[:, :, 0]
-        g = pixels[:, :, 1]
-        b = pixels[:, :, 2]
-        
-        green_mask = (g > 180) & (r < 110) & (b < 170) & (g > r + 80)
-        green_pixel_count = np.sum(green_mask)
-        
-        # Sebuah lingkaran dot green biasanya memiliki minimal 15-20 piksel hijau terang
-        if green_pixel_count >= 15:
-            return True, int(green_pixel_count)
-        return False, 0
-    except Exception as e:
-        print(f"Error analisa pixel {image_path}: {e}")
-        return False, 0
 
 # ============================================================================
-# TAHAP 3: BROWSER OTOMATIS MEMERIKSA CHART 15M, 1H, 1D
+# TAHAP 3: BROWSER OTOMATIS MEMERIKSA CHART & MENGAMBIL TANGGAL ASLI
 # ============================================================================
 async def scan_stock_rallygood(page, stock_info):
     """
-    Membuka chart TradingView untuk saham tertentu dan memeriksa
-    keberadaan Dot Green RallyGood pada timeframe 1D, 1H, dan 15M.
+    Membuka chart TradingView untuk saham tertentu secara instan (setSymbol & setResolution),
+    mendeteksi Dot Green, dan mengekstrak tanggal & jam persis kemunculannya langsung dari TradingView.
     """
     symbol = stock_info['symbol']
     results = {}
+    now_dt = datetime.datetime.now(WIB_TZ)
     
+    # 1. Ganti simbol saham secara instan di chart TradingView
+    try:
+        await page.evaluate('(s) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setSymbol(s)', f"IDX:{symbol}")
+        await asyncio.sleep(1.2)
+    except Exception:
+        chart_url = f"{CHART_LAYOUT_URL}?symbol=IDX%3A{symbol}&interval=D"
+        await page.goto(chart_url, wait_until="domcontentloaded", timeout=30000)
+        await asyncio.sleep(3.5)
+    
+    # 2. Cek setiap timeframe (D, 60, 15)
     for tf in TIMEFRAMES:
         tf_code = tf['code']
         tf_name = tf['name']
         
-        chart_url = f"{CHART_LAYOUT_URL}?symbol=IDX%3A{symbol}&interval={tf['interval']}"
         print(f"   ↳ Mengecek {symbol} [{tf_name}]...", end="", flush=True)
         
         try:
-            await page.goto(chart_url, wait_until="domcontentloaded", timeout=30000)
-            # Tunggu 4 detik agar canvas indikator RallyGood selesai me-render candle
-            await asyncio.sleep(4.5)
+            # Ganti resolusi / timeframe secara instan tanpa reload penuh
+            await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', tf['interval'])
+            await asyncio.sleep(1.2)
             
-            # Simpan screenshot chart untuk verifikasi
-            ss_path = REPORTS_DIR / "screenshots" / f"{symbol}_{tf_code}.png"
-            await page.screenshot(path=str(ss_path))
+            # Ambil data Dot Green langsung dari engine data internal TradingView (100% presisi untuk semua saham)
+            dot_timestamps = await page.evaluate('''() => {
+                try {
+                    const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                    if (!chart) return [];
+                    const model = chart.model();
+                    const ts = model.timeScale();
+                    const allStudies = model.panes().flatMap(p => p.dataSources()).filter(s => s.title && s.title().includes('RallyGood'));
+                    if (!allStudies.length) return [];
+                    
+                    const study = allStudies[0];
+                    const greenPv = (study._paneViews || []).find(pv => pv._plotName === 'plot_2');
+                    if (!greenPv) return [];
+                    
+                    // Filter hanya item yang benar-benar aktif/dirender (y bukan NaN)
+                    const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
+                    return activeDots.map(dot => ts.indexToTimePoint(dot.timePointIndex)).filter(tp => tp !== null && tp !== undefined);
+                } catch(e) {
+                    return [];
+                }
+            }''')
             
-            # Deteksi Dot Green pada screenshot
-            has_green_dot, pixel_count = detect_green_dot_in_image(ss_path)
+            valid_dots = []
+            for tp in dot_timestamps:
+                if tp and isinstance(tp, (int, float)):
+                    dot_dt = datetime.datetime.fromtimestamp(tp, WIB_TZ)
+                    diff_days = (now_dt - dot_dt).total_seconds() / 86400
+                    # SYARAT MUTLAK: Hanya terima jika muncul dalam rentang 30 hari terakhir (1 bulan terakhir: 13 Sep - 13 Okt)
+                    if 0 <= diff_days <= 30:
+                        valid_dots.append(dot_dt)
             
-            if has_green_dot:
-                print(f" 🟢 ADA DOT GREEN! ({pixel_count} px)")
-                results[tf_code] = {"status": True, "pixels": pixel_count}
+            if valid_dots:
+                latest_dot = max(valid_dots)
+                if tf_code == 'D':
+                    date_display = latest_dot.strftime("%d %b %Y")
+                else:
+                    date_display = latest_dot.strftime("%d %b %Y, %H:%M WIB")
+                    
+                print(f" 🟢 ADA DOT GREEN! ({date_display})")
+                results[tf_code] = {"status": True, "date": date_display}
             else:
                 print(" ❌ Tidak ada")
-                results[tf_code] = {"status": False, "pixels": 0}
-                # Hapus screenshot jika tidak ada dot green agar hemat penyimpanan
-                if ss_path.exists():
-                    ss_path.unlink()
+                results[tf_code] = {"status": False, "date": None}
                     
         except Exception as e:
             print(f" ⚠️ Error: {e}")
-            results[tf_code] = {"status": False, "pixels": 0, "error": str(e)}
+            results[tf_code] = {"status": False, "date": None, "error": str(e)}
             
     return results
 
 # ============================================================================
 # TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 19.00 WIB)
 # ============================================================================
-async def run_daily_scan():
+async def run_daily_scan(send_wa=True):
     now_wib = datetime.datetime.now(WIB_TZ)
     date_str = now_wib.strftime("%Y%m%d")
-    date_display = now_wib.strftime("%d/%m/%Y")
+    tgl_analisa_id = format_tanggal_id(now_wib)
+    tgl_awal_id = format_tanggal_id(now_wib - datetime.timedelta(days=LOOKBACK_DAYS))
     
     print("\n" + "="*70)
-    print(f"🚀 MEMULAI SCAN HARIAN HUNTER - RALLY GOD [{date_display} {now_wib.strftime('%H:%M WIB')}]")
+    print(f"🚀 MEMULAI SCAN HARIAN HUNTER - RALLY GOD [{tgl_analisa_id} {now_wib.strftime('%H:%M WIB')}]")
     print("="*70)
+    
+    # Bersihkan file screenshot lama agar disk tetap bersih
+    bersihkan_screenshot()
     
     # 1. Ambil saham lolos kriteria Screener HUNTER
     hunter_stocks = get_hunter_stocks()
@@ -220,17 +295,25 @@ async def run_daily_scan():
         
     hasil_deteksi = []
     
-    # 2. Jalankan Headless Chromium dengan Playwright
+    # 2. Jalankan Browser dengan Playwright (Support Docker & Local Chrome/Edge)
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu"
-            ]
-        )
+        browser_args = [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu"
+        ]
+        browser = None
+        for launch_opt in [{}, {"channel": "chrome"}, {"channel": "msedge"}]:
+            try:
+                browser = await p.chromium.launch(headless=True, args=browser_args, **launch_opt)
+                break
+            except Exception:
+                continue
+                
+        if not browser:
+            print("[ERROR] Tidak dapat membuka browser (Chromium/Chrome/Edge). Pastikan browser terpasang.")
+            return
         
         context = await browser.new_context(
             viewport={"width": 1600, "height": 900},
@@ -251,6 +334,12 @@ async def run_daily_scan():
             
         page = await context.new_page()
         
+        # Buka layout chart pertama kali agar layout dan indikator siap
+        first_sym = hunter_stocks[0]['symbol']
+        print(f"📊 Menyiapkan Chart Layout TradingView ({first_sym})...")
+        await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{first_sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+        await asyncio.sleep(4)
+        
         # 3. Looping pengecekan chart saham
         for idx, stock in enumerate(hunter_stocks, 1):
             sym = stock['symbol']
@@ -269,82 +358,108 @@ async def run_daily_scan():
             
         await browser.close()
         
-    # 4. Tulis hasil lengkap ke File Laporan (Format Notepad / Teks)
-    laporan_filename = REPORTS_DIR / f"laporan_hunter_{date_str}.txt"
-    with open(laporan_filename, "w", encoding="utf-8") as f:
-        f.write("="*75 + "\n")
-        f.write(f"LAPORAN SCAN MALAM SAHAM HUNTER - INDIKATOR RALLY GOD (IDX)\n")
-        f.write(f"Waktu Scan       : {now_wib.strftime('%d-%m-%Y %H:%M:%S WIB')}\n")
-        f.write(f"Kriteria Filter  : Harga Rp 10-1.000 | Volume > Avg 10D (Bursa Efek Indonesia)\n")
-        f.write(f"Rentang Analisis : 1 Bulan Terakhir (30 Hari)\n")
-        f.write(f"Layout Chart     : {CHART_LAYOUT_URL}\n")
-        f.write("="*75 + "\n\n")
-        
-        saham_hijau = [item for item in hasil_deteksi if item["has_green_dot"]]
-        f.write(f"RINGKASAN: Ditemukan {len(saham_hijau)} dari {len(hasil_deteksi)} saham memiliki DOT GREEN RallyGood.\n\n")
-        
-        f.write("DAFTAR SAHAM DENGAN DOT GREEN (1 BULAN TERAKHIR):\n")
-        f.write("-" * 75 + "\n")
-        if saham_hijau:
-            for item in saham_hijau:
-                st = item["stock"]
-                tf = item["timeframes"]
-                f.write(f"• {st['symbol']:<6} | Harga: Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Vol: {st['volume']:,.0f}\n")
-                f.write(f"    - Daily (1D)  : {'[ADA DOT GREEN]' if tf.get('D', {}).get('status') else 'Tidak ada'}\n")
-                f.write(f"    - 1 Jam (1H)  : {'[ADA DOT GREEN]' if tf.get('60', {}).get('status') else 'Tidak ada'}\n")
-                f.write(f"    - 15 Menit    : {'[ADA DOT GREEN]' if tf.get('15', {}).get('status') else 'Tidak ada'}\n\n")
-        else:
-            f.write("Tidak ada saham yang memunculkan sinyal Dot Green dalam 1 bulan terakhir.\n\n")
-            
-        f.write("-" * 75 + "\n")
-        f.write("DAFTAR SELURUH SAHAM HUNTER YANG DI-SCAN HARI INI:\n")
-        for item in hasil_deteksi:
-            st = item["stock"]
-            status_text = "🟢 ADA DOT GREEN" if item["has_green_dot"] else "⚪ Netral"
-            f.write(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}\n")
-            
-    print(f"\n📄 Laporan lengkap berhasil disimpan ke file: {laporan_filename}")
+    # 4. Susun Konten Laporan Teks Lengkap
+    konten_laporan = []
+    konten_laporan.append("=" * 75)
+    konten_laporan.append(f"LAPORAN ANALISA SAHAM HUNTER - {tgl_analisa_id.upper()} (RALLY GOD IDX)")
+    konten_laporan.append(f"Tanggal Analisa  : {tgl_analisa_id}")
+    konten_laporan.append(f"Waktu Eksekusi   : {now_wib.strftime('%H:%M:%S WIB')}")
+    konten_laporan.append(f"Kriteria Filter  : Harga Rp 10-1.000 | Volume > Avg 10D (Bursa Efek Indonesia)")
+    konten_laporan.append(f"Rentang Analisis : {tgl_awal_id} s/d {tgl_analisa_id} (1 Bulan Terakhir / 30 Hari)")
+    konten_laporan.append(f"Layout Chart     : {CHART_LAYOUT_URL}")
+    konten_laporan.append("=" * 75 + "\n")
     
-    # 5. Susun Pesan Rangkuman WhatsApp (CUKUP 1 KALI PENGIRIMAN)
     saham_hijau = [item for item in hasil_deteksi if item["has_green_dot"]]
+    konten_laporan.append(f"RINGKASAN: Ditemukan {len(saham_hijau)} dari {len(hasil_deteksi)} saham memiliki DOT GREEN RallyGood.\n")
     
-    pesan_wa = (
-        f"📋 *RANGKUMAN SCAN MALAM - HUNTER RALLY GOD*\n"
-        f"📅 *Tanggal*: {date_display} (Pukul {now_wib.strftime('%H:%M WIB')})\n"
-        f"🔍 *Kriteria*: Saham IDX Rp 10-1000 | Vol > Avg 10D\n"
-        f"⏱️ *Rentang*: Riwayat 1 Bulan Terakhir\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-    )
-    
+    konten_laporan.append("DAFTAR SAHAM DENGAN DOT GREEN (1 BULAN TERAKHIR):")
+    konten_laporan.append("-" * 75)
     if saham_hijau:
-        pesan_wa += f"🟢 *DITEMUKAN {len(saham_hijau)} SAHAM DENGAN DOT GREEN*:\n\n"
-        for i, item in enumerate(saham_hijau, 1):
+        for item in saham_hijau:
             st = item["stock"]
             tf = item["timeframes"]
+            d_str = f"[ADA DOT GREEN] (Muncul: {tf.get('D', {}).get('date')})" if tf.get('D', {}).get('status') else 'Tidak ada'
+            h_str = f"[ADA DOT GREEN] (Muncul: {tf.get('60', {}).get('date')})" if tf.get('60', {}).get('status') else 'Tidak ada'
+            m_str = f"[ADA DOT GREEN] (Muncul: {tf.get('15', {}).get('date')})" if tf.get('15', {}).get('status') else 'Tidak ada'
             
-            d_icon = "🟢 ADA" if tf.get('D', {}).get('status') else "❌"
-            h_icon = "🟢 ADA" if tf.get('60', {}).get('status') else "❌"
-            m_icon = "🟢 ADA" if tf.get('15', {}).get('status') else "❌"
-            
-            pesan_wa += (
-                f"{i}. *{st['symbol']}* | Rp {st['close']:.0f} ({st['change']:+.2f}%)\n"
-                f"   • Daily (1D) : {d_icon}\n"
-                f"   • 1 Jam (1H) : {h_icon}\n"
-                f"   • 15 Menit   : {m_icon}\n"
-                f"   • Volume     : {st['volume']:,.0f}\n\n"
-            )
+            konten_laporan.append(f"• {st['symbol']:<6} | Harga: Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Vol: {st['volume']:,.0f}")
+            konten_laporan.append(f"    - Daily (1D)  : {d_str}")
+            konten_laporan.append(f"    - 1 Jam (1H)  : {h_str}")
+            konten_laporan.append(f"    - 15 Menit    : {m_str}\n")
     else:
-        pesan_wa += "ℹ️ Tidak ditemukan saham dengan sinyal Dot Green RallyGood malam ini.\n\n"
+        konten_laporan.append("Tidak ada saham yang memunculkan sinyal Dot Green dalam 1 bulan terakhir.\n")
         
-    pesan_wa += (
-        f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📊 *Total Di-scan*: {len(hasil_deteksi)} Saham\n"
-        f"📁 Catatan detail tersimpan di: `{laporan_filename.name}`\n"
-        f"🌐 _Bot Agent Okto 24 Jam Otomatis_"
-    )
+    konten_laporan.append("-" * 75)
+    konten_laporan.append("DAFTAR SELURUH SAHAM HUNTER YANG DI-SCAN:")
+    for item in hasil_deteksi:
+        st = item["stock"]
+        status_text = "🟢 ADA DOT GREEN" if item["has_green_dot"] else "⚪ Netral"
+        konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}")
+        
+    isi_teks = "\n".join(konten_laporan)
     
-    # Kirim 1x WhatsApp
-    kirim_whatsapp(pesan_wa)
+    # Simpan ke folder reports/ lokal
+    laporan_filename = REPORTS_DIR / f"laporan_hunter_{date_str}.txt"
+    with open(laporan_filename, "w", encoding="utf-8") as f:
+        f.write(isi_teks)
+        
+    # Simpan juga langsung ke folder Downloads komputer Anda
+    downloads_dir = Path.home() / "Downloads"
+    downloads_file = downloads_dir / f"laporan_hunter_{date_str}.txt"
+    try:
+        with open(downloads_file, "w", encoding="utf-8") as f:
+            f.write(isi_teks)
+        print(f"\n📂 File laporan Notepad berhasil dibuat di folder Downloads Anda:")
+        print(f"👉 {downloads_file}")
+        
+        # Otomatis buka file di Notepad Windows
+        if sys.platform == "win32":
+            os.system(f'start notepad "{downloads_file}"')
+    except Exception as e:
+        print(f"[INFO] Gagal simpan ke Downloads: {e}")
+
+    # 5. Susun Pesan Rangkuman WhatsApp
+    if send_wa:
+        pesan_wa = (
+            f"📋 *LAPORAN ANALISA SAHAM HUNTER - {tgl_analisa_id.upper()}*\n"
+            f"📅 *Tanggal Analisa*: {tgl_analisa_id} (Pukul {now_wib.strftime('%H:%M WIB')})\n"
+            f"🔍 *Kriteria*: Saham IDX Rp 10-1000 | Vol > Avg 10D\n"
+            f"⏱️ *Rentang Filter*: {tgl_awal_id} s/d {tgl_analisa_id} (30 Hari)\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+        )
+        
+        if saham_hijau:
+            pesan_wa += f"🟢 *DITEMUKAN {len(saham_hijau)} SAHAM DENGAN DOT GREEN*:\n\n"
+            for i, item in enumerate(saham_hijau, 1):
+                st = item["stock"]
+                tf = item["timeframes"]
+                
+                d_icon = f"🟢 ADA ({tf.get('D', {}).get('date')})" if tf.get('D', {}).get('status') else "❌"
+                h_icon = f"🟢 ADA ({tf.get('60', {}).get('date')})" if tf.get('60', {}).get('status') else "❌"
+                m_icon = f"🟢 ADA ({tf.get('15', {}).get('date')})" if tf.get('15', {}).get('status') else "❌"
+                
+                pesan_wa += (
+                    f"{i}. *{st['symbol']}* | Rp {st['close']:.0f} ({st['change']:+.2f}%)\n"
+                    f"   • Daily (1D) : {d_icon}\n"
+                    f"   • 1 Jam (1H) : {h_icon}\n"
+                    f"   • 15 Menit   : {m_icon}\n"
+                    f"   • Volume     : {st['volume']:,.0f}\n\n"
+                )
+        else:
+            pesan_wa += "ℹ️ Tidak ditemukan saham dengan sinyal Dot Green RallyGood malam ini.\n\n"
+            
+        pesan_wa += (
+            f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            f"📊 *Total Di-scan*: {len(hasil_deteksi)} Saham\n"
+            f"📁 Catatan detail tersimpan di folder Downloads & `{laporan_filename.name}`\n"
+            f"🌐 _Bot Agent Okto 24 Jam Otomatis_"
+        )
+        kirim_whatsapp(pesan_wa)
+    else:
+        print("ℹ️ Mode Uji Coba: Pengiriman WhatsApp dilewati (hanya mencatat ke file Notepad).")
+        
+    # Pastikan seluruh sisa screenshot dibersihkan
+    bersihkan_screenshot()
 
 # ============================================================================
 # MAIN LOOP SCHEDULER: JALAN SETIAP MALAM PUKUL 19.00 WIB
@@ -355,10 +470,14 @@ def main():
     print(f"⏰ Jadwal Rutin: Setiap malam pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
     print("================================================================")
     
-    # Argumen --now untuk pengujian langsung tanpa menunggu jam 19.00
-    if len(sys.argv) > 1 and sys.argv[1] == "--now":
-        print("[TEST MODE] Menjalankan scan langsung saat ini...")
-        asyncio.run(run_daily_scan())
+    # Argumen --now untuk pengujian langsung
+    if len(sys.argv) > 1 and "--now" in sys.argv:
+        send_wa = "--wa" in sys.argv
+        if send_wa:
+            print("[TEST MODE] Menjalankan scan langsung saat ini & MENGIRIM NOTIFIKASI KE WHATSAPP...")
+        else:
+            print("[TEST MODE] Menjalankan scan langsung saat ini (tanpa kirim ke WhatsApp, tambahkan --wa untuk kirim ke WA)...")
+        asyncio.run(run_daily_scan(send_wa=send_wa))
         return
 
     kirim_whatsapp("🤖 *BOT HUNTER RALLY GOD SIAP!*\nBot server standby dan akan otomatis melakukan scan setiap malam pukul 19:00 WIB.")

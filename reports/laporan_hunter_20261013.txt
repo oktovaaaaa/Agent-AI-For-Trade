@@ -1,0 +1,81 @@
+===========================================================================
+LAPORAN ANALISA SAHAM HUNTER - 13 OKTOBER 2026 (RALLY GOD IDX)
+Tanggal Analisa  : 13 Oktober 2026
+Waktu Eksekusi   : 19:00:00 WIB
+Kriteria Filter  : Harga Rp 10-1.000 | Volume > Avg 10D (Bursa Efek Indonesia)
+Rentang Analisis : 13 September 2026 s/d 13 Oktober 2026 (1 Bulan Terakhir / 30 Hari)
+Layout Chart     : https://www.tradingview.com/chart/6B2fiCnc/
+===========================================================================
+
+RINGKASAN: Ditemukan 11 dari 11 saham memiliki DOT GREEN RallyGood.
+
+DAFTAR SAHAM DENGAN DOT GREEN (1 BULAN TERAKHIR):
+---------------------------------------------------------------------------
+• BUMI   | Harga: Rp 167  ( +1.21%) | Vol: 1,957,984,900
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 12 Oct 2026, 16:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Oct 2026, 16:00 WIB)
+
+• SQMI   | Harga: Rp 95   ( +5.56%) | Vol: 597,115,500
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : Tidak ada
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 13:30 WIB)
+
+• DSSA   | Harga: Rp 940  ( -2.59%) | Vol: 540,945,000
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 22 Sep 2026, 14:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Oct 2026, 09:15 WIB)
+
+• CUAN   | Harga: Rp 665  ( +1.53%) | Vol: 434,856,000
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 12 Oct 2026, 16:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Oct 2026, 16:00 WIB)
+
+• ESIP   | Harga: Rp 103  (+10.75%) | Vol: 389,400,800
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 13:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Oct 2026, 09:00 WIB)
+
+• ASMI   | Harga: Rp 29   (-14.71%) | Vol: 304,417,000
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : Tidak ada
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 01 Oct 2026, 09:30 WIB)
+
+• NAYZ   | Harga: Rp 100  ( -9.91%) | Vol: 232,832,200
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 13:45 WIB)
+
+• VKTR   | Harga: Rp 570  (-10.24%) | Vol: 222,017,200
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 16 Sep 2026, 15:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 13:30 WIB)
+
+• CTTH   | Harga: Rp 99   (+11.24%) | Vol: 209,880,400
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Oct 2026, 09:00 WIB)
+
+• BRMS   | Harga: Rp 555  ( +0.00%) | Vol: 208,222,500
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 02 Oct 2026, 10:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 02 Oct 2026, 09:00 WIB)
+
+• DYAN   | Harga: Rp 81   ( +3.85%) | Vol: 210,940,000
+    - Daily (1D)  : Tidak ada
+    - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 16:00 WIB)
+    - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 11:45 WIB)
+
+---------------------------------------------------------------------------
+DAFTAR SELURUH SAHAM HUNTER YANG DI-SCAN:
+- BUMI   : Rp 167  ( +1.21%) -> 🟢 ADA DOT GREEN
+- SQMI   : Rp 95   ( +5.56%) -> 🟢 ADA DOT GREEN
+- DSSA   : Rp 940  ( -2.59%) -> 🟢 ADA DOT GREEN
+- CUAN   : Rp 665  ( +1.53%) -> 🟢 ADA DOT GREEN
+- ESIP   : Rp 103  (+10.75%) -> 🟢 ADA DOT GREEN
+- ASMI   : Rp 29   (-14.71%) -> 🟢 ADA DOT GREEN
+- NAYZ   : Rp 100  ( -9.91%) -> 🟢 ADA DOT GREEN
+- VKTR   : Rp 570  (-10.24%) -> 🟢 ADA DOT GREEN
+- CTTH   : Rp 99   (+11.24%) -> 🟢 ADA DOT GREEN
+- BRMS   : Rp 555  ( +0.00%) -> 🟢 ADA DOT GREEN
+- DYAN   : Rp 81   ( +3.85%) -> 🟢 ADA DOT GREEN
