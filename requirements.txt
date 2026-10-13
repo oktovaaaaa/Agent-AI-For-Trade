@@ -1,5 +1,8 @@
 pandas>=2.0.0
 numpy>=1.24.0
-yfinance>=0.2.30
 requests>=2.31.0
 tradingview-screener>=2.0.0
+playwright>=1.40.0
+schedule>=1.2.0
+pillow>=10.0.0
+pytz>=2023.3

@@ -1,13 +1,19 @@
-FROM python:3.10-slim
+FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 
 WORKDIR /app
 
-# Install dependensi
+# Install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy seluruh kode bot
+# Ensure playwright chromium is installed
+RUN playwright install chromium
+
+# Copy all source files
 COPY . .
 
-# Jalankan bot
+# Set timezone to Asia/Jakarta (WIB)
+ENV TZ=Asia/Jakarta
+
+# Run bot
 CMD ["python", "bot_hunter.py"]
