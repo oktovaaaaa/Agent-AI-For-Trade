@@ -36,6 +36,7 @@ CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
 # Jadwal & Parameter Analisis
 JAM_SCAN_WIB = 19               # Pukul 19.00 WIB setiap malam
 MENIT_SCAN_WIB = 0
+LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
@@ -140,14 +141,15 @@ def get_hunter_stocks():
              .select('name', 'close', 'volume', 'average_volume_10d_calc', 'change')
              .where(
                  Column('close').between(10, 1000),
-                 Column('volume') > Column('average_volume_10d_calc')
+                 Column('volume') > Column('average_volume_10d_calc'),
+                 Column('volume').above_pct('premarket_volume', 5.0)
              )
              .order_by('volume', ascending=False))
              
         if LIMIT_SAHAM_SCAN and LIMIT_SAHAM_SCAN > 0:
             q = q.limit(LIMIT_SAHAM_SCAN)
         else:
-            q = q.limit(500) # Ambil seluruh saham yang lolos kriteria HUNTER tanpa batas 10
+            q = q.limit(500) # Ambil seluruh saham yang lolos kriteria HUNTER (153 saham)
         
         df_screener = q.get_scanner_data()[1]
         if df_screener.empty:
@@ -364,13 +366,31 @@ async def run_daily_scan(send_wa=True):
     konten_laporan.append(f"LAPORAN ANALISA SAHAM HUNTER - {tgl_analisa_id.upper()} (RALLY GOD IDX)")
     konten_laporan.append(f"Tanggal Analisa  : {tgl_analisa_id}")
     konten_laporan.append(f"Waktu Eksekusi   : {now_wib.strftime('%H:%M:%S WIB')}")
-    konten_laporan.append(f"Kriteria Filter  : Harga Rp 10-1.000 | Volume > Avg 10D (Bursa Efek Indonesia)")
+    konten_laporan.append(f"Kriteria Filter  : Harga Rp 10-1.000 | Vol > Avg 10D | Vol Pre-mkt > 500% (IDX)")
     konten_laporan.append(f"Rentang Analisis : {tgl_awal_id} s/d {tgl_analisa_id} (1 Bulan Terakhir / 30 Hari)")
     konten_laporan.append(f"Layout Chart     : {CHART_LAYOUT_URL}")
     konten_laporan.append("=" * 75 + "\n")
     
     saham_hijau = [item for item in hasil_deteksi if item["has_green_dot"]]
-    konten_laporan.append(f"RINGKASAN: Ditemukan {len(saham_hijau)} dari {len(hasil_deteksi)} saham memiliki DOT GREEN RallyGood.\n")
+    
+    # Prioritaskan saham yang memiliki Dot Green di 3 timeframe sekaligus di urutan paling atas
+    saham_hijau.sort(key=lambda x: (
+        sum(1 for tf_key in ['D', '60', '15'] if x['timeframes'].get(tf_key, {}).get('status')),
+        x['stock']['volume']
+    ), reverse=True)
+    
+    saham_tiga_dot = [
+        item for item in saham_hijau 
+        if item['timeframes'].get('D', {}).get('status') and 
+           item['timeframes'].get('60', {}).get('status') and 
+           item['timeframes'].get('15', {}).get('status')
+    ]
+    
+    konten_laporan.append(f"RINGKASAN: Ditemukan {len(saham_hijau)} dari {len(hasil_deteksi)} saham memiliki DOT GREEN RallyGood.")
+    if saham_tiga_dot:
+        konten_laporan.append(f"🔥 PERHATIAN: Ada {len(saham_tiga_dot)} saham dengan konfirmasi 3 TIMEFRAME sekaligus!\n")
+    else:
+        konten_laporan.append("\n")
     
     konten_laporan.append("DAFTAR SAHAM DENGAN DOT GREEN (1 BULAN TERAKHIR):")
     konten_laporan.append("-" * 75)
@@ -382,7 +402,11 @@ async def run_daily_scan(send_wa=True):
             h_str = f"[ADA DOT GREEN] (Muncul: {tf.get('60', {}).get('date')})" if tf.get('60', {}).get('status') else 'Tidak ada'
             m_str = f"[ADA DOT GREEN] (Muncul: {tf.get('15', {}).get('date')})" if tf.get('15', {}).get('status') else 'Tidak ada'
             
+            is_all_3 = tf.get('D', {}).get('status') and tf.get('60', {}).get('status') and tf.get('15', {}).get('status')
+            
             konten_laporan.append(f"• {st['symbol']:<6} | Harga: Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Vol: {st['volume']:,.0f}")
+            if is_all_3:
+                konten_laporan.append("    🟢 ANALISA SAHAM INI !!! 🟢 (KOMPLIT 3 TIMEFRAME: 1D + 1H + 15M)")
             konten_laporan.append(f"    - Daily (1D)  : {d_str}")
             konten_laporan.append(f"    - 1 Jam (1H)  : {h_str}")
             konten_laporan.append(f"    - 15 Menit    : {m_str}\n")
@@ -423,7 +447,7 @@ async def run_daily_scan(send_wa=True):
         pesan_wa = (
             f"📋 *LAPORAN ANALISA SAHAM HUNTER - {tgl_analisa_id.upper()}*\n"
             f"📅 *Tanggal Analisa*: {tgl_analisa_id} (Pukul {now_wib.strftime('%H:%M WIB')})\n"
-            f"🔍 *Kriteria*: Saham IDX Rp 10-1000 | Vol > Avg 10D\n"
+            f"🔍 *Kriteria*: Saham IDX Rp 10-1000 | Vol > Avg 10D | Vol Pre-mkt > 500%\n"
             f"⏱️ *Rentang Filter*: {tgl_awal_id} s/d {tgl_analisa_id} (30 Hari)\n"
             f"━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         )
@@ -438,8 +462,12 @@ async def run_daily_scan(send_wa=True):
                 h_icon = f"🟢 ADA ({tf.get('60', {}).get('date')})" if tf.get('60', {}).get('status') else "❌"
                 m_icon = f"🟢 ADA ({tf.get('15', {}).get('date')})" if tf.get('15', {}).get('status') else "❌"
                 
+                is_all_3 = tf.get('D', {}).get('status') and tf.get('60', {}).get('status') and tf.get('15', {}).get('status')
+                
+                pesan_wa += f"{i}. *{st['symbol']}* | Rp {st['close']:.0f} ({st['change']:+.2f}%)\n"
+                if is_all_3:
+                    pesan_wa += "   🟢 *ANALISA SAHAM INI !!!* 🟢\n"
                 pesan_wa += (
-                    f"{i}. *{st['symbol']}* | Rp {st['close']:.0f} ({st['change']:+.2f}%)\n"
                     f"   • Daily (1D) : {d_icon}\n"
                     f"   • 1 Jam (1H) : {h_icon}\n"
                     f"   • 15 Menit   : {m_icon}\n"
