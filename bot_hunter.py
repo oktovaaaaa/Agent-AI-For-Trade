@@ -83,149 +83,127 @@ def format_gain_header(tf_dict):
         return f" ({' | '.join(parts)})"
     return ""
 
-def calculate_smc_levels_fallback(bars, cur_close):
-    """Fallback kalkulasi Supply & Demand sederhana jika indikator belum termuat."""
-    if not bars or len(bars) < 8 or not cur_close:
-        return None
-    last_time = bars[-1]['time']
-    k = 5
-    pivot_highs = []
-    pivot_lows = []
-    for i in range(k, len(bars) - k):
-        high_i = bars[i]['high']
-        low_i = bars[i]['low']
-        if all(high_i >= bars[j]['high'] for j in range(i - k, i + k + 1) if j != i):
-            pivot_highs.append(high_i)
-        if all(low_i <= bars[j]['low'] for j in range(i - k, i + k + 1) if j != i):
-            pivot_lows.append(low_i)
-            
-    sup_above = [p for p in pivot_highs if p > cur_close]
-    nearest_supply = min(sup_above) if sup_above else (max(pivot_highs) if pivot_highs else None)
-    
-    dem_below = [p for p in pivot_lows if p < cur_close]
-    nearest_demand = max(dem_below) if dem_below else (min(pivot_lows) if pivot_lows else None)
-    
-    pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
-    pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
-    
-    status_7d = "⚪ Di Antara Demand & Supply"
-    if nearest_supply and cur_close >= nearest_supply:
-        status_7d = f"🔥 BREAKOUT SUPPLY (Menembus Rp {nearest_supply:.0f})"
-    elif nearest_demand and cur_close <= nearest_demand:
-        status_7d = f"⚠️ BREAKDOWN DEMAND (Menembus Rp {nearest_demand:.0f})"
-    elif abs(pct_to_supply) <= 2.5:
-        status_7d = "⚡ Menguji Area Supply (Dekat Resisten)"
-    elif abs(pct_to_demand) <= 2.5:
-        status_7d = "🟢 Di Area Demand (Potensi Pantulan)"
-        
-    return {
-        "supply": nearest_supply,
-        "demand": nearest_demand,
-        "pct_to_supply": pct_to_supply,
-        "pct_to_demand": pct_to_demand,
-        "status_7d": status_7d
-    }
-
-def parse_real_smc_levels(smc_data, cur_close, recent_bars=None):
+def format_donalt_wa(tf_results):
     """
-    Menganalisa garis Supply, Demand, persentase jarak harga, dan status BOS / CHoCH / Breakout
-    7 hari terakhir LANGSUNG dari indikator TradingView Ultimate SMC Suite milik akun pengguna.
+    Format sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
+    untuk 3 timeframe (1D, 1H, 15M) di WhatsApp.
+    Hanya menamai Golden atau Death (tanpa dot green agar tidak dobel).
+    Menandai tanggal kemunculan dalam rentang 30 hari terakhir.
     """
-    if not cur_close or cur_close <= 0:
-        return None
-        
-    supplies = smc_data.get("supplies", []) if smc_data else []
-    demands = smc_data.get("demands", []) if smc_data else []
-    bos_list = smc_data.get("bosList", []) if smc_data else []
-    
-    # Jika data indikator Ultimate SMC Suite tersedia langsung dari chart TradingView
-    if supplies or demands:
-        sup_above = [s['mid'] for s in supplies if s.get('mid', 0) >= cur_close]
-        if sup_above:
-            nearest_supply = min(sup_above)
-        elif supplies:
-            nearest_supply = max(s['mid'] for s in supplies)
-        else:
-            nearest_supply = None
-            
-        dem_below = [d['mid'] for d in demands if d.get('mid', 0) <= cur_close]
-        if dem_below:
-            nearest_demand = max(dem_below)
-        elif demands:
-            nearest_demand = min(d['mid'] for d in demands)
-        else:
-            nearest_demand = None
-            
-        pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
-        pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
-        
-        # Deteksi aktivitas BOS / CHoCH dalam rentang 7 hari terakhir (1 minggu)
-        now_ts = datetime.datetime.now(WIB_TZ).timestamp()
-        week_sec = 7 * 86400
-        recent_bos = [b for b in bos_list if b.get('timestamp') and (now_ts - b['timestamp']) <= week_sec]
-        
-        # Tentukan status Breakout / Breakdown / Area posisi
-        if nearest_supply and cur_close >= nearest_supply:
-            status_7d = f"🔥 BREAKOUT SUPPLY (Menembus Rp {nearest_supply:.0f})"
-        elif nearest_demand and cur_close <= nearest_demand:
-            status_7d = f"⚠️ BREAKDOWN DEMAND (Menembus Rp {nearest_demand:.0f})"
-        elif abs(pct_to_supply) <= 2.5:
-            status_7d = "⚡ Menguji Area Supply (Dekat Resisten)"
-        elif abs(pct_to_demand) <= 2.5:
-            status_7d = "🟢 Di Area Demand (Potensi Pantulan)"
-        else:
-            if recent_bos:
-                latest_b = max(recent_bos, key=lambda x: x['timestamp'])
-                b_dt = datetime.datetime.fromtimestamp(latest_b['timestamp'], WIB_TZ)
-                b_month = BULAN_PENDEK.get(b_dt.month, b_dt.strftime("%b"))
-                status_7d = f"⚪ Di Antara Demand & Supply ({latest_b['type']}: Rp {latest_b['price']:.0f} tgl {b_dt.day} {b_month})"
-            else:
-                status_7d = "⚪ Di Antara Demand & Supply"
-                
-        return {
-            "supply": nearest_supply,
-            "demand": nearest_demand,
-            "pct_to_supply": pct_to_supply,
-            "pct_to_demand": pct_to_demand,
-            "status_7d": status_7d
-        }
-        
-    # Fallback jika indikator belum sempat ter-render sempurna
-    return calculate_smc_levels_fallback(recent_bars, cur_close)
-
-def format_smc_wa(smc_1d, smc_1h=None):
-    """Format tampilan SMC Supply, Demand & Status 7D untuk Timeframe 1D & 1H di WhatsApp."""
-    if isinstance(smc_1d, dict) and smc_1h is None:
-        smc_1h = smc_1d
-        smc_1d = None
-        
     lines = []
-    if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
-        sup_d = f"Rp {smc_1d['supply']:.0f} ({smc_1d['pct_to_supply']:+.2f}%)"
-        dem_d = f"Rp {smc_1d['demand']:.0f} ({smc_1d['pct_to_demand']:+.2f}%)"
-        lines.append(f"🎯 1D: Sup {sup_d} | Dem {dem_d}")
+    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    has_any = False
+    sub_lines = []
+    
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        donalt = tf_data.get("donalt", {})
+        g = donalt.get("golden")
+        d = donalt.get("death")
         
-    if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
-        sup_h = f"Rp {smc_1h['supply']:.0f} ({smc_1h['pct_to_supply']:+.2f}%)"
-        dem_h = f"Rp {smc_1h['demand']:.0f} ({smc_1h['pct_to_demand']:+.2f}%)"
-        lines.append(f"🎯 1H: Sup {sup_h} | Dem {dem_h}")
-        
-    status_info = None
-    if smc_1h and ("BREAKOUT" in smc_1h.get('status_7d', '') or "BREAKDOWN" in smc_1h.get('status_7d', '')):
-        status_info = f"📍 Status (1H): {smc_1h['status_7d']}"
-    elif smc_1d and ("BREAKOUT" in smc_1d.get('status_7d', '') or "BREAKDOWN" in smc_1d.get('status_7d', '')):
-        status_info = f"📍 Status (1D): {smc_1d['status_7d']}"
-    elif smc_1h and smc_1h.get('status_7d'):
-        status_info = f"📍 Status 7D : {smc_1h['status_7d']}"
-    elif smc_1d and smc_1d.get('status_7d'):
-        status_info = f"📍 Status 7D : {smc_1d['status_7d']}"
-        
-    if status_info:
-        lines.append(status_info)
-        
-    if lines:
+        parts = []
+        if g:
+            has_any = True
+            gain_str = f" ({g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+            parts.append(f"✨ Golden: {g['date']}{gain_str}")
+        if d:
+            has_any = True
+            parts.append(f"⚠️ Death: {d['date']}")
+            
+        if parts:
+            sub_lines.append(f"• {label:<4}: " + " | ".join(parts))
+        else:
+            sub_lines.append(f"• {label:<4}: -")
+            
+    if has_any:
+        lines.append("🏆 *EMA + DonAlt (30 Hari)*:")
+        lines.extend(sub_lines)
         return "\n".join(lines) + "\n"
     return ""
+
+def format_donalt_notepad(tf_results):
+    """Format sinyal Golden Cross & Death Cross untuk laporan Notepad."""
+    lines = []
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        donalt = tf_data.get("donalt", {})
+        g = donalt.get("golden")
+        d = donalt.get("death")
+        
+        parts = []
+        if g:
+            gain_str = f" (Kenaikan: {g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+            parts.append(f"✨ Golden: {g['date']} @ Rp {g['price']:.0f}{gain_str}")
+        else:
+            parts.append("✨ Golden: -")
+            
+        if d:
+            parts.append(f"⚠️ Death: {d['date']} @ Rp {d['price']:.0f}")
+        else:
+            parts.append("⚠️ Death: -")
+            
+        lines.append(f"   - EMA Cross {label}: " + " | ".join(parts))
+    return lines
+
+def format_macd_wa(tf_results):
+    """
+    Format sinyal Bull & Bear (MACD Divergences)
+    untuk 3 timeframe (1D, 1H, 15M) di WhatsApp (30 hari terakhir).
+    """
+    lines = []
+    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    has_any = False
+    sub_lines = []
+    
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        macd = tf_data.get("macd", {})
+        bull = macd.get("bull")
+        bear = macd.get("bear")
+        
+        parts = []
+        if bull:
+            has_any = True
+            parts.append(f"🐂 {bull['type']}: {bull['date']}")
+        if bear:
+            has_any = True
+            parts.append(f"🐻 {bear['type']}: {bear['date']}")
+            
+        if parts:
+            sub_lines.append(f"• {label:<4}: " + " | ".join(parts))
+        else:
+            sub_lines.append(f"• {label:<4}: -")
+            
+    if has_any:
+        lines.append("🌊 *MACD Divergences (30 Hari)*:")
+        lines.extend(sub_lines)
+        return "\n".join(lines) + "\n"
+    return ""
+
+def format_macd_notepad(tf_results):
+    """Format sinyal MACD Divergences (Bull & Bear) untuk laporan Notepad."""
+    lines = []
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        macd = tf_data.get("macd", {})
+        bull = macd.get("bull")
+        bear = macd.get("bear")
+        
+        parts = []
+        if bull:
+            parts.append(f"🐂 {bull['type']}: {bull['date']} @ Rp {bull['price']:.0f}")
+        else:
+            parts.append("🐂 Bull: -")
+            
+        if bear:
+            parts.append(f"🐻 {bear['type']}: {bear['date']} @ Rp {bear['price']:.0f}")
+        else:
+            parts.append("🐻 Bear: -")
+            
+        lines.append(f"   - MACD Div  {label}: " + " | ".join(parts))
+    return lines
 
 def bersihkan_screenshot():
     """Menghapus semua file screenshot gambar agar penyimpanan server/laptop tetap ringan dan hemat disk."""
@@ -385,13 +363,14 @@ async def scan_stock_rallygood(page, stock_info):
         try:
             # Ganti resolusi / timeframe secara instan tanpa reload penuh
             await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', tf['interval'])
-            await asyncio.sleep(1.2)
+            await asyncio.sleep(1.8)
             
-            # Ambil data Dot Green beserta data indikator Ultimate SMC Suite asli
+            # Ambil data Dot Green (RallyGood), Golden/Death (DonAlt), dan Bull/Bear (MACD Divergences)
+            # dengan teknik Dynamic Swapping agar tidak melebihi batas 2 indikator TradingView gratis.
             eval_data = await page.evaluate('''async () => {
                 try {
                     const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                    if (!chart) return { dots: [], bars: [], smc: null };
+                    if (!chart) return { dots: [], donalt: { golden: [], death: [] }, macd: { bull: [], bear: [] }, currentClose: null };
                     const model = chart.model();
                     const ts = model.timeScale();
                     const ms = model.mainSeries();
@@ -399,24 +378,37 @@ async def scan_stock_rallygood(page, stock_info):
                     const lastBar = barsObj && barsObj.last ? barsObj.last() : null;
                     const currentClose = lastBar && lastBar.value ? lastBar.value[4] : null;
 
-                    const lastIdx = barsObj && barsObj.lastIndex ? barsObj.lastIndex() : (barsObj && barsObj.size ? barsObj.size() - 1 : 0);
-                    const startIdx = Math.max(0, lastIdx - 80);
-                    const recentBars = [];
-                    if (barsObj && barsObj.valueAt) {
-                        for (let i = startIdx; i <= lastIdx; i++) {
-                            const b = barsObj.valueAt(i);
-                            if (b && b.length >= 5) {
-                                recentBars.push({ time: b[0], open: b[1], high: b[2], low: b[3], close: b[4], vol: b[5] });
-                            }
-                        }
+                    const allStudies = model.panes().flatMap(p => p.dataSources());
+                    
+                    const smcStudy = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
+                    const donaltStudy = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                    const rallyStudy = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                    const macdStudy = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+
+                    // 1. Pastikan Ultimate SMC Suite mati
+                    if (smcStudy && smcStudy.properties && smcStudy.properties().visible) {
+                        smcStudy.properties().visible.setValue(false);
+                    }
+                    
+                    // 2. Pastikan EMA + DonAlt Suite selalu aktif
+                    if (donaltStudy && donaltStudy.properties && donaltStudy.properties().visible) {
+                        donaltStudy.properties().visible.setValue(true);
                     }
 
-                    // 1. Ekstraksi Dot Green dari indikator RallyGood
+                    // 3. FASE 1: Matikan MACD, Nyalakan RallyGood (Maksimal 2 indikator: DonAlt & RallyGood)
+                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
+                        macdStudy.properties().visible.setValue(false);
+                    }
+                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
+                        rallyStudy.properties().visible.setValue(true);
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 600));
+
+                    // Ekstraksi Dot Green dari RallyGood
                     let dots = [];
-                    const rallyStudies = model.panes().flatMap(p => p.dataSources()).filter(s => s.title && s.title().includes('RallyGood'));
-                    if (rallyStudies.length > 0) {
-                        const study = rallyStudies[0];
-                        const greenPv = (study._paneViews || []).find(pv => pv._plotName === 'plot_2');
+                    if (rallyStudy) {
+                        const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
                         if (greenPv) {
                             const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
                             dots = activeDots.map(dot => {
@@ -424,9 +416,7 @@ async def scan_stock_rallygood(page, stock_info):
                                 let dotClose = null;
                                 if (barsObj && barsObj.valueAt) {
                                     const bar = barsObj.valueAt(dot.timePointIndex);
-                                    if (bar && bar.length > 4) {
-                                        dotClose = bar[4];
-                                    }
+                                    if (bar && bar.length > 4) dotClose = bar[4];
                                 }
                                 return {
                                     timestamp: tp,
@@ -437,91 +427,101 @@ async def scan_stock_rallygood(page, stock_info):
                         }
                     }
 
-                    // 2. Ekstraksi Garis Supply, Demand, BOS & CHoCH LANGSUNG dari Ultimate SMC Suite
-                    let smcData = null;
-                    const smcStudy = model.panes().flatMap(p => p.dataSources()).find(s => s.title && s.title().includes('Ultimate SMC Suite'));
-                    if (smcStudy && smcStudy._graphics && smcStudy._graphics._primitivesCollection) {
-                        const prims = smcStudy._graphics._primitivesCollection;
-                        const boxesInner = prims.dwgboxes?.get('boxes');
-                        const labelsInner = prims.dwglabels?.get('labels');
-                        
-                        const boxDataObj = boxesInner?.get(false)?._primitivesDataById;
-                        const labelDataObj = labelsInner?.get(false)?._primitivesDataById;
-                        
-                        const boxEntries = boxDataObj instanceof Map ? Array.from(boxDataObj.entries()) : Object.entries(boxDataObj || {});
-                        const labelEntries = labelDataObj instanceof Map ? Array.from(labelDataObj.entries()) : Object.entries(labelDataObj || {});
-                        
-                        const parsedBoxes = boxEntries.map(([k, v]) => ({
-                            type: v.t || "",
-                            high: Math.max(v.y1, v.y2),
-                            low: Math.min(v.y1, v.y2),
-                            mid: (v.y1 + v.y2) / 2,
-                            extendRight: v.ex === 'r',
-                            barStart: v.x1,
-                            barEnd: v.x2
-                        }));
-                        
-                        let maxPineX = 0;
-                        for (const b of parsedBoxes) {
-                            if (b.barEnd > maxPineX) maxPineX = b.barEnd;
-                            if (b.barStart > maxPineX) maxPineX = b.barStart;
+                    // Ekstraksi Golden Cross & Death Cross dari EMA + DonAlt Suite
+                    let goldenList = [];
+                    let deathList = [];
+                    if (donaltStudy) {
+                        const d = donaltStudy.data();
+                        if (d) {
+                            for (let i = d.firstIndex(); i <= d.lastIndex(); i++) {
+                                const val = d.valueAt(i);
+                                if (val && Array.isArray(val)) {
+                                    const tp = ts.indexToTimePoint(i);
+                                    const barVal = barsObj ? barsObj.valueAt(i) : null;
+                                    const barTime = barVal ? barVal[0] : tp;
+                                    const barClose = barVal ? barVal[4] : null;
+                                    
+                                    if (val[10] === 1 || val[16] === 1) {
+                                        goldenList.push({ idx: i, timestamp: barTime, price: barClose });
+                                    }
+                                    if (val[11] === 1 || val[17] === 1) {
+                                        deathList.push({ idx: i, timestamp: barTime, price: barClose });
+                                    }
+                                }
+                            }
                         }
-                        for (const [, l] of labelEntries) {
-                            if (l.x > maxPineX) maxPineX = l.x;
-                        }
-                        const offset = maxPineX - lastIdx;
-                        
-                        const supplies = parsedBoxes.filter(b => b.type === 'SUPPLY').map(s => ({
-                            high: s.high,
-                            low: s.low,
-                            mid: s.mid
-                        }));
-                        const demands = parsedBoxes.filter(b => b.type === 'DEMAND').map(d => ({
-                            high: d.high,
-                            low: d.low,
-                            mid: d.mid
-                        }));
-                        
-                        const bosList = labelEntries
-                            .filter(([, l]) => l.t && (l.t.includes('BOS') || l.t.includes('CHoCH')))
-                            .map(([id, l]) => {
-                                const localIdx = l.x - offset;
-                                const bar = barsObj && barsObj.valueAt && localIdx >= 0 && localIdx <= lastIdx ? barsObj.valueAt(localIdx) : null;
-                                const tp = bar ? bar[0] : null;
-                                return {
-                                    type: l.t,
-                                    price: l.y,
-                                    timestamp: tp,
-                                    barsAgo: lastIdx - localIdx
-                                };
-                            });
-                            
-                        smcData = {
-                            supplies: supplies,
-                            demands: demands,
-                            bosList: bosList
-                        };
                     }
 
-                    return { dots: dots, bars: recentBars, currentClose: currentClose, smc: smcData };
+                    // 4. FASE 2: SWAP! Matikan RallyGood, Nyalakan MACD Divergences (Maksimal 2 indikator: DonAlt & MACD)
+                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
+                        rallyStudy.properties().visible.setValue(false);
+                    }
+                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
+                        macdStudy.properties().visible.setValue(true);
+                    }
+
+                    await new Promise(r => setTimeout(r, 800));
+
+                    // Ekstraksi Bullish & Bearish Divergence dari MACD Divergences
+                    let bullList = [];
+                    let bearList = [];
+                    if (macdStudy) {
+                        const md = macdStudy.data();
+                        if (md) {
+                            for (let i = Math.max(0, md.firstIndex()); i <= md.lastIndex(); i++) {
+                                const val = md.valueAt(i);
+                                if (val && Array.isArray(val)) {
+                                    const tp = ts.indexToTimePoint(i);
+                                    const barVal = barsObj ? barsObj.valueAt(i) : null;
+                                    const barTime = barVal ? barVal[0] : tp;
+                                    const barClose = barVal ? barVal[4] : null;
+                                    
+                                    // plot_18: Regular Bull, plot_20: Hidden Bull
+                                    if (val[19] === 1 || val[21] === 1) {
+                                        bullList.push({ idx: i, timestamp: barTime, price: barClose, type: val[19] === 1 ? 'Bull' : 'H Bull' });
+                                    }
+                                    // plot_19: Regular Bear, plot_21: Hidden Bear
+                                    if (val[20] === 1 || val[22] === 1) {
+                                        bearList.push({ idx: i, timestamp: barTime, price: barClose, type: val[20] === 1 ? 'Bear' : 'H Bear' });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 5. FASE 3: RESTORE! Nyalakan kembali RallyGood, Matikan MACD (kembali ke layout 2 indikator standar)
+                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
+                        macdStudy.properties().visible.setValue(false);
+                    }
+                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
+                        rallyStudy.properties().visible.setValue(true);
+                    }
+
+                    await new Promise(r => setTimeout(r, 600));
+
+                    return {
+                        dots: dots,
+                        donalt: { golden: goldenList, death: deathList },
+                        macd: { bull: bullList, bear: bearList },
+                        currentClose: currentClose
+                    };
                 } catch(e) {
-                    return { dots: [], bars: [], currentClose: null, smc: null };
+                    return { dots: [], donalt: { golden: [], death: [] }, macd: { bull: [], bear: [] }, currentClose: null };
                 }
             }''')
             
             dot_data = eval_data.get('dots', [])
-            recent_bars = eval_data.get('bars', [])
             cur_close = eval_data.get('currentClose') or stock_info.get('close')
-            smc_raw = eval_data.get('smc')
-            smc_res = parse_real_smc_levels(smc_raw, cur_close, recent_bars)
+            donalt_raw = eval_data.get('donalt', {})
+            macd_raw = eval_data.get('macd', {})
             
+            # 1. Olah RallyGood Dot Green (30 hari terakhir)
             valid_dots = []
             for d in dot_data:
                 tp = d.get('timestamp')
                 if tp and isinstance(tp, (int, float)):
                     dot_dt = datetime.datetime.fromtimestamp(tp, WIB_TZ)
                     diff_days = (now_dt - dot_dt).total_seconds() / 86400
-                    # SYARAT MUTLAK: Hanya terima jika muncul dalam rentang 30 hari terakhir
                     if 0 <= diff_days <= LOOKBACK_DAYS:
                         valid_dots.append({
                             "dt": dot_dt,
@@ -529,6 +529,10 @@ async def scan_stock_rallygood(page, stock_info):
                             "current_close": d.get("currentClose")
                         })
             
+            dot_status = False
+            date_display = None
+            dot_close = None
+            gain_pct = None
             if valid_dots:
                 latest = max(valid_dots, key=lambda x: x["dt"])
                 latest_dot = latest["dt"]
@@ -540,27 +544,115 @@ async def scan_stock_rallygood(page, stock_info):
                     
                 dot_close = latest.get("dot_close")
                 cur_close = latest.get("current_close") or stock_info["close"]
-                gain_pct = None
                 if dot_close and cur_close and dot_close > 0:
                     gain_pct = ((cur_close - dot_close) / dot_close) * 100
-                    
+                dot_status = True
+
+            # 2. Olah EMA + DonAlt Suite (Golden & Death Cross - 30 hari terakhir)
+            now_ts = now_dt.timestamp()
+            limit_ts = now_ts - (LOOKBACK_DAYS * 86400)
+            
+            recent_golden = [g for g in donalt_raw.get('golden', []) if g.get('timestamp') and g['timestamp'] >= limit_ts]
+            recent_death = [d for d in donalt_raw.get('death', []) if d.get('timestamp') and d['timestamp'] >= limit_ts]
+            
+            golden_res = None
+            if recent_golden:
+                latest_g = max(recent_golden, key=lambda x: x['timestamp'])
+                g_dt = datetime.datetime.fromtimestamp(latest_g['timestamp'], WIB_TZ)
+                b_str = BULAN_PENDEK.get(g_dt.month, g_dt.strftime("%b"))
+                g_date = f"{g_dt.day} {b_str} {g_dt.year}" if tf_code == 'D' else f"{g_dt.day} {b_str} {g_dt.year}, {g_dt.strftime('%H:%M')} WIB"
+                g_price = latest_g.get('price')
+                g_gain = ((cur_close - g_price) / g_price * 100) if (cur_close and g_price and g_price > 0) else None
+                golden_res = {
+                    "date": g_date,
+                    "dt": g_dt,
+                    "price": g_price,
+                    "gain_pct": g_gain
+                }
+                
+            death_res = None
+            if recent_death:
+                latest_d = max(recent_death, key=lambda x: x['timestamp'])
+                d_dt = datetime.datetime.fromtimestamp(latest_d['timestamp'], WIB_TZ)
+                b_str = BULAN_PENDEK.get(d_dt.month, d_dt.strftime("%b"))
+                d_date = f"{d_dt.day} {b_str} {d_dt.year}" if tf_code == 'D' else f"{d_dt.day} {b_str} {d_dt.year}, {d_dt.strftime('%H:%M')} WIB"
+                d_price = latest_d.get('price')
+                death_res = {
+                    "date": d_date,
+                    "dt": d_dt,
+                    "price": d_price
+                }
+                
+            donalt_res = {
+                "golden": golden_res,
+                "death": death_res
+            }
+            
+            # 3. Olah MACD Divergences (Bull & Bear Divergence - 30 hari terakhir)
+            recent_bull = [b for b in macd_raw.get('bull', []) if b.get('timestamp') and b['timestamp'] >= limit_ts]
+            recent_bear = [b for b in macd_raw.get('bear', []) if b.get('timestamp') and b['timestamp'] >= limit_ts]
+            
+            bull_res = None
+            if recent_bull:
+                latest_b = max(recent_bull, key=lambda x: x['timestamp'])
+                b_dt = datetime.datetime.fromtimestamp(latest_b['timestamp'], WIB_TZ)
+                b_str = BULAN_PENDEK.get(b_dt.month, b_dt.strftime("%b"))
+                b_date = f"{b_dt.day} {b_str} {b_dt.year}" if tf_code == 'D' else f"{b_dt.day} {b_str} {b_dt.year}, {b_dt.strftime('%H:%M')} WIB"
+                bull_res = {
+                    "type": latest_b.get("type", "Bull"),
+                    "date": b_date,
+                    "dt": b_dt,
+                    "price": latest_b.get("price")
+                }
+                
+            bear_res = None
+            if recent_bear:
+                latest_br = max(recent_bear, key=lambda x: x['timestamp'])
+                br_dt = datetime.datetime.fromtimestamp(latest_br['timestamp'], WIB_TZ)
+                br_str = BULAN_PENDEK.get(br_dt.month, br_dt.strftime("%b"))
+                br_date = f"{br_dt.day} {br_str} {br_dt.year}" if tf_code == 'D' else f"{br_dt.day} {br_str} {br_dt.year}, {br_dt.strftime('%H:%M')} WIB"
+                bear_res = {
+                    "type": latest_br.get("type", "Bear"),
+                    "date": br_date,
+                    "dt": br_dt,
+                    "price": latest_br.get("price")
+                }
+                
+            macd_res = {
+                "bull": bull_res,
+                "bear": bear_res
+            }
+            
+            # Tampilan konsol informatif
+            indicator_tags = []
+            if golden_res:
+                g_tag = f"✨ Golden: {golden_res['date']}"
+                if golden_res['gain_pct'] is not None:
+                    g_tag += f" ({golden_res['gain_pct']:+.2f}%)"
+                indicator_tags.append(g_tag)
+            if death_res:
+                indicator_tags.append(f"⚠️ Death: {death_res['date']}")
+            if bull_res:
+                indicator_tags.append(f"🐂 {bull_res['type']}: {bull_res['date']}")
+            if bear_res:
+                indicator_tags.append(f"🐻 {bear_res['type']}: {bear_res['date']}")
+                
+            indicator_str = f" [{', '.join(indicator_tags)}]" if indicator_tags else ""
+
+            if dot_status:
                 gain_info = f" (Kenaikan: {gain_pct:+.2f}%)" if gain_pct is not None else ""
-                print(f" 🟢 ADA DOT GREEN! ({date_display}){gain_info}")
-                results[tf_code] = {
-                    "status": True,
-                    "date": date_display,
-                    "dot_close": dot_close,
-                    "gain_pct": gain_pct,
-                    "smc": smc_res
-                }
+                print(f" 🟢 ADA DOT GREEN! ({date_display}){gain_info}{indicator_str}")
             else:
-                print(" ❌ Tidak ada")
-                results[tf_code] = {
-                    "status": False,
-                    "date": None,
-                    "gain_pct": None,
-                    "smc": smc_res
-                }
+                print(f" ❌ Tidak ada dot green{indicator_str}")
+
+            results[tf_code] = {
+                "status": dot_status,
+                "date": date_display,
+                "dot_close": dot_close,
+                "gain_pct": gain_pct,
+                "donalt": donalt_res,
+                "macd": macd_res
+            }
                     
         except Exception as e:
             print(f" ⚠️ Error: {e}")
@@ -636,6 +728,26 @@ async def run_daily_scan(send_wa=True):
         print(f"📊 Menyiapkan Chart Layout TradingView ({first_sym})...")
         await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{first_sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
         await asyncio.sleep(4)
+        
+        # Pastikan status default indikator di awal: DonAlt (ON), RallyGood (ON), MACD (OFF), SMC (OFF)
+        print("⚙️ Sinkronisasi Indikator TradingView: EMA + DonAlt (ON), RallyGood (ON), MACD (OFF)...")
+        await page.evaluate('''async () => {
+            try {
+                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                if (!chart) return;
+                const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
+                const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+                
+                if (smc && smc.properties && smc.properties().visible) smc.properties().visible.setValue(false);
+                if (donalt && donalt.properties && donalt.properties().visible) donalt.properties().visible.setValue(true);
+                if (macd && macd.properties && macd.properties().visible) macd.properties().visible.setValue(false);
+                if (rally && rally.properties && rally.properties().visible) rally.properties().visible.setValue(true);
+            } catch(e) {}
+        }''')
+        await asyncio.sleep(2)
         
         # 3. Looping pengecekan chart saham
         for idx, stock in enumerate(hunter_stocks, 1):
@@ -719,20 +831,13 @@ async def run_daily_scan(send_wa=True):
             konten_laporan.append(f"   - Daily (1D)  : [ADA DOT GREEN] (Muncul: {tf['D']['date']}{g_1d})")
             konten_laporan.append(f"   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: {tf['60']['date']}{g_1h})")
             konten_laporan.append(f"   - 15 Menit    : [ADA DOT GREEN] (Muncul: {tf['15']['date']})")
-            if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
-                sup_d = f"Rp {smc_1d['supply']:.0f} ({smc_1d['pct_to_supply']:+.2f}%)"
-                dem_d = f"Rp {smc_1d['demand']:.0f} ({smc_1d['pct_to_demand']:+.2f}%)"
-                konten_laporan.append(f"   - SMC Daily(1D): Supply: {sup_d} | Demand: {dem_d}")
-            if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
-                sup_h = f"Rp {smc_1h['supply']:.0f} ({smc_1h['pct_to_supply']:+.2f}%)"
-                dem_h = f"Rp {smc_1h['demand']:.0f} ({smc_1h['pct_to_demand']:+.2f}%)"
-                konten_laporan.append(f"   - SMC 1 Jam(1H): Supply: {sup_h} | Demand: {dem_h}")
-            if smc_1h and smc_1h.get('status_7d'):
-                konten_laporan.append(f"   - Status 7D   : {smc_1h['status_7d']}\n")
-            elif smc_1d and smc_1d.get('status_7d'):
-                konten_laporan.append(f"   - Status 7D   : {smc_1d['status_7d']}\n")
-            else:
-                konten_laporan.append("")
+            # Tambahkan sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
+            notepad_donalt_lines = format_donalt_notepad(tf)
+            konten_laporan.extend(notepad_donalt_lines)
+            # Tambahkan sinyal MACD Divergences (Bull & Bear)
+            notepad_macd_lines = format_macd_notepad(tf)
+            konten_laporan.extend(notepad_macd_lines)
+            konten_laporan.append("")
     else:
         konten_laporan.append("Tidak ada saham dengan 3 Dot Green sekaligus malam ini.\n")
         
@@ -745,8 +850,6 @@ async def run_daily_scan(send_wa=True):
             st = item["stock"]
             tf = item["timeframes"]
             gain_str = format_gain_header(tf)
-            smc_1d = tf.get('D', {}).get('smc')
-            smc_1h = tf.get('60', {}).get('smc')
             konten_laporan.append(f"{idx}. {st['symbol']} | Harga: Rp {st['close']:.0f}{gain_str} | Vol: {st['volume']:,.0f}")
             if tf.get('D', {}).get('status'):
                 g_1d = f" (Kenaikan: {tf['D']['gain_pct']:+.2f}%)" if tf.get('D', {}).get('gain_pct') is not None else ""
@@ -756,18 +859,10 @@ async def run_daily_scan(send_wa=True):
                 konten_laporan.append(f"   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: {tf['60']['date']}{g_1h})")
             if tf.get('15', {}).get('status'):
                 konten_laporan.append(f"   - 15 Menit    : [ADA DOT GREEN] (Muncul: {tf['15']['date']})")
-            if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
-                sup_d = f"Rp {smc_1d['supply']:.0f} ({smc_1d['pct_to_supply']:+.2f}%)"
-                dem_d = f"Rp {smc_1d['demand']:.0f} ({smc_1d['pct_to_demand']:+.2f}%)"
-                konten_laporan.append(f"   - SMC Daily(1D): Supply: {sup_d} | Demand: {dem_d}")
-            if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
-                sup_h = f"Rp {smc_1h['supply']:.0f} ({smc_1h['pct_to_supply']:+.2f}%)"
-                dem_h = f"Rp {smc_1h['demand']:.0f} ({smc_1h['pct_to_demand']:+.2f}%)"
-                konten_laporan.append(f"   - SMC 1 Jam(1H): Supply: {sup_h} | Demand: {dem_h}")
-            if smc_1h and smc_1h.get('status_7d'):
-                konten_laporan.append(f"   - Status 7D   : {smc_1h['status_7d']}")
-            elif smc_1d and smc_1d.get('status_7d'):
-                konten_laporan.append(f"   - Status 7D   : {smc_1d['status_7d']}")
+            notepad_donalt_lines = format_donalt_notepad(tf)
+            konten_laporan.extend(notepad_donalt_lines)
+            notepad_macd_lines = format_macd_notepad(tf)
+            konten_laporan.extend(notepad_macd_lines)
             konten_laporan.append("")
     else:
         konten_laporan.append("Tidak ada saham dengan 2 Dot Green malam ini.\n")
@@ -785,7 +880,26 @@ async def run_daily_scan(send_wa=True):
             if tf.get('60', {}).get('status'): active_tf.append(f"1H ({tf['60']['date']})")
             if tf.get('15', {}).get('status'): active_tf.append(f"15M ({tf['15']['date']})")
             tf_str = ", ".join(active_tf)
-            konten_laporan.append(f"• {st['symbol']:<6} | Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Dot di: {tf_str}")
+            
+            donalt_tags = []
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+                g = tf.get(code, {}).get("donalt", {}).get("golden")
+                if g:
+                    gain_s = f" ({g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+                    donalt_tags.append(f"Golden {lbl}: {g['date']}{gain_s}")
+            donalt_note = f" | EMA: {', '.join(donalt_tags)}" if donalt_tags else ""
+            
+            macd_tags = []
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+                m = tf.get(code, {}).get("macd", {})
+                b = m.get("bull")
+                br = m.get("bear")
+                if b:
+                    macd_tags.append(f"Bull {lbl}: {b['date']}")
+                if br:
+                    macd_tags.append(f"Bear {lbl}: {br['date']}")
+            macd_note = f" | MACD: {', '.join(macd_tags)}" if macd_tags else ""
+            konten_laporan.append(f"• {st['symbol']:<6} | Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Dot di: {tf_str}{donalt_note}{macd_note}")
         konten_laporan.append("")
     else:
         konten_laporan.append("Tidak ada.\n")
@@ -798,7 +912,21 @@ async def run_daily_scan(send_wa=True):
         st = item["stock"]
         k_dot = item.get("count_green", 0)
         status_text = f"🟢 {k_dot} TIMEFRAME" if k_dot > 0 else "⚪ Netral"
-        konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}")
+        g_tfs = []
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            if item["timeframes"].get(code, {}).get("donalt", {}).get("golden"):
+                g_tfs.append(lbl)
+        golden_str = f" [Golden Cross: {', '.join(g_tfs)}]" if g_tfs else ""
+        
+        m_tfs = []
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            m = item["timeframes"].get(code, {}).get("macd", {})
+            if m.get("bull"):
+                m_tfs.append(f"Bull {lbl}")
+            if m.get("bear"):
+                m_tfs.append(f"Bear {lbl}")
+        macd_str = f" [MACD: {', '.join(m_tfs)}]" if m_tfs else ""
+        konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}{golden_str}{macd_str}")
         
     isi_teks = "\n".join(konten_laporan)
     
@@ -853,9 +981,8 @@ async def run_daily_scan(send_wa=True):
                     tf = item["timeframes"]
                     gain_str = format_gain_header(tf)
                     gain_line = f"{gain_str.strip()}\n" if gain_str else ""
-                    smc_1d = tf.get('D', {}).get('smc')
-                    smc_1h = tf.get('60', {}).get('smc')
-                    smc_line = format_smc_wa(smc_1d, smc_1h)
+                    donalt_line = format_donalt_wa(tf)
+                    macd_line = format_macd_wa(tf)
                     pesan_wa += (
                         f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
                         f"{gain_line}"
@@ -863,7 +990,8 @@ async def run_daily_scan(send_wa=True):
                         f"• Daily (1D)  : {tf['D']['date']}\n"
                         f"• 1 Jam (1H)  : {tf['60']['date']}\n"
                         f"• 15 Mnt (15M): {tf['15']['date']}\n"
-                        f"{smc_line}"
+                        f"{donalt_line}"
+                        f"{macd_line}"
                     )
                     if idx < len(saham_3_dot):
                         pesan_wa += "───────────────────\n"
@@ -888,9 +1016,8 @@ async def run_daily_scan(send_wa=True):
                     tf = item["timeframes"]
                     gain_str = format_gain_header(tf)
                     gain_line = f"{gain_str.strip()}\n" if gain_str else ""
-                    smc_1d = tf.get('D', {}).get('smc')
-                    smc_1h = tf.get('60', {}).get('smc')
-                    smc_line = format_smc_wa(smc_1d, smc_1h)
+                    donalt_line = format_donalt_wa(tf)
+                    macd_line = format_macd_wa(tf)
                     pesan_wa += (
                         f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
                         f"{gain_line}"
@@ -902,7 +1029,8 @@ async def run_daily_scan(send_wa=True):
                         pesan_wa += f"• 1 Jam (1H)  : {tf['60']['date']}\n"
                     if tf.get('15', {}).get('status'):
                         pesan_wa += f"• 15 Mnt (15M): {tf['15']['date']}\n"
-                    pesan_wa += f"{smc_line}"
+                    pesan_wa += f"{donalt_line}"
+                    pesan_wa += f"{macd_line}"
                     if idx < len(saham_2_dot):
                         pesan_wa += "───────────────────\n"
             else:
@@ -921,8 +1049,6 @@ async def run_daily_scan(send_wa=True):
             f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Potensial)\n"
             f"• ⚪ 1 Timeframe Saja  : {len(saham_1_dot)} Saham (Diabaikan)\n"
             f"• ⚪ 0 Timeframe       : {len(saham_0_dot)} Saham (Netral)\n\n"
-            f"💡 _Hanya saham dengan minimal 2 Timeframe yang dikirimkan ke WhatsApp agar ringkas dan fokus di HP._\n"
-            f"📁 _Laporan lengkap seluruh {len(hasil_deteksi)} saham tersimpan di file Notepad Downloads & repository._\n"
             f"🌐 _Bot Agent Okto 24 Jam Otomatis_"
         )
         kirim_whatsapp(pesan_wa)
@@ -941,6 +1067,16 @@ def main():
     print(f"⏰ Jadwal Rutin: Setiap malam pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
     print("================================================================")
     
+    # Argumen --limit untuk membatasi jumlah saham saat pengujian (contoh: --limit 5 atau --limit 10)
+    global LIMIT_SAHAM_SCAN
+    for i, arg in enumerate(sys.argv):
+        if arg == "--limit" and i + 1 < len(sys.argv):
+            try:
+                LIMIT_SAHAM_SCAN = int(sys.argv[i + 1])
+                print(f"🎯 Batas scan disetel ke {LIMIT_SAHAM_SCAN} saham (--limit {LIMIT_SAHAM_SCAN}).")
+            except ValueError:
+                pass
+
     # Argumen --now untuk pengujian langsung
     if len(sys.argv) > 1 and "--now" in sys.argv:
         send_wa = "--wa" in sys.argv

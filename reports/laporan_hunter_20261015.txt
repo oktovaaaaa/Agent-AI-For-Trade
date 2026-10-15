@@ -1,7 +1,7 @@
 ===========================================================================
 LAPORAN ANALISA SAHAM HUNTER - 15 OKTOBER 2026 (RALLY GOD IDX)
 Tanggal Analisa  : 15 Oktober 2026
-Waktu Eksekusi   : 10:07:09 WIB
+Waktu Eksekusi   : 11:35:37 WIB
 Kriteria Filter  : Harga Rp 10-1.000 | Vol > Avg 10D | Vol Pre-mkt > 500% (IDX)
 Rentang Analisis : 15 September 2026 s/d 15 Oktober 2026 (1 Bulan Terakhir / 30 Hari)
 Layout Chart     : https://www.tradingview.com/chart/6B2fiCnc/
@@ -10,8 +10,8 @@ Layout Chart     : https://www.tradingview.com/chart/6B2fiCnc/
 RINGKASAN HASIL PEMINDAIAN:
 • Total Saham Screener Hunter : 11 Saham
 • Saham 3 Timeframe (Prioritas) : 0 Saham
-• Saham 2 Timeframe (Potensial) : 5 Saham
-• Saham 1 Timeframe Saja        : 6 Saham
+• Saham 2 Timeframe (Potensial) : 3 Saham
+• Saham 1 Timeframe Saja        : 8 Saham
 • Saham Netral (0 Timeframe)    : 0 Saham
 *(Catatan: Notifikasi WhatsApp hanya menyaring saham dengan minimal 2 Timeframe)*
 
@@ -21,64 +21,61 @@ RINGKASAN HASIL PEMINDAIAN:
 Tidak ada saham dengan 3 Dot Green sekaligus malam ini.
 
 ===========================================================================
-[BAGIAN 2] SAHAM RADAR POTENSIAL (2 TIMEFRAME) - 5 SAHAM:
+[BAGIAN 2] SAHAM RADAR POTENSIAL (2 TIMEFRAME) - 3 SAHAM:
 ===========================================================================
-1. DYAN | Harga: Rp 81 (1H: +9.33%) | Vol: 210,940,000
-   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 16:00 WIB (Kenaikan: +9.33%))
+1. DYAN | Harga: Rp 81 (1H: +6.67%) | Vol: 210,940,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 16:00 WIB (Kenaikan: +6.67%))
    - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 14:45 WIB)
-   - SMC Daily(1D): Supply: Rp 111 (+35.83%) | Demand: Rp 66 (-18.91%)
-   - SMC 1 Jam(1H): Supply: Rp 85 (+3.27%) | Demand: Rp 76 (-6.95%)
-   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 79 tgl 13 Okt)
+   - EMA Cross Daily (1D)  : ✨ Golden: - | ⚠️ Death: 8 Okt 2026 @ Rp 80
+   - EMA Cross 1 Jam (1H)  : ✨ Golden: 22 Sep 2026, 09:00 WIB @ Rp 100 (Kenaikan: -20.00%) | ⚠️ Death: 28 Sep 2026, 11:00 WIB @ Rp 77
+   - EMA Cross 15 Mnt (15M): ✨ Golden: 5 Okt 2026, 13:45 WIB @ Rp 85 (Kenaikan: -5.88%) | ⚠️ Death: 8 Okt 2026, 10:45 WIB @ Rp 82
+   - MACD Div  Daily (1D)  : 🐂 Bull: - | 🐻 Bear: -
+   - MACD Div  1 Jam (1H)  : 🐂 Bull: - | 🐻 Bear: -
+   - MACD Div  15 Mnt (15M): 🐂 Bull: - | 🐻 Bear: -
 
-2. TRON | Harga: Rp 87 (1H: +20.83%) | Vol: 115,998,900
-   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB (Kenaikan: +20.83%))
-   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 11:15 WIB)
-   - SMC Daily(1D): Supply: Rp 110 (+26.09%) | Demand: Rp 62 (-28.77%)
-   - SMC 1 Jam(1H): Supply: Rp 111 (+27.15%) | Demand: Rp 72 (-17.74%)
-   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 81 tgl 14 Okt)
-
-3. DEFI | Harga: Rp 101 (1H: +31.58%) | Vol: 108,862,300
-   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 14:00 WIB (Kenaikan: +31.58%))
+2. DEFI | Harga: Rp 92 (1H: +21.05%) | Vol: 164,624,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 14:00 WIB (Kenaikan: +21.05%))
    - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:00 WIB)
-   - SMC Daily(1D): Supply: Rp 146 (+44.18%) | Demand: Rp 78 (-23.19%)
-   - SMC 1 Jam(1H): Supply: Rp 112 (+11.61%) | Demand: Rp 76 (-23.51%)
-   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 88 tgl 14 Okt)
+   - EMA Cross Daily (1D)  : ✨ Golden: - | ⚠️ Death: -
+   - EMA Cross 1 Jam (1H)  : ✨ Golden: - | ⚠️ Death: 24 Sep 2026, 13:00 WIB @ Rp 104
+   - EMA Cross 15 Mnt (15M): ✨ Golden: - | ⚠️ Death: -
+   - MACD Div  Daily (1D)  : 🐂 Bull: - | 🐻 Bear: -
+   - MACD Div  1 Jam (1H)  : 🐂 Bull: - | 🐻 Bear: -
+   - MACD Div  15 Mnt (15M): 🐂 Bull: - | 🐻 Bear: -
 
-4. PSDN | Harga: Rp 124 (1H: +10.71%) | Vol: 46,340,200
-   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB (Kenaikan: +10.71%))
-   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 14:15 WIB)
-   - SMC Daily(1D): Supply: Rp 158 (+27.55%) | Demand: Rp 107 (-13.32%)
-   - SMC 1 Jam(1H): Supply: Rp 149 (+19.87%) | Demand: Rp 118 (-4.44%)
-   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 122 tgl 14 Okt)
-
-5. ACES | Harga: Rp 360 (1H: +11.11%) | Vol: 42,800,900
-   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 16:00 WIB (Kenaikan: +11.11%))
+3. ACES | Harga: Rp 364 (1H: +12.35%) | Vol: 154,505,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 16:00 WIB (Kenaikan: +12.35%))
    - 15 Menit    : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 15:15 WIB)
-   - SMC Daily(1D): Supply: Rp 359 (+0.22%) | Demand: Rp 312 (-12.97%)
-   - SMC 1 Jam(1H): Supply: Rp 367 (+2.08%) | Demand: Rp 311 (-13.70%)
-   - Status 7D   : ⚡ Menguji Area Supply (Dekat Resisten)
+   - EMA Cross Daily (1D)  : ✨ Golden: - | ⚠️ Death: -
+   - EMA Cross 1 Jam (1H)  : ✨ Golden: - | ⚠️ Death: -
+   - EMA Cross 15 Mnt (15M): ✨ Golden: 14 Okt 2026, 14:00 WIB @ Rp 336 (Kenaikan: +7.74%) | ⚠️ Death: -
+   - MACD Div  Daily (1D)  : 🐂 Bull: - | 🐻 Bear: -
+   - MACD Div  1 Jam (1H)  : 🐂 Bull: 29 Sep 2026, 15:00 WIB @ Rp 342 | 🐻 Bear: -
+   - MACD Div  15 Mnt (15M): 🐂 Bull: 13 Okt 2026, 10:00 WIB @ Rp 322 | 🐻 Bear: 8 Okt 2026, 16:00 WIB @ Rp 328
 
 ===========================================================================
-[BAGIAN 3] SAHAM DENGAN 1 TIMEFRAME SAJA - 6 SAHAM (DIABAIKAN DARI WA):
+[BAGIAN 3] SAHAM DENGAN 1 TIMEFRAME SAJA - 8 SAHAM (DIABAIKAN DARI WA):
 ===========================================================================
-• SQMI   | Rp 96   ( +6.67%) | Dot di: 15M (30 Sep 2026, 15:30 WIB)
-• DKHH   | Rp 118  (+15.69%) | Dot di: 15M (2 Okt 2026, 16:00 WIB)
-• AKKU   | Rp 97   (+24.36%) | Dot di: 15M (30 Sep 2026, 16:00 WIB)
-• BAIK   | Rp 278  ( -1.42%) | Dot di: 15M (9 Okt 2026, 14:45 WIB)
-• MEDS   | Rp 80   ( +3.90%) | Dot di: 15M (2 Okt 2026, 14:00 WIB)
-• PWON   | Rp 292  ( +1.39%) | Dot di: 15M (2 Okt 2026, 09:00 WIB)
+• SQMI   | Rp 93   ( +3.33%) | Dot di: 15M (30 Sep 2026, 16:00 WIB) | EMA: Golden 15M: 5 Okt 2026, 13:30 WIB (-2.08%) | MACD: Bear 1D: 14 Okt 2026, Bull 15M: 12 Okt 2026, 15:00 WIB, Bear 15M: 7 Okt 2026, 16:00 WIB
+• BNBR   | Rp 61   ( -4.69%) | Dot di: 15M (15 Okt 2026, 11:00 WIB) | MACD: Bull 1H: 21 Sep 2026, 15:00 WIB, Bull 15M: 8 Okt 2026, 15:30 WIB
+• DSSA   | Rp 855  ( -4.47%) | Dot di: 15M (15 Okt 2026, 11:15 WIB) | EMA: Golden 1H: 24 Sep 2026, 14:00 WIB (-22.12%), Golden 15M: 29 Sep 2026, 15:00 WIB (-20.93%) | MACD: Bull 1H: 23 Sep 2026, 14:00 WIB, Bear 1H: 7 Okt 2026, 13:00 WIB, Bear 15M: 6 Okt 2026, 11:45 WIB
+• DKHH   | Rp 114  (+11.76%) | Dot di: 15M (2 Okt 2026, 16:00 WIB) | EMA: Golden 15M: 25 Sep 2026, 09:30 WIB (+58.33%) | MACD: Bull 15M: 5 Okt 2026, 10:00 WIB, Bear 15M: 12 Okt 2026, 15:45 WIB
+• AKKU   | Rp 103  (+32.05%) | Dot di: 15M (30 Sep 2026, 16:00 WIB) | EMA: Golden 1H: 1 Okt 2026, 10:00 WIB (+134.09%), Golden 15M: 1 Okt 2026, 11:30 WIB (+145.24%) | MACD: Bear 1H: 13 Okt 2026, 09:00 WIB, Bear 15M: 8 Okt 2026, 11:00 WIB
+• PCAR   | Rp 87   (+10.13%) | Dot di: 15M (1 Okt 2026, 10:30 WIB) | MACD: Bear 1H: 7 Okt 2026, 13:00 WIB, Bull 15M: 2 Okt 2026, 10:45 WIB, Bear 15M: 8 Okt 2026, 14:00 WIB
+• BAIK   | Rp 276  ( -2.13%) | Dot di: 15M (9 Okt 2026, 14:45 WIB) | EMA: Golden 15M: 13 Okt 2026, 10:00 WIB (+13.22%) | MACD: Bull 15M: 2 Okt 2026, 11:00 WIB, Bear 15M: 13 Okt 2026, 11:45 WIB
+• VKTR   | Rp 440  (-12.00%) | Dot di: 15M (15 Okt 2026, 11:00 WIB) | EMA: Golden 1H: 6 Okt 2026, 14:00 WIB (-30.23%), Golden 15M: 30 Sep 2026, 14:00 WIB (-26.74%) | MACD: Bull 1H: 17 Sep 2026, 15:00 WIB, Bull 15M: 14 Okt 2026, 11:15 WIB, Bear 15M: 6 Okt 2026, 15:30 WIB
 
 ===========================================================================
 [BAGIAN 4] REKAPITULASI SELURUH 11 SAHAM HUNTER:
 ===========================================================================
-- SQMI   : Rp 96   ( +6.67%) -> 🟢 1 TIMEFRAME
-- DKHH   : Rp 118  (+15.69%) -> 🟢 1 TIMEFRAME
-- AKKU   : Rp 97   (+24.36%) -> 🟢 1 TIMEFRAME
-- BAIK   : Rp 278  ( -1.42%) -> 🟢 1 TIMEFRAME
-- TRON   : Rp 87   (-13.86%) -> 🟢 2 TIMEFRAME
-- DEFI   : Rp 101  (+20.24%) -> 🟢 2 TIMEFRAME
-- MEDS   : Rp 80   ( +3.90%) -> 🟢 1 TIMEFRAME
-- PWON   : Rp 292  ( +1.39%) -> 🟢 1 TIMEFRAME
-- PSDN   : Rp 124  ( -1.59%) -> 🟢 2 TIMEFRAME
-- ACES   : Rp 360  ( +5.26%) -> 🟢 2 TIMEFRAME
-- DYAN   : Rp 81   ( +3.85%) -> 🟢 2 TIMEFRAME
+- SQMI   : Rp 93   ( +3.33%) -> 🟢 1 TIMEFRAME [Golden Cross: 15M] [MACD: Bear 1D, Bull 15M, Bear 15M]
+- BNBR   : Rp 61   ( -4.69%) -> 🟢 1 TIMEFRAME [MACD: Bull 1H, Bull 15M]
+- DSSA   : Rp 855  ( -4.47%) -> 🟢 1 TIMEFRAME [Golden Cross: 1H, 15M] [MACD: Bull 1H, Bear 1H, Bear 15M]
+- DKHH   : Rp 114  (+11.76%) -> 🟢 1 TIMEFRAME [Golden Cross: 15M] [MACD: Bull 15M, Bear 15M]
+- AKKU   : Rp 103  (+32.05%) -> 🟢 1 TIMEFRAME [Golden Cross: 1H, 15M] [MACD: Bear 1H, Bear 15M]
+- PCAR   : Rp 87   (+10.13%) -> 🟢 1 TIMEFRAME [MACD: Bear 1H, Bull 15M, Bear 15M]
+- BAIK   : Rp 276  ( -2.13%) -> 🟢 1 TIMEFRAME [Golden Cross: 15M] [MACD: Bull 15M, Bear 15M]
+- DEFI   : Rp 92   ( +9.52%) -> 🟢 2 TIMEFRAME
+- ACES   : Rp 364  ( +6.43%) -> 🟢 2 TIMEFRAME [Golden Cross: 15M] [MACD: Bull 1H, Bull 15M, Bear 15M]
+- VKTR   : Rp 440  (-12.00%) -> 🟢 1 TIMEFRAME [Golden Cross: 1H, 15M] [MACD: Bull 1H, Bull 15M, Bear 15M]
+- DYAN   : Rp 81   ( +3.85%) -> 🟢 2 TIMEFRAME [Golden Cross: 1H, 15M]
