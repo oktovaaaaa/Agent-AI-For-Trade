@@ -13,16 +13,25 @@ Bot otomatis pemantau saham **Bursa Efek Indonesia (IDX)** berbasis **TradingVie
 2. **Pemeriksaan Multi-Timeframe (1 Bulan Terakhir)**:
    - Memeriksa **Daily (1D)**, **1 Jam (1H)**, dan **15 Menit (15M)** langsung dari engine data internal TradingView.
    - Mendeteksi apakah muncul titik hijau (*Dot Green*) khas `(人•ᴗ•)RallyGood` dalam rentang 30 hari ke belakang.
-3. **Peringatan Khusus 3 Timeframe (Golden Signal)**:
-   - Jika suatu saham memiliki sinyal Dot Green lengkap di ketiga timeframe sekaligus (15M + 1H + 1D), bot otomatis menandainya dengan:
-     `🟢 ANALISA SAHAM INI !!! 🟢`
-     dan menempatkannya di urutan prioritas teratas.
-4. **Pembersihan Otomatis Screenshot**:
+3. **Peringatan & Kategori Khusus (Anti-Spam Layar HP)**:
+   - 🔥 **3 Timeframe**: Ditandai 1 kali di atas kategori dengan `🟢 ANALISA SAHAM INI !!! 🟢`.
+   - ⚡ **2 Timeframe**: Ditandai 1 kali di atas kategori dengan `🟡 PANTAU SAHAM INI !!! 🟡`.
+   - Tidak ada pengulangan tulisan peringatan di setiap saham, sehingga tampilan sangat bersih dan tidak membingungkan di layar HP.
+4. **Perhitungan Kenaikan Riil Sejak Dot Green Muncul**:
+   - Persentase di samping harga bukan lagi kenaikan 1 hari hari ini, melainkan **kenaikan riil sejak sinyal Dot Green pertama kali muncul**:
+     - Untuk 3 Timeframe: Menghitung kenaikan dari Dot 1D dan Dot 1H (misal: `(1D: +12.50% | 1H: +5.20%)`).
+     - Untuk 2 Timeframe: Menghitung kenaikan dari Dot 1D dan/atau Dot 1H yang aktif (misal: `(1H: +18.89%)`).
+   - Memberikan sinyal instan apakah saham tersebut baru saja *breakout* (masih fresh) atau sudah reli tinggi.
+5. **Analisa SMC Supply & Demand Ganda (1D & 1H) + Breakout/Breakdown 7 Hari**:
+   - Mendeteksi level **Supply Terdekat** (Resisten) dan **Demand Terdekat** (Support) langsung dari indikator *Ultimate SMC Suite* asli untuk **kedua timeframe sekaligus: Daily (1D) & 1 Jam (1H)**.
+   - Menghitung jarak persentase eksak: berapa % lagi menuju Supply dan berapa % harga berada di atas Demand di masing-masing timeframe.
+   - Mendeteksi status **Breakout Supply**, **Breakdown Demand**, atau riwayat struktur **BOS (Break of Structure) & CHoCH (Change of Character)** dalam rentang waktu **1 minggu (7 hari) terakhir**.
+6. **Pembersihan Otomatis Screenshot**:
    - Tidak membebani storage disk, semua temporary screenshot langsung dibersihkan otomatis.
-5. **Pencatatan Laporan & Notifikasi WhatsApp**:
-   - File teks tersimpan di `reports/laporan_hunter_YYYYMMDD.txt` dan folder `Downloads`.
+7. **Pencatatan Laporan & Notifikasi WhatsApp**:
+   - File teks rekapitulasi seluruh 153 saham tersimpan di `reports/laporan_hunter_YYYYMMDD.txt` dan folder `Downloads`.
    - Mengirimkan rangkuman rapi ke WhatsApp via Fonnte setiap pukul **19.00 WIB** setiap malam.
-6. **Cloud-Ready (Laptop Bisa Dimatikan)**:
+8. **Cloud-Ready (Laptop Bisa Dimatikan)**:
    - Mendukung deployment di Cloud Server / VPS Linux menggunakan Docker.
 
 ---

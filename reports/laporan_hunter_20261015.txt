@@ -1,0 +1,84 @@
+===========================================================================
+LAPORAN ANALISA SAHAM HUNTER - 15 OKTOBER 2026 (RALLY GOD IDX)
+Tanggal Analisa  : 15 Oktober 2026
+Waktu Eksekusi   : 10:07:09 WIB
+Kriteria Filter  : Harga Rp 10-1.000 | Vol > Avg 10D | Vol Pre-mkt > 500% (IDX)
+Rentang Analisis : 15 September 2026 s/d 15 Oktober 2026 (1 Bulan Terakhir / 30 Hari)
+Layout Chart     : https://www.tradingview.com/chart/6B2fiCnc/
+===========================================================================
+
+RINGKASAN HASIL PEMINDAIAN:
+• Total Saham Screener Hunter : 11 Saham
+• Saham 3 Timeframe (Prioritas) : 0 Saham
+• Saham 2 Timeframe (Potensial) : 5 Saham
+• Saham 1 Timeframe Saja        : 6 Saham
+• Saham Netral (0 Timeframe)    : 0 Saham
+*(Catatan: Notifikasi WhatsApp hanya menyaring saham dengan minimal 2 Timeframe)*
+
+===========================================================================
+[BAGIAN 1] SAHAM PRIORITAS UTAMA (3 TIMEFRAME SEKALIGUS) - 0 SAHAM:
+===========================================================================
+Tidak ada saham dengan 3 Dot Green sekaligus malam ini.
+
+===========================================================================
+[BAGIAN 2] SAHAM RADAR POTENSIAL (2 TIMEFRAME) - 5 SAHAM:
+===========================================================================
+1. DYAN | Harga: Rp 81 (1H: +9.33%) | Vol: 210,940,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 16:00 WIB (Kenaikan: +9.33%))
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 14:45 WIB)
+   - SMC Daily(1D): Supply: Rp 111 (+35.83%) | Demand: Rp 66 (-18.91%)
+   - SMC 1 Jam(1H): Supply: Rp 85 (+3.27%) | Demand: Rp 76 (-6.95%)
+   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 79 tgl 13 Okt)
+
+2. TRON | Harga: Rp 87 (1H: +20.83%) | Vol: 115,998,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB (Kenaikan: +20.83%))
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 11:15 WIB)
+   - SMC Daily(1D): Supply: Rp 110 (+26.09%) | Demand: Rp 62 (-28.77%)
+   - SMC 1 Jam(1H): Supply: Rp 111 (+27.15%) | Demand: Rp 72 (-17.74%)
+   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 81 tgl 14 Okt)
+
+3. DEFI | Harga: Rp 101 (1H: +31.58%) | Vol: 108,862,300
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 14:00 WIB (Kenaikan: +31.58%))
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:00 WIB)
+   - SMC Daily(1D): Supply: Rp 146 (+44.18%) | Demand: Rp 78 (-23.19%)
+   - SMC 1 Jam(1H): Supply: Rp 112 (+11.61%) | Demand: Rp 76 (-23.51%)
+   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 88 tgl 14 Okt)
+
+4. PSDN | Harga: Rp 124 (1H: +10.71%) | Vol: 46,340,200
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB (Kenaikan: +10.71%))
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 14:15 WIB)
+   - SMC Daily(1D): Supply: Rp 158 (+27.55%) | Demand: Rp 107 (-13.32%)
+   - SMC 1 Jam(1H): Supply: Rp 149 (+19.87%) | Demand: Rp 118 (-4.44%)
+   - Status 7D   : ⚪ Di Antara Demand & Supply (CHoCH: Rp 122 tgl 14 Okt)
+
+5. ACES | Harga: Rp 360 (1H: +11.11%) | Vol: 42,800,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 16:00 WIB (Kenaikan: +11.11%))
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 15:15 WIB)
+   - SMC Daily(1D): Supply: Rp 359 (+0.22%) | Demand: Rp 312 (-12.97%)
+   - SMC 1 Jam(1H): Supply: Rp 367 (+2.08%) | Demand: Rp 311 (-13.70%)
+   - Status 7D   : ⚡ Menguji Area Supply (Dekat Resisten)
+
+===========================================================================
+[BAGIAN 3] SAHAM DENGAN 1 TIMEFRAME SAJA - 6 SAHAM (DIABAIKAN DARI WA):
+===========================================================================
+• SQMI   | Rp 96   ( +6.67%) | Dot di: 15M (30 Sep 2026, 15:30 WIB)
+• DKHH   | Rp 118  (+15.69%) | Dot di: 15M (2 Okt 2026, 16:00 WIB)
+• AKKU   | Rp 97   (+24.36%) | Dot di: 15M (30 Sep 2026, 16:00 WIB)
+• BAIK   | Rp 278  ( -1.42%) | Dot di: 15M (9 Okt 2026, 14:45 WIB)
+• MEDS   | Rp 80   ( +3.90%) | Dot di: 15M (2 Okt 2026, 14:00 WIB)
+• PWON   | Rp 292  ( +1.39%) | Dot di: 15M (2 Okt 2026, 09:00 WIB)
+
+===========================================================================
+[BAGIAN 4] REKAPITULASI SELURUH 11 SAHAM HUNTER:
+===========================================================================
+- SQMI   : Rp 96   ( +6.67%) -> 🟢 1 TIMEFRAME
+- DKHH   : Rp 118  (+15.69%) -> 🟢 1 TIMEFRAME
+- AKKU   : Rp 97   (+24.36%) -> 🟢 1 TIMEFRAME
+- BAIK   : Rp 278  ( -1.42%) -> 🟢 1 TIMEFRAME
+- TRON   : Rp 87   (-13.86%) -> 🟢 2 TIMEFRAME
+- DEFI   : Rp 101  (+20.24%) -> 🟢 2 TIMEFRAME
+- MEDS   : Rp 80   ( +3.90%) -> 🟢 1 TIMEFRAME
+- PWON   : Rp 292  ( +1.39%) -> 🟢 1 TIMEFRAME
+- PSDN   : Rp 124  ( -1.59%) -> 🟢 2 TIMEFRAME
+- ACES   : Rp 360  ( +5.26%) -> 🟢 2 TIMEFRAME
+- DYAN   : Rp 81   ( +3.85%) -> 🟢 2 TIMEFRAME

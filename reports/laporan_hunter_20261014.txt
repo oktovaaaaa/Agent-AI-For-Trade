@@ -1,0 +1,466 @@
+===========================================================================
+LAPORAN ANALISA SAHAM HUNTER - 14 OKTOBER 2026 (RALLY GOD IDX)
+Tanggal Analisa  : 14 Oktober 2026
+Waktu Eksekusi   : 21:55:17 WIB
+Kriteria Filter  : Harga Rp 10-1.000 | Vol > Avg 10D | Vol Pre-mkt > 500% (IDX)
+Rentang Analisis : 14 September 2026 s/d 14 Oktober 2026 (1 Bulan Terakhir / 30 Hari)
+Layout Chart     : https://www.tradingview.com/chart/6B2fiCnc/
+===========================================================================
+
+RINGKASAN HASIL PEMINDAIAN:
+• Total Saham Screener Hunter : 128 Saham
+• Saham 3 Timeframe (Prioritas) : 8 Saham
+• Saham 2 Timeframe (Potensial) : 48 Saham
+• Saham 1 Timeframe Saja        : 68 Saham
+• Saham Netral (0 Timeframe)    : 4 Saham
+*(Catatan: Notifikasi WhatsApp hanya menyaring saham dengan minimal 2 Timeframe)*
+
+===========================================================================
+[BAGIAN 1] SAHAM PRIORITAS UTAMA (3 TIMEFRAME SEKALIGUS) - 8 SAHAM:
+===========================================================================
+1. REAL | Harga: Rp 45 (+2.27%) | Vol: 136,173,000
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 1 Okt 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 14:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 14:45 WIB)
+
+2. MAXI | Harga: Rp 26 (-7.14%) | Vol: 105,257,900
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 12 Okt 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 11:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 10:00 WIB)
+
+3. SMRA | Harga: Rp 264 (+3.12%) | Vol: 90,416,400
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 7 Okt 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 7 Okt 2026, 14:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 7 Okt 2026, 11:30 WIB)
+
+4. BEER | Harga: Rp 64 (+4.92%) | Vol: 26,624,900
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 16:00 WIB)
+
+5. CTRA | Harga: Rp 585 (+1.74%) | Vol: 21,630,100
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 13:45 WIB)
+
+6. GPSO | Harga: Rp 234 (+1.74%) | Vol: 17,447,000
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 7 Okt 2026, 09:30 WIB)
+
+7. SOLA | Harga: Rp 73 (-2.67%) | Vol: 9,586,900
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 14:15 WIB)
+
+8. PNSE | Harga: Rp 450 (+6.64%) | Vol: 40,500
+   🟢 ANALISA SAHAM INI !!! 🟢
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 15:00 WIB)
+
+===========================================================================
+[BAGIAN 2] SAHAM RADAR POTENSIAL (2 TIMEFRAME) - 48 SAHAM:
+===========================================================================
+1. STRK | Harga: Rp 107 (+18.89%) | Vol: 711,265,200
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026)
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+
+2. TRON | Harga: Rp 101 (+34.67%) | Vol: 391,661,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 11:15 WIB)
+
+3. BUVA | Harga: Rp 520 (-11.86%) | Vol: 119,209,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:45 WIB)
+
+4. FOLK | Harga: Rp 103 (-11.21%) | Vol: 106,458,700
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 14:00 WIB)
+
+5. KBLV | Harga: Rp 116 (+18.37%) | Vol: 86,502,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 15:45 WIB)
+
+6. SDMU | Harga: Rp 66 (+1.54%) | Vol: 69,545,500
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 09:15 WIB)
+
+7. CTTH | Harga: Rp 100 (+1.01%) | Vol: 64,294,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:00 WIB)
+
+8. PART | Harga: Rp 111 (+0.91%) | Vol: 62,025,200
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 15 Sep 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:15 WIB)
+
+9. PICO | Harga: Rp 177 (-8.76%) | Vol: 61,303,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 10:00 WIB)
+
+10. LAJU | Harga: Rp 57 (+3.64%) | Vol: 58,946,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 15:45 WIB)
+
+11. SCMA | Harga: Rp 173 (-1.70%) | Vol: 51,061,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 16:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 13:30 WIB)
+
+12. RANS | Harga: Rp 178 (-1.66%) | Vol: 44,602,300
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 7 Okt 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:00 WIB)
+
+13. MSIN | Harga: Rp 173 (+0.00%) | Vol: 41,899,000
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 15:30 WIB)
+
+14. CDIA | Harga: Rp 500 (+0.00%) | Vol: 35,585,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:15 WIB)
+
+15. SLIS | Harga: Rp 72 (+2.86%) | Vol: 31,221,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 25 Sep 2026, 11:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 10:00 WIB)
+
+16. NICL | Harga: Rp 356 (+3.49%) | Vol: 28,714,200
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:15 WIB)
+
+17. VTNY | Harga: Rp 52 (-1.89%) | Vol: 26,008,600
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 15:00 WIB)
+
+18. RGAS | Harga: Rp 86 (+0.00%) | Vol: 22,824,600
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 09:45 WIB)
+
+19. ELSA | Harga: Rp 680 (+3.82%) | Vol: 22,352,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 14:30 WIB)
+
+20. PPRE | Harga: Rp 86 (+1.18%) | Vol: 22,311,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 15:30 WIB)
+
+21. KUAS | Harga: Rp 89 (+2.30%) | Vol: 21,841,300
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 16:00 WIB)
+
+22. HATM | Harga: Rp 670 (+10.74%) | Vol: 21,601,100
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 22 Sep 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 6 Okt 2026, 11:15 WIB)
+
+23. HDIT | Harga: Rp 39 (+2.63%) | Vol: 17,921,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 5 Okt 2026, 13:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 10:00 WIB)
+
+24. PRDL | Harga: Rp 168 (+4.35%) | Vol: 16,692,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 09:15 WIB)
+
+25. NTBK | Harga: Rp 64 (-1.54%) | Vol: 16,675,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 5 Okt 2026, 10:15 WIB)
+
+26. AGRS | Harga: Rp 59 (+1.72%) | Vol: 14,687,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 14:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 15:00 WIB)
+
+27. ASRI | Harga: Rp 115 (+0.00%) | Vol: 14,032,900
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 8 Okt 2026, 09:00 WIB)
+
+28. AVIA | Harga: Rp 350 (-1.13%) | Vol: 12,796,200
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 18 Sep 2026, 16:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 15:30 WIB)
+
+29. CENT | Harga: Rp 89 (-1.11%) | Vol: 12,484,200
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 14:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 15:45 WIB)
+
+30. RBMS | Harga: Rp 45 (+2.27%) | Vol: 12,006,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 14:45 WIB)
+
+31. FWCT | Harga: Rp 82 (-2.38%) | Vol: 11,197,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 11:30 WIB)
+
+32. OASA | Harga: Rp 220 (-1.79%) | Vol: 10,724,700
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 13 Okt 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 14:30 WIB)
+
+33. ENZO | Harga: Rp 60 (-1.64%) | Vol: 10,462,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 09:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 09:45 WIB)
+
+34. SUPA | Harga: Rp 458 (-2.97%) | Vol: 9,998,300
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 22 Sep 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 15:00 WIB)
+
+35. WBSA | Harga: Rp 555 (-0.89%) | Vol: 9,523,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 14:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 14:15 WIB)
+
+36. PBSA | Harga: Rp 384 (-54.56%) | Vol: 9,332,000
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 10:15 WIB)
+
+37. BINO | Harga: Rp 98 (-5.77%) | Vol: 5,962,600
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 14 Okt 2026, 15:45 WIB)
+
+38. PEVE | Harga: Rp 374 (+5.65%) | Vol: 5,447,400
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 15 Sep 2026, 11:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 11:45 WIB)
+
+39. HDFA | Harga: Rp 93 (+0.00%) | Vol: 3,896,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:30 WIB)
+
+40. WTON | Harga: Rp 72 (+0.00%) | Vol: 2,845,100
+   - Daily (1D)  : [ADA DOT GREEN] (Muncul: 1 Okt 2026)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 1 Okt 2026, 10:30 WIB)
+
+41. SOTS | Harga: Rp 650 (+1.56%) | Vol: 2,725,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 11:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 11:45 WIB)
+
+42. SATU | Harga: Rp 244 (+0.83%) | Vol: 2,562,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 16 Sep 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 24 Sep 2026, 15:15 WIB)
+
+43. PJHB | Harga: Rp 153 (+0.00%) | Vol: 1,403,300
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 16:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 30 Sep 2026, 16:00 WIB)
+
+44. INTD | Harga: Rp 314 (-1.88%) | Vol: 1,371,500
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 18 Sep 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 14:00 WIB)
+
+45. ECII | Harga: Rp 155 (-0.64%) | Vol: 1,086,600
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 29 Sep 2026, 10:30 WIB)
+
+46. DRMA | Harga: Rp 945 (-0.53%) | Vol: 1,006,800
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 21 Sep 2026, 11:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 7 Okt 2026, 11:45 WIB)
+
+47. CSRA | Harga: Rp 715 (-0.69%) | Vol: 263,600
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 15:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 2 Okt 2026, 15:45 WIB)
+
+48. AWAN | Harga: Rp 148 (-2.63%) | Vol: 239,700
+   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: 12 Okt 2026, 10:00 WIB)
+   - 15 Menit    : [ADA DOT GREEN] (Muncul: 28 Sep 2026, 09:30 WIB)
+
+===========================================================================
+[BAGIAN 3] SAHAM DENGAN 1 TIMEFRAME SAJA - 68 SAHAM (DIABAIKAN DARI WA):
+===========================================================================
+• GRPH   | Rp 130  (+18.18%) | Dot di: 15M (13 Okt 2026, 09:15 WIB)
+• CUAN   | Rp 665  ( +0.00%) | Dot di: 15M (14 Okt 2026, 09:45 WIB)
+• DYAN   | Rp 81   ( +3.85%) | Dot di: 15M (1 Okt 2026, 14:45 WIB)
+• ERAA   | Rp 625  ( +0.00%) | Dot di: 15M (1 Okt 2026, 10:30 WIB)
+• DKHH   | Rp 102  ( +5.15%) | Dot di: 15M (2 Okt 2026, 16:00 WIB)
+• TOWR   | Rp 454  ( +0.44%) | Dot di: 15M (30 Sep 2026, 15:30 WIB)
+• GPRA   | Rp 100  ( +3.09%) | Dot di: 15M (8 Okt 2026, 09:00 WIB)
+• PWON   | Rp 288  ( +3.60%) | Dot di: 15M (2 Okt 2026, 09:00 WIB)
+• MGNA   | Rp 189  (+18.12%) | Dot di: 15M (30 Sep 2026, 14:45 WIB)
+• SGER   | Rp 780  ( +1.30%) | Dot di: 15M (30 Sep 2026, 13:30 WIB)
+• BAIK   | Rp 282  (+15.57%) | Dot di: 15M (9 Okt 2026, 14:45 WIB)
+• BDKR   | Rp 195  ( +0.00%) | Dot di: 15M (1 Okt 2026, 10:45 WIB)
+• MMIX   | Rp 975  ( +0.52%) | Dot di: 15M (30 Sep 2026, 13:30 WIB)
+• KLBF   | Rp 780  ( +0.00%) | Dot di: 15M (2 Okt 2026, 10:15 WIB)
+• SBMA   | Rp 124  (-13.89%) | Dot di: 15M (29 Sep 2026, 11:30 WIB)
+• MPXL   | Rp 316  ( +8.97%) | Dot di: 15M (29 Sep 2026, 13:30 WIB)
+• TOOL   | Rp 55   ( +0.00%) | Dot di: 15M (2 Okt 2026, 15:00 WIB)
+• AYAM   | Rp 505  ( +0.00%) | Dot di: 15M (30 Sep 2026, 14:00 WIB)
+• GULA   | Rp 785  ( -1.26%) | Dot di: 15M (1 Okt 2026, 09:30 WIB)
+• CLEO   | Rp 448  ( +3.70%) | Dot di: 15M (1 Okt 2026, 11:00 WIB)
+• ELIT   | Rp 260  ( +4.84%) | Dot di: 15M (1 Okt 2026, 14:30 WIB)
+• TOSK   | Rp 83   ( +1.22%) | Dot di: 15M (2 Okt 2026, 15:45 WIB)
+• MAPA   | Rp 615  ( -0.81%) | Dot di: 15M (13 Okt 2026, 15:45 WIB)
+• FILM   | Rp 530  ( -4.50%) | Dot di: 15M (14 Okt 2026, 09:45 WIB)
+• CARS   | Rp 102  ( -3.77%) | Dot di: 15M (8 Okt 2026, 14:00 WIB)
+• SIDO   | Rp 356  ( +1.71%) | Dot di: 15M (6 Okt 2026, 10:00 WIB)
+• JATI   | Rp 104  ( +0.97%) | Dot di: 15M (2 Okt 2026, 09:30 WIB)
+• CMNT   | Rp 760  ( +2.01%) | Dot di: 15M (24 Sep 2026, 13:45 WIB)
+• VRNA   | Rp 85   ( +1.19%) | Dot di: 15M (29 Sep 2026, 10:30 WIB)
+• SNLK   | Rp 234  ( +0.00%) | Dot di: 15M (6 Okt 2026, 13:45 WIB)
+• BKDP   | Rp 186  ( +4.49%) | Dot di: 15M (5 Okt 2026, 09:00 WIB)
+• BLES   | Rp 206  ( +3.00%) | Dot di: 15M (30 Sep 2026, 13:30 WIB)
+• PMUI   | Rp 96   ( -1.03%) | Dot di: 15M (30 Sep 2026, 10:45 WIB)
+• VAST   | Rp 106  ( +0.00%) | Dot di: 15M (30 Sep 2026, 09:15 WIB)
+• BELI   | Rp 314  (+11.35%) | Dot di: 15M (6 Okt 2026, 09:45 WIB)
+• BATR   | Rp 95   ( +0.00%) | Dot di: 15M (29 Sep 2026, 14:15 WIB)
+• MTEL   | Rp 444  ( -2.63%) | Dot di: 15M (6 Okt 2026, 10:00 WIB)
+• BJTM   | Rp 510  ( +0.00%) | Dot di: 15M (6 Okt 2026, 14:45 WIB)
+• KOPI   | Rp 180  ( -2.70%) | Dot di: 15M (14 Okt 2026, 15:15 WIB)
+• MGRO   | Rp 730  ( +0.00%) | Dot di: 15M (25 Sep 2026, 14:30 WIB)
+• NRCA   | Rp 555  ( +6.73%) | Dot di: 15M (13 Okt 2026, 09:00 WIB)
+• BOLA   | Rp 181  ( -1.63%) | Dot di: 15M (2 Okt 2026, 10:15 WIB)
+• DOSS   | Rp 159  ( +1.92%) | Dot di: 15M (13 Okt 2026, 11:15 WIB)
+• KKGI   | Rp 294  ( +0.00%) | Dot di: 15M (30 Sep 2026, 13:30 WIB)
+• IMJS   | Rp 168  ( +0.00%) | Dot di: 15M (1 Okt 2026, 15:15 WIB)
+• LPIN   | Rp 460  ( +4.07%) | Dot di: 15M (25 Sep 2026, 10:15 WIB)
+• HGII   | Rp 139  ( -0.71%) | Dot di: 15M (30 Sep 2026, 09:00 WIB)
+• SDPC   | Rp 197  ( +0.51%) | Dot di: 15M (28 Sep 2026, 14:30 WIB)
+• SHID   | Rp 745  ( -4.49%) | Dot di: 15M (12 Okt 2026, 09:15 WIB)
+• TBLA   | Rp 595  ( -0.83%) | Dot di: 15M (8 Okt 2026, 09:00 WIB)
+• JAYA   | Rp 141  ( -3.42%) | Dot di: 15M (14 Okt 2026, 14:30 WIB)
+• MDLA   | Rp 206  ( +0.00%) | Dot di: 15M (29 Sep 2026, 11:45 WIB)
+• MTLA   | Rp 735  ( -0.68%) | Dot di: 15M (29 Sep 2026, 09:30 WIB)
+• SDRA   | Rp 198  ( +0.00%) | Dot di: 15M (28 Sep 2026, 15:45 WIB)
+• IFII   | Rp 204  ( -0.97%) | Dot di: 15M (6 Okt 2026, 14:00 WIB)
+• BABY   | Rp 186  ( -2.62%) | Dot di: 15M (30 Sep 2026, 09:00 WIB)
+• PSGO   | Rp 193  ( +0.52%) | Dot di: 15M (24 Sep 2026, 09:00 WIB)
+• KMDS   | Rp 530  ( +3.92%) | Dot di: 15M (25 Sep 2026, 11:00 WIB)
+• BUAH   | Rp 482  ( -0.82%) | Dot di: 15M (24 Sep 2026, 09:30 WIB)
+• TOTO   | Rp 242  ( +0.83%) | Dot di: 15M (6 Okt 2026, 15:45 WIB)
+• PSSI   | Rp 368  ( -1.08%) | Dot di: 15M (6 Okt 2026, 15:15 WIB)
+• ASRM   | Rp 268  ( +6.35%) | Dot di: 15M (6 Okt 2026, 10:00 WIB)
+• BUDI   | Rp 228  ( +0.88%) | Dot di: 15M (22 Sep 2026, 09:00 WIB)
+• SAME   | Rp 286  ( +0.00%) | Dot di: 15M (23 Sep 2026, 15:45 WIB)
+• VINS   | Rp 140  ( -1.41%) | Dot di: 15M (21 Sep 2026, 09:45 WIB)
+• SPMA   | Rp 161  ( +0.62%) | Dot di: 15M (28 Sep 2026, 10:45 WIB)
+• PRAY   | Rp 765  ( +1.32%) | Dot di: 15M (17 Sep 2026, 14:30 WIB)
+• AMOR   | Rp 368  ( +0.00%) | Dot di: 15M (28 Sep 2026, 11:30 WIB)
+
+===========================================================================
+[BAGIAN 4] REKAPITULASI SELURUH 128 SAHAM HUNTER:
+===========================================================================
+- STRK   : Rp 107  (+18.89%) -> 🟢 2 TIMEFRAME
+- GRPH   : Rp 130  (+18.18%) -> 🟢 1 TIMEFRAME
+- TRON   : Rp 101  (+34.67%) -> 🟢 2 TIMEFRAME
+- CUAN   : Rp 665  ( +0.00%) -> 🟢 1 TIMEFRAME
+- VKTR   : Rp 500  (-12.28%) -> ⚪ Netral
+- REAL   : Rp 45   ( +2.27%) -> 🟢 3 TIMEFRAME
+- ERAA   : Rp 625  ( +0.00%) -> 🟢 1 TIMEFRAME
+- BUVA   : Rp 520  (-11.86%) -> 🟢 2 TIMEFRAME
+- DKHH   : Rp 102  ( +5.15%) -> 🟢 1 TIMEFRAME
+- TOWR   : Rp 454  ( +0.44%) -> 🟢 1 TIMEFRAME
+- GPRA   : Rp 100  ( +3.09%) -> 🟢 1 TIMEFRAME
+- FOLK   : Rp 103  (-11.21%) -> 🟢 2 TIMEFRAME
+- MAXI   : Rp 26   ( -7.14%) -> 🟢 3 TIMEFRAME
+- PWON   : Rp 288  ( +3.60%) -> 🟢 1 TIMEFRAME
+- SMRA   : Rp 264  ( +3.12%) -> 🟢 3 TIMEFRAME
+- KBLV   : Rp 116  (+18.37%) -> 🟢 2 TIMEFRAME
+- MGNA   : Rp 189  (+18.12%) -> 🟢 1 TIMEFRAME
+- SDMU   : Rp 66   ( +1.54%) -> 🟢 2 TIMEFRAME
+- SGER   : Rp 780  ( +1.30%) -> 🟢 1 TIMEFRAME
+- CTTH   : Rp 100  ( +1.01%) -> 🟢 2 TIMEFRAME
+- PART   : Rp 111  ( +0.91%) -> 🟢 2 TIMEFRAME
+- BAIK   : Rp 282  (+15.57%) -> 🟢 1 TIMEFRAME
+- PICO   : Rp 177  ( -8.76%) -> 🟢 2 TIMEFRAME
+- LAJU   : Rp 57   ( +3.64%) -> 🟢 2 TIMEFRAME
+- ATLA   : Rp 25   (-10.71%) -> ⚪ Netral
+- BDKR   : Rp 195  ( +0.00%) -> 🟢 1 TIMEFRAME
+- SCMA   : Rp 173  ( -1.70%) -> 🟢 2 TIMEFRAME
+- MMIX   : Rp 975  ( +0.52%) -> 🟢 1 TIMEFRAME
+- RANS   : Rp 178  ( -1.66%) -> 🟢 2 TIMEFRAME
+- KLBF   : Rp 780  ( +0.00%) -> 🟢 1 TIMEFRAME
+- MSIN   : Rp 173  ( +0.00%) -> 🟢 2 TIMEFRAME
+- SBMA   : Rp 124  (-13.89%) -> 🟢 1 TIMEFRAME
+- MPXL   : Rp 316  ( +8.97%) -> 🟢 1 TIMEFRAME
+- CDIA   : Rp 500  ( +0.00%) -> 🟢 2 TIMEFRAME
+- TOOL   : Rp 55   ( +0.00%) -> 🟢 1 TIMEFRAME
+- SLIS   : Rp 72   ( +2.86%) -> 🟢 2 TIMEFRAME
+- AYAM   : Rp 505  ( +0.00%) -> 🟢 1 TIMEFRAME
+- GULA   : Rp 785  ( -1.26%) -> 🟢 1 TIMEFRAME
+- CNMA   : Rp 85   ( -1.16%) -> ⚪ Netral
+- NICL   : Rp 356  ( +3.49%) -> 🟢 2 TIMEFRAME
+- BEER   : Rp 64   ( +4.92%) -> 🟢 3 TIMEFRAME
+- VTNY   : Rp 52   ( -1.89%) -> 🟢 2 TIMEFRAME
+- CLEO   : Rp 448  ( +3.70%) -> 🟢 1 TIMEFRAME
+- RGAS   : Rp 86   ( +0.00%) -> 🟢 2 TIMEFRAME
+- ELSA   : Rp 680  ( +3.82%) -> 🟢 2 TIMEFRAME
+- PPRE   : Rp 86   ( +1.18%) -> 🟢 2 TIMEFRAME
+- KUAS   : Rp 89   ( +2.30%) -> 🟢 2 TIMEFRAME
+- CTRA   : Rp 585  ( +1.74%) -> 🟢 3 TIMEFRAME
+- HATM   : Rp 670  (+10.74%) -> 🟢 2 TIMEFRAME
+- ELIT   : Rp 260  ( +4.84%) -> 🟢 1 TIMEFRAME
+- TOSK   : Rp 83   ( +1.22%) -> 🟢 1 TIMEFRAME
+- MAPA   : Rp 615  ( -0.81%) -> 🟢 1 TIMEFRAME
+- HDIT   : Rp 39   ( +2.63%) -> 🟢 2 TIMEFRAME
+- FILM   : Rp 530  ( -4.50%) -> 🟢 1 TIMEFRAME
+- CARS   : Rp 102  ( -3.77%) -> 🟢 1 TIMEFRAME
+- SIDO   : Rp 356  ( +1.71%) -> 🟢 1 TIMEFRAME
+- GPSO   : Rp 234  ( +1.74%) -> 🟢 3 TIMEFRAME
+- JATI   : Rp 104  ( +0.97%) -> 🟢 1 TIMEFRAME
+- PRDL   : Rp 168  ( +4.35%) -> 🟢 2 TIMEFRAME
+- NTBK   : Rp 64   ( -1.54%) -> 🟢 2 TIMEFRAME
+- CMNT   : Rp 760  ( +2.01%) -> 🟢 1 TIMEFRAME
+- AGRS   : Rp 59   ( +1.72%) -> 🟢 2 TIMEFRAME
+- ASRI   : Rp 115  ( +0.00%) -> 🟢 2 TIMEFRAME
+- VRNA   : Rp 85   ( +1.19%) -> 🟢 1 TIMEFRAME
+- SNLK   : Rp 234  ( +0.00%) -> 🟢 1 TIMEFRAME
+- AVIA   : Rp 350  ( -1.13%) -> 🟢 2 TIMEFRAME
+- CENT   : Rp 89   ( -1.11%) -> 🟢 2 TIMEFRAME
+- BKDP   : Rp 186  ( +4.49%) -> 🟢 1 TIMEFRAME
+- RBMS   : Rp 45   ( +2.27%) -> 🟢 2 TIMEFRAME
+- FWCT   : Rp 82   ( -2.38%) -> 🟢 2 TIMEFRAME
+- OASA   : Rp 220  ( -1.79%) -> 🟢 2 TIMEFRAME
+- BLES   : Rp 206  ( +3.00%) -> 🟢 1 TIMEFRAME
+- ENZO   : Rp 60   ( -1.64%) -> 🟢 2 TIMEFRAME
+- SUPA   : Rp 458  ( -2.97%) -> 🟢 2 TIMEFRAME
+- SOLA   : Rp 73   ( -2.67%) -> 🟢 3 TIMEFRAME
+- WBSA   : Rp 555  ( -0.89%) -> 🟢 2 TIMEFRAME
+- PBSA   : Rp 384  (-54.56%) -> 🟢 2 TIMEFRAME
+- PMUI   : Rp 96   ( -1.03%) -> 🟢 1 TIMEFRAME
+- VAST   : Rp 106  ( +0.00%) -> 🟢 1 TIMEFRAME
+- BELI   : Rp 314  (+11.35%) -> 🟢 1 TIMEFRAME
+- BATR   : Rp 95   ( +0.00%) -> 🟢 1 TIMEFRAME
+- BINO   : Rp 98   ( -5.77%) -> 🟢 2 TIMEFRAME
+- MTEL   : Rp 444  ( -2.63%) -> 🟢 1 TIMEFRAME
+- BJTM   : Rp 510  ( +0.00%) -> 🟢 1 TIMEFRAME
+- PEVE   : Rp 374  ( +5.65%) -> 🟢 2 TIMEFRAME
+- KOPI   : Rp 180  ( -2.70%) -> 🟢 1 TIMEFRAME
+- MGRO   : Rp 730  ( +0.00%) -> 🟢 1 TIMEFRAME
+- HDFA   : Rp 93   ( +0.00%) -> 🟢 2 TIMEFRAME
+- NRCA   : Rp 555  ( +6.73%) -> 🟢 1 TIMEFRAME
+- WTON   : Rp 72   ( +0.00%) -> 🟢 2 TIMEFRAME
+- BOLA   : Rp 181  ( -1.63%) -> 🟢 1 TIMEFRAME
+- SOTS   : Rp 650  ( +1.56%) -> 🟢 2 TIMEFRAME
+- DOSS   : Rp 159  ( +1.92%) -> 🟢 1 TIMEFRAME
+- SATU   : Rp 244  ( +0.83%) -> 🟢 2 TIMEFRAME
+- KKGI   : Rp 294  ( +0.00%) -> 🟢 1 TIMEFRAME
+- IMJS   : Rp 168  ( +0.00%) -> 🟢 1 TIMEFRAME
+- LPIN   : Rp 460  ( +4.07%) -> 🟢 1 TIMEFRAME
+- HGII   : Rp 139  ( -0.71%) -> 🟢 1 TIMEFRAME
+- SDPC   : Rp 197  ( +0.51%) -> 🟢 1 TIMEFRAME
+- SHID   : Rp 745  ( -4.49%) -> 🟢 1 TIMEFRAME
+- TBLA   : Rp 595  ( -0.83%) -> 🟢 1 TIMEFRAME
+- PJHB   : Rp 153  ( +0.00%) -> 🟢 2 TIMEFRAME
+- JAYA   : Rp 141  ( -3.42%) -> 🟢 1 TIMEFRAME
+- MDLA   : Rp 206  ( +0.00%) -> 🟢 1 TIMEFRAME
+- INTD   : Rp 314  ( -1.88%) -> 🟢 2 TIMEFRAME
+- MTLA   : Rp 735  ( -0.68%) -> 🟢 1 TIMEFRAME
+- ECII   : Rp 155  ( -0.64%) -> 🟢 2 TIMEFRAME
+- SDRA   : Rp 198  ( +0.00%) -> 🟢 1 TIMEFRAME
+- DRMA   : Rp 945  ( -0.53%) -> 🟢 2 TIMEFRAME
+- IFII   : Rp 204  ( -0.97%) -> 🟢 1 TIMEFRAME
+- BABY   : Rp 186  ( -2.62%) -> 🟢 1 TIMEFRAME
+- PSGO   : Rp 193  ( +0.52%) -> 🟢 1 TIMEFRAME
+- KMDS   : Rp 530  ( +3.92%) -> 🟢 1 TIMEFRAME
+- BUAH   : Rp 482  ( -0.82%) -> 🟢 1 TIMEFRAME
+- TOTO   : Rp 242  ( +0.83%) -> 🟢 1 TIMEFRAME
+- PSSI   : Rp 368  ( -1.08%) -> 🟢 1 TIMEFRAME
+- ASRM   : Rp 268  ( +6.35%) -> 🟢 1 TIMEFRAME
+- BUDI   : Rp 228  ( +0.88%) -> 🟢 1 TIMEFRAME
+- SAME   : Rp 286  ( +0.00%) -> 🟢 1 TIMEFRAME
+- VINS   : Rp 140  ( -1.41%) -> 🟢 1 TIMEFRAME
+- CSRA   : Rp 715  ( -0.69%) -> 🟢 2 TIMEFRAME
+- AWAN   : Rp 148  ( -2.63%) -> 🟢 2 TIMEFRAME
+- SPMA   : Rp 161  ( +0.62%) -> 🟢 1 TIMEFRAME
+- PDES   : Rp 374  ( +1.08%) -> ⚪ Netral
+- PRAY   : Rp 765  ( +1.32%) -> 🟢 1 TIMEFRAME
+- AMOR   : Rp 368  ( +0.00%) -> 🟢 1 TIMEFRAME
+- PNSE   : Rp 450  ( +6.64%) -> 🟢 3 TIMEFRAME
+- DYAN   : Rp 81   ( +3.85%) -> 🟢 1 TIMEFRAME
