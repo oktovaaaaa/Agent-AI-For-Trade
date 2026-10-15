@@ -83,6 +83,113 @@ def format_gain_header(tf_dict):
         return f" ({' | '.join(parts)})"
     return ""
 
+def calculate_smc_levels_fallback(bars, cur_close):
+    """Fallback kalkulasi Supply & Demand sederhana jika indikator belum termuat."""
+    if not bars or len(bars) < 8 or not cur_close:
+        return None
+    k = 5
+    pivot_highs = []
+    pivot_lows = []
+    for i in range(k, len(bars) - k):
+        high_i = bars[i]['high']
+        low_i = bars[i]['low']
+        if all(high_i >= bars[j]['high'] for j in range(i - k, i + k + 1) if j != i):
+            pivot_highs.append(high_i)
+        if all(low_i <= bars[j]['low'] for j in range(i - k, i + k + 1) if j != i):
+            pivot_lows.append(low_i)
+            
+    sup_above = [p for p in pivot_highs if p > cur_close]
+    nearest_supply = min(sup_above) if sup_above else (max(pivot_highs) if pivot_highs else None)
+    
+    dem_below = [p for p in pivot_lows if p < cur_close]
+    nearest_demand = max(dem_below) if dem_below else (min(pivot_lows) if pivot_lows else None)
+    
+    pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
+    pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
+    
+    status_7d = "⚪ Di Antara Demand & Supply"
+    if nearest_supply and cur_close >= nearest_supply:
+        status_7d = f"🔥 BREAKOUT SUPPLY (Menembus Rp {nearest_supply:.0f})"
+    elif nearest_demand and cur_close <= nearest_demand:
+        status_7d = f"⚠️ BREAKDOWN DEMAND (Menembus Rp {nearest_demand:.0f})"
+    elif abs(pct_to_supply) <= 2.5:
+        status_7d = "⚡ Menguji Area Supply (Dekat Resisten)"
+    elif abs(pct_to_demand) <= 2.5:
+        status_7d = "🟢 Di Area Demand (Potensi Pantulan)"
+        
+    return {
+        "supply": nearest_supply,
+        "demand": nearest_demand,
+        "pct_to_supply": pct_to_supply,
+        "pct_to_demand": pct_to_demand,
+        "status_7d": status_7d
+    }
+
+def parse_real_smc_levels(smc_data, cur_close, recent_bars=None):
+    """
+    Menganalisa garis Supply, Demand, persentase jarak harga, dan status BOS / CHoCH / Breakout
+    7 hari terakhir LANGSUNG dari indikator TradingView Ultimate SMC Suite milik akun pengguna.
+    """
+    if not cur_close or cur_close <= 0:
+        return None
+        
+    supplies = smc_data.get("supplies", []) if smc_data else []
+    demands = smc_data.get("demands", []) if smc_data else []
+    bos_list = smc_data.get("bosList", []) if smc_data else []
+    
+    if supplies or demands:
+        sup_above = [s['mid'] for s in supplies if s.get('mid', 0) >= cur_close]
+        if sup_above:
+            nearest_supply = min(sup_above)
+        elif supplies:
+            nearest_supply = max(s['mid'] for s in supplies)
+        else:
+            nearest_supply = None
+            
+        dem_below = [d['mid'] for d in demands if d.get('mid', 0) <= cur_close]
+        if dem_below:
+            nearest_demand = max(dem_below)
+        elif demands:
+            nearest_demand = min(d['mid'] for d in demands)
+        else:
+            nearest_demand = None
+            
+        pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
+        pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
+        
+        now_ts = datetime.datetime.now(WIB_TZ).timestamp()
+        week_sec = 7 * 86400
+        recent_bos = [b for b in bos_list if b.get('timestamp') and (now_ts - b['timestamp']) <= week_sec]
+        
+        if nearest_supply and cur_close >= nearest_supply:
+            status_7d = f"🔥 BREAKOUT SUPPLY (Menembus Rp {nearest_supply:.0f})"
+        elif nearest_demand and cur_close <= nearest_demand:
+            status_7d = f"⚠️ BREAKDOWN DEMAND (Menembus Rp {nearest_demand:.0f})"
+        elif abs(pct_to_supply) <= 2.5:
+            status_7d = "⚡ Menguji Area Supply (Dekat Resisten)"
+        elif abs(pct_to_demand) <= 2.5:
+            status_7d = "🟢 Di Area Demand (Potensi Pantulan)"
+        else:
+            if recent_bos:
+                latest_b = max(recent_bos, key=lambda x: x['timestamp'])
+                b_dt = datetime.datetime.fromtimestamp(latest_b['timestamp'], WIB_TZ)
+                b_month = BULAN_PENDEK.get(b_dt.month, b_dt.strftime("%b"))
+                status_7d = f"⚪ Di Antara Demand & Supply ({latest_b['type']}: Rp {latest_b['price']:.0f} tgl {b_dt.day} {b_month})"
+            else:
+                status_7d = "⚪ Di Antara Demand & Supply"
+                
+        return {
+            "supply": nearest_supply,
+            "demand": nearest_demand,
+            "pct_to_supply": pct_to_supply,
+            "pct_to_demand": pct_to_demand,
+            "status_7d": status_7d
+        }
+        
+    if recent_bars:
+        return calculate_smc_levels_fallback(recent_bars, cur_close)
+    return None
+
 def format_donalt_wa(tf_results):
     """
     Format sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
@@ -104,7 +211,11 @@ def format_donalt_wa(tf_results):
         parts = []
         if g:
             has_any = True
-            gain_str = f" ({g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+            if g.get('gain_pct') is not None:
+                rev_s = " s/d Death" if g.get('reversed') else ""
+                gain_str = f" ({g['gain_pct']:+.2f}%{rev_s})"
+            else:
+                gain_str = ""
             parts.append(f"✨ Golden: {g['date']}{gain_str}")
         if d:
             has_any = True
@@ -115,11 +226,9 @@ def format_donalt_wa(tf_results):
         else:
             sub_lines.append(f"• {label:<4}: -")
             
-    if has_any:
-        lines.append("🏆 *EMA + DonAlt (30 Hari)*:")
-        lines.extend(sub_lines)
-        return "\n".join(lines) + "\n"
-    return ""
+    lines.append("🏆 *EMA + DonAlt (30 Hari)*:")
+    lines.extend(sub_lines)
+    return "\n".join(lines) + "\n"
 
 def format_donalt_notepad(tf_results):
     """Format sinyal Golden Cross & Death Cross untuk laporan Notepad."""
@@ -133,7 +242,11 @@ def format_donalt_notepad(tf_results):
         
         parts = []
         if g:
-            gain_str = f" (Kenaikan: {g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+            if g.get('gain_pct') is not None:
+                rev_s = " s/d Death" if g.get('reversed') else ""
+                gain_str = f" (Kenaikan: {g['gain_pct']:+.2f}%{rev_s})"
+            else:
+                gain_str = ""
             parts.append(f"✨ Golden: {g['date']} @ Rp {g['price']:.0f}{gain_str}")
         else:
             parts.append("✨ Golden: -")
@@ -153,7 +266,6 @@ def format_macd_wa(tf_results):
     """
     lines = []
     tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
-    has_any = False
     sub_lines = []
     
     for code, label in tf_order:
@@ -164,10 +276,8 @@ def format_macd_wa(tf_results):
         
         parts = []
         if bull:
-            has_any = True
             parts.append(f"🐂 {bull['type']}: {bull['date']}")
         if bear:
-            has_any = True
             parts.append(f"🐻 {bear['type']}: {bear['date']}")
             
         if parts:
@@ -175,11 +285,9 @@ def format_macd_wa(tf_results):
         else:
             sub_lines.append(f"• {label:<4}: -")
             
-    if has_any:
-        lines.append("🌊 *MACD Divergences (30 Hari)*:")
-        lines.extend(sub_lines)
-        return "\n".join(lines) + "\n"
-    return ""
+    lines.append("🌊 *MACD Divergences (30 Hari)*:")
+    lines.extend(sub_lines)
+    return "\n".join(lines) + "\n"
 
 def format_macd_notepad(tf_results):
     """Format sinyal MACD Divergences (Bull & Bear) untuk laporan Notepad."""
@@ -203,6 +311,129 @@ def format_macd_notepad(tf_results):
             parts.append("🐻 Bear: -")
             
         lines.append(f"   - MACD Div  {label}: " + " | ".join(parts))
+    return lines
+
+def format_scalping_wa(tf_results):
+    """
+    Format sinyal BUY & SELL serta status Trend dari indikator
+    ( ͡° ͜ʖ ͡°) Scalping vs Swing Trading untuk 3 timeframe (1D, 1H, 15M) di WhatsApp.
+    """
+    lines = []
+    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    sub_lines = []
+    
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        sc = tf_data.get("scalping", {})
+        buy = sc.get("buy")
+        sell = sc.get("sell")
+        trend = sc.get("trend")
+        
+        parts = []
+        if buy:
+            if buy.get('gain_pct') is not None:
+                rev_s = " s/d SELL" if buy.get('reversed') else ""
+                gain_s = f" ({buy['gain_pct']:+.2f}%{rev_s})"
+            else:
+                gain_s = ""
+            parts.append(f"🟢 BUY: {buy['date']}{gain_s}")
+        if sell:
+            parts.append(f"🔴 SELL: {sell['date']}")
+        if trend and trend != "-":
+            parts.append(f"Trend: {trend}")
+            
+        if parts:
+            sub_lines.append(f"• {label:<4}: " + " | ".join(parts))
+        else:
+            sub_lines.append(f"• {label:<4}: -")
+            
+    lines.append("⚔️ *Scalping vs Swing Trading (30 Hari)*:")
+    lines.extend(sub_lines)
+    return "\n".join(lines) + "\n"
+
+def format_scalping_notepad(tf_results):
+    """Format sinyal Scalping vs Swing Trading untuk laporan Notepad."""
+    lines = []
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    for code, label in tf_order:
+        tf_data = tf_results.get(code, {})
+        sc = tf_data.get("scalping", {})
+        buy = sc.get("buy")
+        sell = sc.get("sell")
+        trend = sc.get("trend") or "-"
+        
+        parts = []
+        if buy:
+            if buy.get('gain_pct') is not None:
+                rev_s = " s/d SELL" if buy.get('reversed') else ""
+                gain_s = f" ({buy['gain_pct']:+.2f}%{rev_s})"
+            else:
+                gain_s = ""
+            parts.append(f"🟢 BUY: {buy['date']} @ Rp {buy['price']:.0f}{gain_s}")
+        else:
+            parts.append("🟢 BUY: -")
+            
+        if sell:
+            parts.append(f"🔴 SELL: {sell['date']} @ Rp {sell['price']:.0f}")
+        else:
+            parts.append("🔴 SELL: -")
+            
+        parts.append(f"Trend: {trend}")
+        lines.append(f"   - Scalping  {label}: " + " | ".join(parts))
+    return lines
+
+def format_smc_wa(smc_1d, smc_1h=None):
+    """Format tampilan SMC Supply, Demand & Status 7D untuk Timeframe 1D & 1H di WhatsApp."""
+    if isinstance(smc_1d, dict) and smc_1h is None:
+        smc_1h = smc_1d
+        smc_1d = None
+        
+    lines = []
+    if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
+        sup_d = f"Rp {smc_1d['supply']:.0f} ({smc_1d['pct_to_supply']:+.2f}%)"
+        dem_d = f"Rp {smc_1d['demand']:.0f} ({smc_1d['pct_to_demand']:+.2f}%)"
+        lines.append(f"• 1D  : Sup {sup_d} | Dem {dem_d}")
+        
+    if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
+        sup_h = f"Rp {smc_1h['supply']:.0f} ({smc_1h['pct_to_supply']:+.2f}%)"
+        dem_h = f"Rp {smc_1h['demand']:.0f} ({smc_1h['pct_to_demand']:+.2f}%)"
+        lines.append(f"• 1H  : Sup {sup_h} | Dem {dem_h}")
+        
+    status_info = None
+    if smc_1h and ("BREAKOUT" in smc_1h.get('status_7d', '') or "BREAKDOWN" in smc_1h.get('status_7d', '')):
+        status_info = f"📍 Status (1H): {smc_1h['status_7d']}"
+    elif smc_1d and ("BREAKOUT" in smc_1d.get('status_7d', '') or "BREAKDOWN" in smc_1d.get('status_7d', '')):
+        status_info = f"📍 Status (1D): {smc_1d['status_7d']}"
+    elif smc_1h and smc_1h.get('status_7d'):
+        status_info = f"📍 Status 7D : {smc_1h['status_7d']}"
+    elif smc_1d and smc_1d.get('status_7d'):
+        status_info = f"📍 Status 7D : {smc_1d['status_7d']}"
+        
+    if status_info:
+        lines.append(status_info)
+        
+    if lines:
+        return "🎯 *Supply & Demand (SMC Suite)*:\n" + "\n".join(lines) + "\n"
+    return ""
+
+def format_smc_notepad(tf_results):
+    """Format sinyal SMC Supply, Demand & Status 7D untuk laporan Notepad."""
+    lines = []
+    smc_1d = tf_results.get('D', {}).get('smc')
+    smc_1h = tf_results.get('60', {}).get('smc')
+    
+    if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
+        sup_d = f"Rp {smc_1d['supply']:.0f} ({smc_1d['pct_to_supply']:+.2f}%)"
+        dem_d = f"Rp {smc_1d['demand']:.0f} ({smc_1d['pct_to_demand']:+.2f}%)"
+        lines.append(f"   - SMC Daily (1D)       : Supply: {sup_d} | Demand: {dem_d}")
+    if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
+        sup_h = f"Rp {smc_1h['supply']:.0f} ({smc_1h['pct_to_supply']:+.2f}%)"
+        dem_h = f"Rp {smc_1h['demand']:.0f} ({smc_1h['pct_to_demand']:+.2f}%)"
+        lines.append(f"   - SMC 1 Jam (1H)       : Supply: {sup_h} | Demand: {dem_h}")
+    if smc_1h and smc_1h.get('status_7d'):
+        lines.append(f"   - SMC Status 7D        : {smc_1h['status_7d']}")
+    elif smc_1d and smc_1d.get('status_7d'):
+        lines.append(f"   - SMC Status 7D        : {smc_1d['status_7d']}")
     return lines
 
 def bersihkan_screenshot():
@@ -365,47 +596,63 @@ async def scan_stock_rallygood(page, stock_info):
             await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', tf['interval'])
             await asyncio.sleep(1.8)
             
-            # Ambil data Dot Green (RallyGood), Golden/Death (DonAlt), dan Bull/Bear (MACD Divergences)
-            # dengan teknik Dynamic Swapping agar tidak melebihi batas 2 indikator TradingView gratis.
+            # Ambil data Dot Green (RallyGood), Golden/Death (DonAlt), Supply/Demand (SMC),
+            # BUY/SELL/Trend (Scalping vs Swing Trading), dan Bull/Bear (MACD Divergences)
+            # dengan teknik Dynamic Swapping berurutan agar tidak pernah melebihi batas 2 indikator TradingView gratis.
             eval_data = await page.evaluate('''async () => {
                 try {
                     const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                    if (!chart) return { dots: [], donalt: { golden: [], death: [] }, macd: { bull: [], bear: [] }, currentClose: null };
+                    if (!chart) return { dots: [], donalt: { golden: [], death: [] }, smc: null, scalping: { buy: [], sell: [], trend: null }, macd: { bull: [], bear: [] }, currentClose: null, bars: [] };
                     const model = chart.model();
                     const ts = model.timeScale();
                     const ms = model.mainSeries();
                     const barsObj = ms && ms.bars ? ms.bars() : null;
+                    const lastIdx = barsObj && barsObj.lastIndex ? barsObj.lastIndex() : (barsObj && barsObj.last ? barsObj.last().index : 0);
                     const lastBar = barsObj && barsObj.last ? barsObj.last() : null;
                     const currentClose = lastBar && lastBar.value ? lastBar.value[4] : null;
 
+                    // Bar historis untuk fallback kalkulasi SMC jika diperlukan
+                    const recentBars = [];
+                    if (barsObj && barsObj.valueAt) {
+                        for (let i = Math.max(0, lastIdx - 50); i <= lastIdx; i++) {
+                            const b = barsObj.valueAt(i);
+                            if (b) recentBars.push({ time: b[0], open: b[1], high: b[2], low: b[3], close: b[4], volume: b[5] });
+                        }
+                    }
+
                     const allStudies = model.panes().flatMap(p => p.dataSources());
-                    
                     const smcStudy = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
                     const donaltStudy = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
                     const rallyStudy = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                    const scStudy = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
                     const macdStudy = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
 
-                    // 1. Pastikan Ultimate SMC Suite mati
-                    if (smcStudy && smcStudy.properties && smcStudy.properties().visible) {
-                        smcStudy.properties().visible.setValue(false);
-                    }
-                    
-                    // 2. Pastikan EMA + DonAlt Suite selalu aktif
-                    if (donaltStudy && donaltStudy.properties && donaltStudy.properties().visible) {
+                    // FASE 0: Keamanan awal - pastikan hanya EMA + DonAlt & RallyGood yang aktif (Maksimal 2 Indikator)
+                    // Matikan dulu indikator sekunder sebelum menyalakan indikator utama agar TradingView tidak menolak batas 2 indikator
+                    let needWait = false;
+                    if (smcStudy?.properties?.().visible?.value()) { smcStudy.properties().visible.setValue(false); needWait = true; }
+                    if (scStudy?.properties?.().visible?.value()) { scStudy.properties().visible.setValue(false); needWait = true; }
+                    if (macdStudy?.properties?.().visible?.value()) { macdStudy.properties().visible.setValue(false); needWait = true; }
+                    if (needWait) await new Promise(r => setTimeout(r, 400));
+
+                    if (donaltStudy?.properties?.().visible && !donaltStudy.properties().visible.value()) {
                         donaltStudy.properties().visible.setValue(true);
                     }
-
-                    // 3. FASE 1: Matikan MACD, Nyalakan RallyGood (Maksimal 2 indikator: DonAlt & RallyGood)
-                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
-                        macdStudy.properties().visible.setValue(false);
-                    }
-                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
+                    if (rallyStudy?.properties?.().visible && !rallyStudy.properties().visible.value()) {
                         rallyStudy.properties().visible.setValue(true);
                     }
-                    
                     await new Promise(r => setTimeout(r, 600));
 
-                    // Ekstraksi Dot Green dari RallyGood
+                    // FASE 1: Ekstraksi RallyGood (Dot Green) & EMA + DonAlt Suite (Golden/Death Cross)
+                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 1500ms)
+                    if (rallyStudy) {
+                        for (let r = 0; r < 15; r++) {
+                            const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
+                            if (greenPv && greenPv._items && greenPv._items.length > 0) break;
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                    }
+
                     let dots = [];
                     if (rallyStudy) {
                         const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
@@ -427,7 +674,6 @@ async def scan_stock_rallygood(page, stock_info):
                         }
                     }
 
-                    // Ekstraksi Golden Cross & Death Cross dari EMA + DonAlt Suite
                     let goldenList = [];
                     let deathList = [];
                     if (donaltStudy) {
@@ -452,17 +698,143 @@ async def scan_stock_rallygood(page, stock_info):
                         }
                     }
 
-                    // 4. FASE 2: SWAP! Matikan RallyGood, Nyalakan MACD Divergences (Maksimal 2 indikator: DonAlt & MACD)
-                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
-                        rallyStudy.properties().visible.setValue(false);
-                    }
-                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
-                        macdStudy.properties().visible.setValue(true);
+                    // FASE 2: GANTIAN! Matikan RallyGood, Nyalakan Ultimate SMC Suite (Cek Supply & Demand)
+                    // Total indikator aktif: 2 (DonAlt + SMC)
+                    if (rallyStudy?.properties?.().visible) rallyStudy.properties().visible.setValue(false);
+                    await new Promise(r => setTimeout(r, 400));
+                    if (smcStudy?.properties?.().visible) smcStudy.properties().visible.setValue(true);
+                    await new Promise(r => setTimeout(r, 700));
+
+                    let smcData = null;
+                    if (smcStudy && smcStudy._graphics && smcStudy._graphics._primitivesCollection) {
+                        const prims = smcStudy._graphics._primitivesCollection;
+                        const boxesInner = prims.dwgboxes?.get('boxes');
+                        const labelsInner = prims.dwglabels?.get('labels');
+                        
+                        const boxDataObj = boxesInner?.get(false)?._primitivesDataById;
+                        const labelDataObj = labelsInner?.get(false)?._primitivesDataById;
+                        
+                        const boxEntries = boxDataObj instanceof Map ? Array.from(boxDataObj.entries()) : Object.entries(boxDataObj || {});
+                        const labelEntries = labelDataObj instanceof Map ? Array.from(labelDataObj.entries()) : Object.entries(labelDataObj || {});
+                        
+                        const parsedBoxes = boxEntries.map(([k, v]) => ({
+                            type: v.t || "",
+                            high: Math.max(v.y1, v.y2),
+                            low: Math.min(v.y1, v.y2),
+                            mid: (v.y1 + v.y2) / 2,
+                            extendRight: v.ex === 'r',
+                            barStart: v.x1,
+                            barEnd: v.x2
+                        }));
+                        
+                        let maxPineX = 0;
+                        for (const b of parsedBoxes) {
+                            if (b.barEnd > maxPineX) maxPineX = b.barEnd;
+                            if (b.barStart > maxPineX) maxPineX = b.barStart;
+                        }
+                        for (const [, l] of labelEntries) {
+                            if (l.x > maxPineX) maxPineX = l.x;
+                        }
+                        const offset = maxPineX - lastIdx;
+                        
+                        const supplies = parsedBoxes.filter(b => b.type === 'SUPPLY').map(s => ({
+                            high: s.high,
+                            low: s.low,
+                            mid: s.mid
+                        }));
+                        const demands = parsedBoxes.filter(b => b.type === 'DEMAND').map(d => ({
+                            high: d.high,
+                            low: d.low,
+                            mid: d.mid
+                        }));
+                        
+                        const bosList = labelEntries
+                            .filter(([, l]) => l.t && (l.t.includes('BOS') || l.t.includes('CHoCH')))
+                            .map(([id, l]) => {
+                                const localIdx = l.x - offset;
+                                const bar = barsObj && barsObj.valueAt && localIdx >= 0 && localIdx <= lastIdx ? barsObj.valueAt(localIdx) : null;
+                                const tp = bar ? bar[0] : null;
+                                return {
+                                    type: l.t,
+                                    price: l.y,
+                                    timestamp: tp,
+                                    barsAgo: lastIdx - localIdx
+                                };
+                            });
+                            
+                        smcData = {
+                            supplies: supplies,
+                            demands: demands,
+                            bosList: bosList
+                        };
                     }
 
-                    await new Promise(r => setTimeout(r, 800));
+                    // FASE 3: GANTIAN! Matikan Ultimate SMC Suite, Nyalakan ( ͡° ͜ʖ ͡°) Scalping vs Swing Trading
+                    // Total indikator aktif: 2 (DonAlt + Scalping vs Swing Trading)
+                    if (smcStudy?.properties?.().visible) smcStudy.properties().visible.setValue(false);
+                    await new Promise(r => setTimeout(r, 400));
+                    if (scStudy?.properties?.().visible) scStudy.properties().visible.setValue(true);
+                    
+                    // Beri waktu TradingView mengkalkulasi data Scalping vs Swing Trading (polling hingga 1200ms)
+                    for (let r = 0; r < 12; r++) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        const scD = scStudy?.data?.();
+                        if (scD && scD.lastIndex() > 0) {
+                            const lastV = scD.valueAt(scD.lastIndex());
+                            if (lastV && Array.isArray(lastV)) break;
+                        }
+                    }
 
-                    // Ekstraksi Bullish & Bearish Divergence dari MACD Divergences
+                    let buyList = [];
+                    let sellList = [];
+                    let currentTrend = null;
+                    if (scStudy) {
+                        const scData = scStudy.data();
+                        if (scData) {
+                            for (let i = scData.lastIndex(); i >= Math.max(0, scData.firstIndex()); i--) {
+                                const v = scData.valueAt(i);
+                                if (v && Array.isArray(v) && (v[2] === 0 || v[2] === 1)) {
+                                    currentTrend = (v[2] === 0) ? 'BUY (Green)' : 'SELL (Red)';
+                                    break;
+                                }
+                            }
+                            for (let i = Math.max(0, scData.firstIndex()); i <= scData.lastIndex(); i++) {
+                                const val = scData.valueAt(i);
+                                if (val && Array.isArray(val)) {
+                                    const tp = ts.indexToTimePoint(i);
+                                    const barVal = barsObj ? barsObj.valueAt(i) : null;
+                                    const barTime = barVal ? barVal[0] : tp;
+                                    const barClose = barVal ? barVal[4] : null;
+
+                                    // plot_2 / val[3] adalah sinyal BUY shape
+                                    if (val[3] !== null && val[3] !== undefined && !isNaN(val[3])) {
+                                        buyList.push({ idx: i, timestamp: barTime, price: val[3] || barClose });
+                                    }
+                                    // plot_3 / val[4] adalah sinyal SELL shape
+                                    if (val[4] !== null && val[4] !== undefined && !isNaN(val[4])) {
+                                        sellList.push({ idx: i, timestamp: barTime, price: val[4] || barClose });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // FASE 4: GANTIAN! Matikan Scalping vs Swing Trading, Nyalakan MACD Divergences
+                    // Total indikator aktif: 2 (DonAlt + MACD)
+                    if (scStudy?.properties?.().visible) scStudy.properties().visible.setValue(false);
+                    await new Promise(r => setTimeout(r, 400));
+                    if (macdStudy?.properties?.().visible) macdStudy.properties().visible.setValue(true);
+                    
+                    // Beri waktu TradingView mengkalkulasi data MACD (polling hingga 1200ms)
+                    for (let r = 0; r < 12; r++) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        const mdD = macdStudy?.data?.();
+                        if (mdD && mdD.lastIndex() > 0) {
+                            const lastV = mdD.valueAt(mdD.lastIndex());
+                            if (lastV && Array.isArray(lastV)) break;
+                        }
+                    }
+
                     let bullList = [];
                     let bearList = [];
                     if (macdStudy) {
@@ -489,31 +861,34 @@ async def scan_stock_rallygood(page, stock_info):
                         }
                     }
 
-                    // 5. FASE 3: RESTORE! Nyalakan kembali RallyGood, Matikan MACD (kembali ke layout 2 indikator standar)
-                    if (macdStudy && macdStudy.properties && macdStudy.properties().visible) {
-                        macdStudy.properties().visible.setValue(false);
-                    }
-                    if (rallyStudy && rallyStudy.properties && rallyStudy.properties().visible) {
-                        rallyStudy.properties().visible.setValue(true);
-                    }
-
+                    // FASE 5: RESTORE! Matikan MACD Divergences, Nyalakan kembali RallyGood
+                    // Kembali ke layout 2 indikator standar (DonAlt + RallyGood)
+                    if (macdStudy?.properties?.().visible) macdStudy.properties().visible.setValue(false);
+                    await new Promise(r => setTimeout(r, 400));
+                    if (rallyStudy?.properties?.().visible) rallyStudy.properties().visible.setValue(true);
                     await new Promise(r => setTimeout(r, 600));
 
                     return {
                         dots: dots,
                         donalt: { golden: goldenList, death: deathList },
+                        smc: smcData,
+                        scalping: { buy: buyList, sell: sellList, trend: currentTrend },
                         macd: { bull: bullList, bear: bearList },
-                        currentClose: currentClose
+                        currentClose: currentClose,
+                        bars: recentBars
                     };
                 } catch(e) {
-                    return { dots: [], donalt: { golden: [], death: [] }, macd: { bull: [], bear: [] }, currentClose: null };
+                    return { dots: [], donalt: { golden: [], death: [] }, smc: null, scalping: { buy: [], sell: [], trend: null }, macd: { bull: [], bear: [] }, currentClose: null, bars: [], error: String(e) };
                 }
             }''')
             
             dot_data = eval_data.get('dots', [])
             cur_close = eval_data.get('currentClose') or stock_info.get('close')
             donalt_raw = eval_data.get('donalt', {})
+            smc_raw = eval_data.get('smc')
+            scalping_raw = eval_data.get('scalping', {})
             macd_raw = eval_data.get('macd', {})
+            recent_bars = eval_data.get('bars', [])
             
             # 1. Olah RallyGood Dot Green (30 hari terakhir)
             valid_dots = []
@@ -562,11 +937,25 @@ async def scan_stock_rallygood(page, stock_info):
                 b_str = BULAN_PENDEK.get(g_dt.month, g_dt.strftime("%b"))
                 g_date = f"{g_dt.day} {b_str} {g_dt.year}" if tf_code == 'D' else f"{g_dt.day} {b_str} {g_dt.year}, {g_dt.strftime('%H:%M')} WIB"
                 g_price = latest_g.get('price')
-                g_gain = ((cur_close - g_price) / g_price * 100) if (cur_close and g_price and g_price > 0) else None
+                
+                # Cek apakah trend berbalik arah ke Death Cross setelah sinyal Golden Cross ini
+                all_deaths = donalt_raw.get('death', [])
+                deaths_after_g = [d for d in all_deaths if d.get('timestamp') and d['timestamp'] > latest_g['timestamp']]
+                g_reversed = False
+                g_exit_price = cur_close
+                if deaths_after_g:
+                    first_d = min(deaths_after_g, key=lambda x: x['timestamp'])
+                    if first_d.get('price'):
+                        g_exit_price = first_d.get('price')
+                        g_reversed = True
+                        
+                g_gain = ((g_exit_price - g_price) / g_price * 100) if (g_exit_price and g_price and g_price > 0) else None
                 golden_res = {
                     "date": g_date,
                     "dt": g_dt,
                     "price": g_price,
+                    "exit_price": g_exit_price,
+                    "reversed": g_reversed,
                     "gain_pct": g_gain
                 }
                 
@@ -588,7 +977,64 @@ async def scan_stock_rallygood(page, stock_info):
                 "death": death_res
             }
             
-            # 3. Olah MACD Divergences (Bull & Bear Divergence - 30 hari terakhir)
+            # 3. Olah Scalping vs Swing Trading (BUY & SELL Signals + Trend - 30 hari terakhir)
+            recent_sc_buys = [b for b in scalping_raw.get('buy', []) if b.get('timestamp') and b['timestamp'] >= limit_ts]
+            recent_sc_sells = [s for s in scalping_raw.get('sell', []) if s.get('timestamp') and s['timestamp'] >= limit_ts]
+            
+            sc_buy_res = None
+            if recent_sc_buys:
+                latest_buy = max(recent_sc_buys, key=lambda x: x['timestamp'])
+                b_dt = datetime.datetime.fromtimestamp(latest_buy['timestamp'], WIB_TZ)
+                b_str = BULAN_PENDEK.get(b_dt.month, b_dt.strftime("%b"))
+                b_date = f"{b_dt.day} {b_str} {b_dt.year}" if tf_code == 'D' else f"{b_dt.day} {b_str} {b_dt.year}, {b_dt.strftime('%H:%M')} WIB"
+                b_price = latest_buy.get('price')
+                
+                # Cek apakah trend berbalik arah ke SELL setelah sinyal BUY ini
+                all_sells = scalping_raw.get('sell', [])
+                sells_after_buy = [s for s in all_sells if s.get('timestamp') and s['timestamp'] > latest_buy['timestamp']]
+                b_reversed = False
+                b_exit_price = cur_close
+                if sells_after_buy:
+                    first_sell = min(sells_after_buy, key=lambda x: x['timestamp'])
+                    if first_sell.get('price'):
+                        b_exit_price = first_sell.get('price')
+                        b_reversed = True
+                        
+                b_gain = ((b_exit_price - b_price) / b_price * 100) if (b_exit_price and b_price and b_price > 0) else None
+                sc_buy_res = {
+                    "date": b_date,
+                    "dt": b_dt,
+                    "price": b_price,
+                    "exit_price": b_exit_price,
+                    "reversed": b_reversed,
+                    "gain_pct": b_gain
+                }
+                
+            sc_sell_res = None
+            if recent_sc_sells:
+                latest_sell = max(recent_sc_sells, key=lambda x: x['timestamp'])
+                s_dt = datetime.datetime.fromtimestamp(latest_sell['timestamp'], WIB_TZ)
+                s_str = BULAN_PENDEK.get(s_dt.month, s_dt.strftime("%b"))
+                s_date = f"{s_dt.day} {s_str} {s_dt.year}" if tf_code == 'D' else f"{s_dt.day} {s_str} {s_dt.year}, {s_dt.strftime('%H:%M')} WIB"
+                s_price = latest_sell.get('price')
+                sc_sell_res = {
+                    "date": s_date,
+                    "dt": s_dt,
+                    "price": s_price
+                }
+                
+            scalping_res = {
+                "buy": sc_buy_res,
+                "sell": sc_sell_res,
+                "trend": scalping_raw.get('trend')
+            }
+            
+            # 4. Olah Ultimate SMC Suite (Supply & Demand, Status 7D) untuk Daily (1D) dan 1 Jam (1H)
+            smc_res = None
+            if tf_code in ['D', '60']:
+                smc_res = parse_real_smc_levels(smc_raw, cur_close, recent_bars)
+
+            # 5. Olah MACD Divergences (Bull & Bear Divergence - 30 hari terakhir)
             recent_bull = [b for b in macd_raw.get('bull', []) if b.get('timestamp') and b['timestamp'] >= limit_ts]
             recent_bear = [b for b in macd_raw.get('bear', []) if b.get('timestamp') and b['timestamp'] >= limit_ts]
             
@@ -626,12 +1072,25 @@ async def scan_stock_rallygood(page, stock_info):
             # Tampilan konsol informatif
             indicator_tags = []
             if golden_res:
+                rev_s = " s/d Death" if golden_res.get('reversed') else ""
                 g_tag = f"✨ Golden: {golden_res['date']}"
                 if golden_res['gain_pct'] is not None:
-                    g_tag += f" ({golden_res['gain_pct']:+.2f}%)"
+                    g_tag += f" ({golden_res['gain_pct']:+.2f}%{rev_s})"
                 indicator_tags.append(g_tag)
             if death_res:
                 indicator_tags.append(f"⚠️ Death: {death_res['date']}")
+            if sc_buy_res:
+                rev_s = " s/d SELL" if sc_buy_res.get('reversed') else ""
+                sc_tag = f"⚔️ Scalp BUY: {sc_buy_res['date']}"
+                if sc_buy_res['gain_pct'] is not None:
+                    sc_tag += f" ({sc_buy_res['gain_pct']:+.2f}%{rev_s})"
+                indicator_tags.append(sc_tag)
+            if sc_sell_res:
+                indicator_tags.append(f"🔴 Scalp SELL: {sc_sell_res['date']}")
+            if scalping_res.get('trend'):
+                indicator_tags.append(f"Trend: {scalping_res['trend']}")
+            if smc_res and smc_res.get('status_7d'):
+                indicator_tags.append(f"🎯 SMC: {smc_res['status_7d']}")
             if bull_res:
                 indicator_tags.append(f"🐂 {bull_res['type']}: {bull_res['date']}")
             if bear_res:
@@ -651,6 +1110,8 @@ async def scan_stock_rallygood(page, stock_info):
                 "dot_close": dot_close,
                 "gain_pct": gain_pct,
                 "donalt": donalt_res,
+                "scalping": scalping_res,
+                "smc": smc_res,
                 "macd": macd_res
             }
                     
@@ -727,10 +1188,19 @@ async def run_daily_scan(send_wa=True):
         first_sym = hunter_stocks[0]['symbol']
         print(f"📊 Menyiapkan Chart Layout TradingView ({first_sym})...")
         await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{first_sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
-        await asyncio.sleep(4)
         
-        # Pastikan status default indikator di awal: DonAlt (ON), RallyGood (ON), MACD (OFF), SMC (OFF)
-        print("⚙️ Sinkronisasi Indikator TradingView: EMA + DonAlt (ON), RallyGood (ON), MACD (OFF)...")
+        # Tunggu sampai chart TradingView siap (polling hingga 20 detik)
+        for _ in range(20):
+            await asyncio.sleep(1)
+            ready = await page.evaluate('''() => {
+                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                return !!chart && chart.model().panes().flatMap(p => p.dataSources()).length >= 4;
+            }''')
+            if ready:
+                break
+        
+        # Pastikan status default indikator di awal: DonAlt (ON), RallyGood (ON), lainnya (OFF)
+        print("⚙️ Sinkronisasi Indikator TradingView: EMA + DonAlt (ON), RallyGood (ON), Lainnya (OFF)...")
         await page.evaluate('''async () => {
             try {
                 const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
@@ -739,15 +1209,21 @@ async def run_daily_scan(send_wa=True):
                 const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
                 const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
                 const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
                 const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
                 
-                if (smc && smc.properties && smc.properties().visible) smc.properties().visible.setValue(false);
-                if (donalt && donalt.properties && donalt.properties().visible) donalt.properties().visible.setValue(true);
-                if (macd && macd.properties && macd.properties().visible) macd.properties().visible.setValue(false);
-                if (rally && rally.properties && rally.properties().visible) rally.properties().visible.setValue(true);
+                // Matikan dulu indikator ekstra agar slot TradingView 2 indikator bersih
+                if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
+                if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
+                if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
+                await new Promise(r => setTimeout(r, 600));
+
+                if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
+                if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
+                await new Promise(r => setTimeout(r, 1000));
             } catch(e) {}
         }''')
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         
         # 3. Looping pengecekan chart saham
         for idx, stock in enumerate(hunter_stocks, 1):
@@ -764,6 +1240,29 @@ async def run_daily_scan(send_wa=True):
                 "timeframes": tf_results,
                 "has_green_dot": any_green
             })
+            
+        # Kembalikan status indikator ke default di TradingView sebelum menutup browser
+        try:
+            await page.evaluate('''async () => {
+                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                if (!chart) return;
+                const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
+                const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
+                const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+
+                if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
+                if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
+                if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
+                await new Promise(r => setTimeout(r, 400));
+                if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
+                if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
+                await new Promise(r => setTimeout(r, 600));
+            }''')
+        except Exception:
+            pass
             
         await browser.close()
         
@@ -834,6 +1333,12 @@ async def run_daily_scan(send_wa=True):
             # Tambahkan sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
             notepad_donalt_lines = format_donalt_notepad(tf)
             konten_laporan.extend(notepad_donalt_lines)
+            # Tambahkan sinyal Scalping vs Swing Trading (BUY & SELL + Trend)
+            notepad_scalping_lines = format_scalping_notepad(tf)
+            konten_laporan.extend(notepad_scalping_lines)
+            # Tambahkan sinyal SMC Supply & Demand (Daily & 1 Jam)
+            notepad_smc_lines = format_smc_notepad(tf)
+            konten_laporan.extend(notepad_smc_lines)
             # Tambahkan sinyal MACD Divergences (Bull & Bear)
             notepad_macd_lines = format_macd_notepad(tf)
             konten_laporan.extend(notepad_macd_lines)
@@ -861,6 +1366,10 @@ async def run_daily_scan(send_wa=True):
                 konten_laporan.append(f"   - 15 Menit    : [ADA DOT GREEN] (Muncul: {tf['15']['date']})")
             notepad_donalt_lines = format_donalt_notepad(tf)
             konten_laporan.extend(notepad_donalt_lines)
+            notepad_scalping_lines = format_scalping_notepad(tf)
+            konten_laporan.extend(notepad_scalping_lines)
+            notepad_smc_lines = format_smc_notepad(tf)
+            konten_laporan.extend(notepad_smc_lines)
             notepad_macd_lines = format_macd_notepad(tf)
             konten_laporan.extend(notepad_macd_lines)
             konten_laporan.append("")
@@ -885,10 +1394,33 @@ async def run_daily_scan(send_wa=True):
             for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
                 g = tf.get(code, {}).get("donalt", {}).get("golden")
                 if g:
-                    gain_s = f" ({g['gain_pct']:+.2f}%)" if g.get('gain_pct') is not None else ""
+                    rev_s = " s/d Death" if g.get('reversed') else ""
+                    gain_s = f" ({g['gain_pct']:+.2f}%{rev_s})" if g.get('gain_pct') is not None else ""
                     donalt_tags.append(f"Golden {lbl}: {g['date']}{gain_s}")
             donalt_note = f" | EMA: {', '.join(donalt_tags)}" if donalt_tags else ""
             
+            scalp_tags = []
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+                sc = tf.get(code, {}).get("scalping", {})
+                b = sc.get("buy")
+                s = sc.get("sell")
+                if b:
+                    rev_s = " s/d SELL" if b.get('reversed') else ""
+                    gain_s = f" ({b['gain_pct']:+.2f}%{rev_s})" if b.get('gain_pct') is not None else ""
+                    scalp_tags.append(f"BUY {lbl}: {b['date']}{gain_s}")
+                if s:
+                    scalp_tags.append(f"SELL {lbl}: {s['date']}")
+            scalp_note = f" | Scalp: {', '.join(scalp_tags)}" if scalp_tags else ""
+
+            smc_1d = tf.get('D', {}).get('smc')
+            smc_1h = tf.get('60', {}).get('smc')
+            smc_notes = []
+            if smc_1d and smc_1d.get('supply') and smc_1d.get('demand'):
+                smc_notes.append(f"1D Sup:{smc_1d['supply']:.0f}/Dem:{smc_1d['demand']:.0f}")
+            if smc_1h and smc_1h.get('supply') and smc_1h.get('demand'):
+                smc_notes.append(f"1H Sup:{smc_1h['supply']:.0f}/Dem:{smc_1h['demand']:.0f}")
+            smc_note = f" | SMC: {', '.join(smc_notes)}" if smc_notes else ""
+
             macd_tags = []
             for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
                 m = tf.get(code, {}).get("macd", {})
@@ -899,7 +1431,7 @@ async def run_daily_scan(send_wa=True):
                 if br:
                     macd_tags.append(f"Bear {lbl}: {br['date']}")
             macd_note = f" | MACD: {', '.join(macd_tags)}" if macd_tags else ""
-            konten_laporan.append(f"• {st['symbol']:<6} | Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Dot di: {tf_str}{donalt_note}{macd_note}")
+            konten_laporan.append(f"• {st['symbol']:<6} | Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) | Dot di: {tf_str}{donalt_note}{scalp_note}{smc_note}{macd_note}")
         konten_laporan.append("")
     else:
         konten_laporan.append("Tidak ada.\n")
@@ -918,6 +1450,15 @@ async def run_daily_scan(send_wa=True):
                 g_tfs.append(lbl)
         golden_str = f" [Golden Cross: {', '.join(g_tfs)}]" if g_tfs else ""
         
+        sc_tfs = []
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            sc = item["timeframes"].get(code, {}).get("scalping", {})
+            if sc.get("buy"):
+                sc_tfs.append(f"BUY {lbl}")
+            if sc.get("sell"):
+                sc_tfs.append(f"SELL {lbl}")
+        scalp_str = f" [Scalp: {', '.join(sc_tfs)}]" if sc_tfs else ""
+
         m_tfs = []
         for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
             m = item["timeframes"].get(code, {}).get("macd", {})
@@ -926,29 +1467,9 @@ async def run_daily_scan(send_wa=True):
             if m.get("bear"):
                 m_tfs.append(f"Bear {lbl}")
         macd_str = f" [MACD: {', '.join(m_tfs)}]" if m_tfs else ""
-        konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}{golden_str}{macd_str}")
+        konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}{golden_str}{scalp_str}{macd_str}")
         
-    isi_teks = "\n".join(konten_laporan)
-    
-    # Simpan ke folder reports/ lokal
-    laporan_filename = REPORTS_DIR / f"laporan_hunter_{date_str}.txt"
-    with open(laporan_filename, "w", encoding="utf-8") as f:
-        f.write(isi_teks)
-        
-    # Simpan juga langsung ke folder Downloads komputer Anda
-    downloads_dir = Path.home() / "Downloads"
-    downloads_file = downloads_dir / f"laporan_hunter_{date_str}.txt"
-    try:
-        with open(downloads_file, "w", encoding="utf-8") as f:
-            f.write(isi_teks)
-        print(f"\n📂 File laporan Notepad berhasil dibuat di folder Downloads Anda:")
-        print(f"👉 {downloads_file}")
-        
-        # Otomatis buka file di Notepad Windows
-        if sys.platform == "win32":
-            os.system(f'start notepad "{downloads_file}"')
-    except Exception as e:
-        print(f"[INFO] Gagal simpan ke Downloads: {e}")
+    # Fitur simpan file TXT ke folder Downloads/reports & buka Notepad telah dihapus (hasil langsung dikirim ke WhatsApp)
 
     # 5. Susun Pesan Rangkuman WhatsApp (HANYA MINIMAL 2 TIMEFRAME)
     if send_wa:
@@ -982,6 +1503,10 @@ async def run_daily_scan(send_wa=True):
                     gain_str = format_gain_header(tf)
                     gain_line = f"{gain_str.strip()}\n" if gain_str else ""
                     donalt_line = format_donalt_wa(tf)
+                    scalp_line = format_scalping_wa(tf)
+                    smc_1d = tf.get('D', {}).get('smc')
+                    smc_1h = tf.get('60', {}).get('smc')
+                    smc_line = format_smc_wa(smc_1d, smc_1h)
                     macd_line = format_macd_wa(tf)
                     pesan_wa += (
                         f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
@@ -991,6 +1516,8 @@ async def run_daily_scan(send_wa=True):
                         f"• 1 Jam (1H)  : {tf['60']['date']}\n"
                         f"• 15 Mnt (15M): {tf['15']['date']}\n"
                         f"{donalt_line}"
+                        f"{scalp_line}"
+                        f"{smc_line}"
                         f"{macd_line}"
                     )
                     if idx < len(saham_3_dot):
@@ -1017,6 +1544,10 @@ async def run_daily_scan(send_wa=True):
                     gain_str = format_gain_header(tf)
                     gain_line = f"{gain_str.strip()}\n" if gain_str else ""
                     donalt_line = format_donalt_wa(tf)
+                    scalp_line = format_scalping_wa(tf)
+                    smc_1d = tf.get('D', {}).get('smc')
+                    smc_1h = tf.get('60', {}).get('smc')
+                    smc_line = format_smc_wa(smc_1d, smc_1h)
                     macd_line = format_macd_wa(tf)
                     pesan_wa += (
                         f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
@@ -1030,6 +1561,8 @@ async def run_daily_scan(send_wa=True):
                     if tf.get('15', {}).get('status'):
                         pesan_wa += f"• 15 Mnt (15M): {tf['15']['date']}\n"
                     pesan_wa += f"{donalt_line}"
+                    pesan_wa += f"{scalp_line}"
+                    pesan_wa += f"{smc_line}"
                     pesan_wa += f"{macd_line}"
                     if idx < len(saham_2_dot):
                         pesan_wa += "───────────────────\n"
