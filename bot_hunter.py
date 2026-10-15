@@ -33,9 +33,9 @@ TRADINGVIEW_SESSIONID = os.environ.get("TRADINGVIEW_SESSIONID", "999m9aq36s5hhqv
 # URL Layout Chart TradingView Anda tempat indikator (人•ᴗ•)RallyGood terpasang
 CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
 
-# Jadwal & Parameter Analisis
-JAM_SCAN_WIB = 19               # Pukul 19.00 WIB setiap malam
-MENIT_SCAN_WIB = 0
+# Jadwal & Parameter Analisis (Default: Pukul 16.30 WIB / 04:30 Sore pasca tutup bursa)
+JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
+MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 30))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
 
@@ -1122,7 +1122,7 @@ async def scan_stock_rallygood(page, stock_info):
     return results
 
 # ============================================================================
-# TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 19.00 WIB)
+# TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.30 WIB)
 # ============================================================================
 async def run_daily_scan(send_wa=True):
     now_wib = datetime.datetime.now(WIB_TZ)
@@ -1592,12 +1592,12 @@ async def run_daily_scan(send_wa=True):
     bersihkan_screenshot()
 
 # ============================================================================
-# MAIN LOOP SCHEDULER: JALAN SETIAP MALAM PUKUL 19.00 WIB
+# MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.30 WIB
 # ============================================================================
 def main():
     print("================================================================")
-    print("🚀 BOT HUNTER + RALLY GOD 19.00 WIB (OKTOVAAAAA) DIAKTIFKAN")
-    print(f"⏰ Jadwal Rutin: Setiap malam pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
+    print("🚀 BOT HUNTER + RALLY GOD (OKTOVAAAAA) DIAKTIFKAN")
+    print(f"⏰ Jadwal Rutin: Setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
     print("================================================================")
     
     # Argumen --limit untuk membatasi jumlah saham saat pengujian (contoh: --limit 5 atau --limit 10)
@@ -1620,7 +1620,7 @@ def main():
         asyncio.run(run_daily_scan(send_wa=send_wa))
         return
 
-    kirim_whatsapp("🤖 *BOT HUNTER RALLY GOD SIAP!*\nBot server standby dan akan otomatis melakukan scan setiap malam pukul 19:00 WIB.")
+    kirim_whatsapp(f"🤖 *BOT HUNTER RALLY GOD SIAP!*\nBot server standby dan akan otomatis melakukan scan setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB.")
     
     scan_terakhir_tanggal = None
     

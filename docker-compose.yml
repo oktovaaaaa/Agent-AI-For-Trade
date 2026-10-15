@@ -10,9 +10,11 @@ services:
       - NOMOR_WHATSAPP_TUJUAN=6282111144710
       - TRADINGVIEW_SESSIONID=999m9aq36s5hhqv7yw2vfubqvqhxbmj9
       - TZ=Asia/Jakarta
+      - JAM_SCAN_WIB=16
+      - MENIT_SCAN_WIB=30
     volumes:
-      # Simpan riwayat laporan scan agar tidak hilang saat container restart
-      - ./reports:/app/reports
+      # Simpan cache data internal (opsional)
+      - ./reports:/app/reports:z
     logging:
       driver: "json-file"
       options:
