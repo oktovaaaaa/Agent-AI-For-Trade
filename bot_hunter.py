@@ -1236,33 +1236,38 @@ async def run_daily_scan(send_wa=True):
         }''')
         await asyncio.sleep(1)
         
-        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing & Auto-Skip
+        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing & Auto-Retry
         for idx, stock in enumerate(hunter_stocks, 1):
             sym = stock['symbol']
             print(f"\n[{idx}/{len(hunter_stocks)}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
             
-            try:
-                tf_results = await scan_stock_rallygood(page, stock)
-                
-                # Cek apakah ada minimal satu timeframe dengan Dot Green
-                any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
-                
-                hasil_deteksi.append({
-                    "stock": stock,
-                    "timeframes": tf_results,
-                    "has_green_dot": any_green
-                })
-            except Exception as err_saham:
-                print(f"⚠️ [AUTO-SKIP] Saham {sym} mengalami error: {err_saham}. Otomatis lanjut ke saham berikutnya...")
-                # Jika halaman tertutup atau browser terputus, pulihkan halaman secara otomatis
+            MAX_RETRIES = 2  # Coba ulang hingga 2x jika ada kendala agar data saham tidak hilang
+            for attempt in range(1, MAX_RETRIES + 1):
                 try:
-                    if page.is_closed():
-                        print("🔄 [SELF-HEALING] Membuka kembali halaman browser...")
-                        page = await context.new_page()
-                        await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
-                except Exception as rec_err:
-                    print(f"⚠️ Gagal memulihkan halaman: {rec_err}")
-                continue
+                    tf_results = await scan_stock_rallygood(page, stock)
+                    
+                    # Cek apakah ada minimal satu timeframe dengan Dot Green
+                    any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
+                    
+                    hasil_deteksi.append({
+                        "stock": stock,
+                        "timeframes": tf_results,
+                        "has_green_dot": any_green
+                    })
+                    break  # Sukses! Lanjut ke saham berikutnya
+                    
+                except Exception as err_saham:
+                    if attempt < MAX_RETRIES:
+                        print(f"⚠️ [RETRY {attempt}/{MAX_RETRIES}] Saham {sym} terkendala: {err_saham}. Merefresh chart & mencoba ulang saham {sym}...")
+                        try:
+                            if page.is_closed():
+                                page = await context.new_page()
+                            await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+                            await asyncio.sleep(2.5)
+                        except Exception as rec_err:
+                            print(f"⚠️ Gagal memulihkan halaman saat retry: {rec_err}")
+                    else:
+                        print(f"❌ [SKIP] Saham {sym} sudah dicoba {MAX_RETRIES}x namun tetap gagal: {err_saham}. Melanjutkan ke saham berikutnya...")
             
         # Kembalikan status indikator ke default di TradingView sebelum menutup browser
         try:
