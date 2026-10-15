@@ -583,9 +583,13 @@ async def scan_stock_rallygood(page, stock_info):
         await page.evaluate('(s) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setSymbol(s)', f"IDX:{symbol}")
         await asyncio.sleep(1.2)
     except Exception:
-        chart_url = f"{CHART_LAYOUT_URL}?symbol=IDX%3A{symbol}&interval=D"
-        await page.goto(chart_url, wait_until="domcontentloaded", timeout=30000)
-        await asyncio.sleep(3.5)
+        try:
+            chart_url = f"{CHART_LAYOUT_URL}?symbol=IDX%3A{symbol}&interval=D"
+            await page.goto(chart_url, wait_until="domcontentloaded", timeout=30000)
+            await asyncio.sleep(3.5)
+        except Exception as e:
+            print(f" ⚠️ Kendala navigasi chart {symbol}: {e}")
+            return results
     
     # 2. Cek setiap timeframe (D, 60, 15)
     for tf in TIMEFRAMES:
@@ -1154,7 +1158,11 @@ async def run_daily_scan(send_wa=True):
             "--no-sandbox",
             "--disable-setuid-sandbox",
             "--disable-dev-shm-usage",
-            "--disable-gpu"
+            "--disable-gpu",
+            "--js-flags=--max-old-space-size=512",
+            "--disable-extensions",
+            "--disable-background-networking",
+            "--mute-audio"
         ]
         browser = None
         for launch_opt in [{}, {"channel": "chrome"}, {"channel": "msedge"}]:
@@ -1228,21 +1236,33 @@ async def run_daily_scan(send_wa=True):
         }''')
         await asyncio.sleep(1)
         
-        # 3. Looping pengecekan chart saham
+        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing & Auto-Skip
         for idx, stock in enumerate(hunter_stocks, 1):
             sym = stock['symbol']
             print(f"\n[{idx}/{len(hunter_stocks)}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
             
-            tf_results = await scan_stock_rallygood(page, stock)
-            
-            # Cek apakah ada minimal satu timeframe dengan Dot Green
-            any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
-            
-            hasil_deteksi.append({
-                "stock": stock,
-                "timeframes": tf_results,
-                "has_green_dot": any_green
-            })
+            try:
+                tf_results = await scan_stock_rallygood(page, stock)
+                
+                # Cek apakah ada minimal satu timeframe dengan Dot Green
+                any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
+                
+                hasil_deteksi.append({
+                    "stock": stock,
+                    "timeframes": tf_results,
+                    "has_green_dot": any_green
+                })
+            except Exception as err_saham:
+                print(f"⚠️ [AUTO-SKIP] Saham {sym} mengalami error: {err_saham}. Otomatis lanjut ke saham berikutnya...")
+                # Jika halaman tertutup atau browser terputus, pulihkan halaman secara otomatis
+                try:
+                    if page.is_closed():
+                        print("🔄 [SELF-HEALING] Membuka kembali halaman browser...")
+                        page = await context.new_page()
+                        await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+                except Exception as rec_err:
+                    print(f"⚠️ Gagal memulihkan halaman: {rec_err}")
+                continue
             
         # Kembalikan status indikator ke default di TradingView sebelum menutup browser
         try:
