@@ -5,6 +5,7 @@ import datetime
 import requests
 import json
 import asyncio
+import gc
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -1159,7 +1160,7 @@ async def run_daily_scan(send_wa=True):
             "--disable-setuid-sandbox",
             "--disable-dev-shm-usage",
             "--disable-gpu",
-            "--js-flags=--max-old-space-size=512",
+            "--js-flags=--max-old-space-size=256",
             "--disable-extensions",
             "--disable-background-networking",
             "--mute-audio"
@@ -1193,52 +1194,72 @@ async def run_daily_scan(send_wa=True):
         else:
             print("[INFO] Menjalankan tanpa sessionid (indikator publik/template layout).")
             
-        page = await context.new_page()
-        
+        async def buat_halaman_chart(sym_target):
+            p = await context.new_page()
+            try:
+                await p.route(
+                    "**/*",
+                    lambda route: route.abort() if route.request.resource_type in ["media"] or any(
+                        x in route.request.url for x in ["google-analytics", "doubleclick", "hotjar", "datadoghq"]
+                    ) else route.continue_()
+                )
+            except Exception:
+                pass
+            await p.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=45000)
+            for _ in range(20):
+                await asyncio.sleep(1)
+                ready = await p.evaluate('''() => {
+                    const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                    return !!chart && chart.model().panes().flatMap(p => p.dataSources()).length >= 4;
+                }''')
+                if ready:
+                    break
+            # Sinkronisasi status default indikator di awal
+            await p.evaluate('''async () => {
+                try {
+                    const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                    if (!chart) return;
+                    const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                    const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
+                    const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                    const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                    const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
+                    const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+                    
+                    if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
+                    if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
+                    if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
+                    await new Promise(r => setTimeout(r, 500));
+
+                    if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
+                    if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
+                    await new Promise(r => setTimeout(r, 800));
+                } catch(e) {}
+            }''')
+            await asyncio.sleep(1)
+            return p
+
         # Buka layout chart pertama kali agar layout dan indikator siap
         first_sym = hunter_stocks[0]['symbol']
         print(f"📊 Menyiapkan Chart Layout TradingView ({first_sym})...")
-        await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{first_sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+        page = await buat_halaman_chart(first_sym)
+        print("⚙️ Sinkronisasi Indikator TradingView Selesai.")
         
-        # Tunggu sampai chart TradingView siap (polling hingga 20 detik)
-        for _ in range(20):
-            await asyncio.sleep(1)
-            ready = await page.evaluate('''() => {
-                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                return !!chart && chart.model().panes().flatMap(p => p.dataSources()).length >= 4;
-            }''')
-            if ready:
-                break
-        
-        # Pastikan status default indikator di awal: DonAlt (ON), RallyGood (ON), lainnya (OFF)
-        print("⚙️ Sinkronisasi Indikator TradingView: EMA + DonAlt (ON), RallyGood (ON), Lainnya (OFF)...")
-        await page.evaluate('''async () => {
-            try {
-                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                if (!chart) return;
-                const allStudies = chart.model().panes().flatMap(p => p.dataSources());
-                const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
-                const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
-                const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
-                const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
-                const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
-                
-                // Matikan dulu indikator ekstra agar slot TradingView 2 indikator bersih
-                if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
-                if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
-                if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
-                await new Promise(r => setTimeout(r, 600));
-
-                if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
-                if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
-                await new Promise(r => setTimeout(r, 1000));
-            } catch(e) {}
-        }''')
-        await asyncio.sleep(1)
-        
-        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing & Auto-Retry
+        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing, Auto-Retry & RAM Purge
         for idx, stock in enumerate(hunter_stocks, 1):
             sym = stock['symbol']
+            
+            # FITUR AUTO-PURGE RAM: Setiap 5 saham, bersihkan alokasi memori WebGL browser agar RAM tetap < 250 MB
+            if idx > 1 and (idx - 1) % 5 == 0:
+                print(f"\n🧹 [RAM AUTO-PURGE] Mengosongkan cache grafik & me-refresh browser (RAM reset < 200 MB)...")
+                try:
+                    await page.close()
+                except Exception:
+                    pass
+                gc.collect()
+                page = await buat_halaman_chart(sym)
+                print(f"✨ Browser segar kembali. Melanjutkan analisis {sym}...")
+
             print(f"\n[{idx}/{len(hunter_stocks)}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
             
             MAX_RETRIES = 2  # Coba ulang hingga 2x jika ada kendala agar data saham tidak hilang
@@ -1261,8 +1282,9 @@ async def run_daily_scan(send_wa=True):
                         print(f"⚠️ [RETRY {attempt}/{MAX_RETRIES}] Saham {sym} terkendala: {err_saham}. Merefresh chart & mencoba ulang saham {sym}...")
                         try:
                             if page.is_closed():
-                                page = await context.new_page()
-                            await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+                                page = await buat_halaman_chart(sym)
+                            else:
+                                await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
                             await asyncio.sleep(2.5)
                         except Exception as rec_err:
                             print(f"⚠️ Gagal memulihkan halaman saat retry: {rec_err}")
