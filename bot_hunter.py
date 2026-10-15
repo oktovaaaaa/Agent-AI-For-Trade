@@ -46,10 +46,13 @@ TIMEFRAMES = [
     {"code": "15", "name": "15 Menit (15M)", "interval": "15"}
 ]
 
-# Folder Penyimpanan Laporan
+# Folder Penyimpanan Laporan (Opsional)
 REPORTS_DIR = Path("reports")
-REPORTS_DIR.mkdir(exist_ok=True)
-(REPORTS_DIR / "screenshots").mkdir(exist_ok=True)
+try:
+    REPORTS_DIR.mkdir(exist_ok=True)
+    (REPORTS_DIR / "screenshots").mkdir(exist_ok=True)
+except Exception:
+    pass
 
 WIB_TZ = pytz.timezone("Asia/Jakarta")
 
