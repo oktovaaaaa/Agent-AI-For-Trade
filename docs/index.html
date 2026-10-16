@@ -2464,20 +2464,73 @@ function openStockDetail(symbol) {
     `;
   }
 
+  // Helper Parser MACD per Timeframe
+  function formatMacdPerTf(macdObj) {
+    if (!macdObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
+    const bull = macdObj.bull || [];
+    const bear = macdObj.bear || [];
+    const parts = [];
+    if (Array.isArray(bull) && bull.length > 0) {
+      const bStr = bull.map(b => `${b.type || 'Bullish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
+      parts.push(`<span style="color:var(--status-green); font-weight:600;">🐂 Bull: ${bStr}</span>`);
+    }
+    if (Array.isArray(bear) && bear.length > 0) {
+      const bStr = bear.map(b => `${b.type || 'Bearish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">🐻 Bear: ${bStr}</span>`);
+    }
+    return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral / Tidak Ada Divergensi)</span>';
+  }
+
+  // Helper Parser DonAlt per Timeframe
+  function formatDonaltPerTf(donaltObj) {
+    if (!donaltObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
+    const g = donaltObj.golden;
+    const d = donaltObj.death;
+    const parts = [];
+    if (g && g.date) {
+      const gainExtra = g.gain_pct != null ? ` (+${g.gain_pct.toFixed(1)}%)` : '';
+      parts.push(`<span style="color:var(--status-gold); font-weight:600;">✨ Golden: ${g.date}${gainExtra}</span>`);
+    }
+    if (d && d.date) {
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">⚠️ Death: ${d.date}</span>`);
+    }
+    return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
+  }
+
+  // Helper Parser Scalping per Timeframe
+  function formatScalpPerTf(scalpObj) {
+    if (!scalpObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
+    const trend = scalpObj.trend || '';
+    if (!trend || trend === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
+    if (trend.includes('BUY') || trend.includes('Green')) {
+      return `<span style="color:var(--status-green); font-weight:700;">🟢 ${trend}</span>`;
+    }
+    if (trend.includes('SELL') || trend.includes('Red')) {
+      return `<span style="color:var(--status-red); font-weight:700;">🔴 ${trend}</span>`;
+    }
+    return `<span style="color:var(--text-secondary);">${trend}</span>`;
+  }
+
+  // Helper Parser SMC per Timeframe
+  function formatSmcPerTf(smcObj) {
+    const status = typeof smcObj === 'string' ? smcObj : (smcObj?.status_7d || '-');
+    if (!status || status === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    if (status.includes('BREAKOUT')) {
+      return `<span style="color:var(--status-cyan); font-weight:700;">🔥 ${status}</span>`;
+    }
+    if (status.includes('DEMAND') || status.includes('Pantulan')) {
+      return `<span style="color:var(--status-green); font-weight:600;">🟢 ${status}</span>`;
+    }
+    return `<span style="color:var(--text-secondary); font-size:11.5px;">${status}</span>`;
+  }
+
   // Evaluasi DonAlt EMA Suite
   const donaltD = tfD.donalt || {};
   const donalt60 = tf60.donalt || {};
   const donalt15 = tf15.donalt || {};
 
-  const golden15 = donalt15.golden?.date || "-";
-  const death15 = donalt15.death?.date || "-";
-  const golden60 = donalt60.golden?.date || "-";
-  const death60 = donalt60.death?.date || "-";
-  const goldenD = donaltD.golden?.date || "-";
-  const deathD = donaltD.death?.date || "-";
-
-  const hasGolden = (golden15 !== "-" || golden60 !== "-" || goldenD !== "-");
-  const hasDeath = (death15 !== "-" || death60 !== "-" || deathD !== "-");
+  const hasGolden = (donaltD.golden || donalt60.golden || donalt15.golden);
+  const hasDeath = (donaltD.death || donalt60.death || donalt15.death);
 
   // Evaluasi Scalping Signal
   const scalpD = tfD.scalping || {};
@@ -2490,22 +2543,12 @@ function openStockDetail(symbol) {
   // Evaluasi SMC
   const smcD = tfD.smc?.status_7d || "-";
   const smc60 = tf60.smc?.status_7d || "-";
+  const smc15 = tf15.smc?.status_7d || "-";
 
   // Evaluasi MACD
   const macdD = tfD.macd || {};
   const macd60 = tf60.macd || {};
   const macd15 = tf15.macd || {};
-  const macdBull = macd15.bull || macd60.bull || macdD.bull || [];
-  const macdBear = macd15.bear || macd60.bear || macdD.bear || [];
-
-  let macdBullText = "-";
-  if (Array.isArray(macdBull) && macdBull.length > 0) {
-    macdBullText = macdBull.map(b => `${b.type || 'Bullish'} (${b.date || ''} @ Rp ${b.price || '-'})`).join(", ");
-  }
-  let macdBearText = "-";
-  if (Array.isArray(macdBear) && macdBear.length > 0) {
-    macdBearText = macdBear.map(b => `${b.type || 'Bearish'} (${b.date || ''} @ Rp ${b.price || '-'})`).join(", ");
-  }
 
   const modalHtml = `
     <div class="modal-dialog" onclick="event.stopPropagation()">
@@ -2532,23 +2575,23 @@ function openStockDetail(symbol) {
       <!-- Modal Body -->
       <div class="modal-body">
         
-        <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME -->
+        <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 15M) -->
         <div class="modal-section">
           <div class="modal-sec-title">
             <span>🟢 Sinyal RallyGood Dot Green & Kenaikan Harga</span>
-            <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe Terpenuhi</span>
+            <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe (1D, 1H, 15M)</span>
           </div>
           <div class="modal-tf-grid">
-            ${renderTfDetailCard("Daily (1D)", tfD)}
-            ${renderTfDetailCard("1 Jam (1H / 60m)", tf60)}
-            ${renderTfDetailCard("15 Menit (15M)", tf15)}
+            ${renderTfDetailCard("1D", tfD)}
+            ${renderTfDetailCard("1H", tf60)}
+            ${renderTfDetailCard("15M", tf15)}
           </div>
         </div>
 
         <!-- SECTION 2 & 3: DONALT EMA + SCALPING SIGNAL -->
         <div class="detail-box-grid">
           
-          <!-- DonAlt EMA Suite -->
+          <!-- DonAlt EMA Suite (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>✨ DonAlt EMA Golden & Death Cross</span>
@@ -2556,57 +2599,49 @@ function openStockDetail(symbol) {
             </div>
             
             <div class="detail-info-row">
-              <span class="detail-info-label">Golden Cross (15M):</span>
-              <span class="detail-info-value" style="color:var(--status-gold);">${golden15}</span>
+              <span class="detail-info-label">DonAlt (1D):</span>
+              <span class="detail-info-value">${formatDonaltPerTf(donaltD)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Death Cross (15M):</span>
-              <span class="detail-info-value" style="color:var(--status-red);">${death15}</span>
+              <span class="detail-info-label">DonAlt (1H):</span>
+              <span class="detail-info-value">${formatDonaltPerTf(donalt60)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Golden Cross (1H):</span>
-              <span class="detail-info-value" style="color:var(--status-gold);">${golden60}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Death Cross (1H):</span>
-              <span class="detail-info-value" style="color:var(--status-red);">${death60}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">EMA Daily (1D):</span>
-              <span class="detail-info-value">${goldenD !== '-' ? goldenD : (deathD !== '-' ? deathD : 'Sideways / Netral')}</span>
+              <span class="detail-info-label">DonAlt (15M):</span>
+              <span class="detail-info-value">${formatDonaltPerTf(donalt15)}</span>
             </div>
           </div>
 
-          <!-- Scalping & Trend Signal -->
+          <!-- Scalping & Trend Signal (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>⚡ Scalping Signal & Trend (Bull/Bear)</span>
+              <span>⚡ Scalping Signal & Trend</span>
               <span class="modal-tf-status ${isScalpBuy ? 'active' : 'inactive'}">
                 ${isScalpBuy ? '🟢 BUY' : '🔴 SELL'}
               </span>
             </div>
 
             <div class="detail-info-row">
-              <span class="detail-info-label">Status Trend Saat Ini:</span>
+              <span class="detail-info-label">Status Trend:</span>
               <span class="detail-info-value" style="color:${isScalpBuy ? 'var(--status-green)' : 'var(--status-red)'}; font-weight:700;">
                 ${scalpTrend}
               </span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Scalping 15 Menit:</span>
-              <span class="detail-info-value">${scalp15.trend || '-'}</span>
+              <span class="detail-info-label">Scalping (1D):</span>
+              <span class="detail-info-value">${formatScalpPerTf(scalpD)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Scalping 1 Jam (1H):</span>
-              <span class="detail-info-value">${scalp60.trend || '-'}</span>
+              <span class="detail-info-label">Scalping (1H):</span>
+              <span class="detail-info-value">${formatScalpPerTf(scalp60)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Volume Saham:</span>
+              <span class="detail-info-label">Scalping (15M):</span>
+              <span class="detail-info-value">${formatScalpPerTf(scalp15)}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Volume Transaksi:</span>
               <span class="detail-info-value">${volFormatted}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Kondisi Pasar:</span>
-              <span class="detail-info-value">${changeVal >= 0 ? 'Menguat (+)' : 'Koreksi (-)'}</span>
             </div>
           </div>
 
@@ -2615,20 +2650,24 @@ function openStockDetail(symbol) {
         <!-- SECTION 4 & 5: SMART MONEY CONCEPTS (SMC) & MACD DIVERGENCE -->
         <div class="detail-box-grid">
           
-          <!-- Smart Money Concepts -->
+          <!-- Smart Money Concepts (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>🌊 Smart Money Concepts (SMC)</span>
-              <span class="badge-mini">Level Kunci</span>
+              <span class="badge-mini">Supply & Demand</span>
             </div>
 
             <div class="detail-info-row">
-              <span class="detail-info-label">Status SMC (1 Jam):</span>
-              <span class="detail-info-value">${smc60}</span>
+              <span class="detail-info-label">SMC (1D):</span>
+              <span class="detail-info-value">${formatSmcPerTf(smcD)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Status SMC (Daily):</span>
-              <span class="detail-info-value">${smcD}</span>
+              <span class="detail-info-label">SMC (1H):</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc60)}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">SMC (15M):</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc15)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Area Supply (Resisten):</span>
@@ -2640,25 +2679,29 @@ function openStockDetail(symbol) {
             </div>
           </div>
 
-          <!-- MACD Divergences -->
+          <!-- MACD Divergences (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>📊 MACD Divergences (Momentum)</span>
-              <span class="badge-mini">Divergensi</span>
+              <span>📊 MACD Divergences</span>
+              <span class="badge-mini">1D • 1H • 15M</span>
             </div>
 
             <div class="detail-info-row">
-              <span class="detail-info-label">Bullish Divergence:</span>
-              <span class="detail-info-value" style="color:var(--status-green);">${macdBullText}</span>
+              <span class="detail-info-label">MACD (1D):</span>
+              <span class="detail-info-value">${formatMacdPerTf(macdD)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Bearish Divergence:</span>
-              <span class="detail-info-value" style="color:var(--status-red);">${macdBearText}</span>
+              <span class="detail-info-label">MACD (1H):</span>
+              <span class="detail-info-value">${formatMacdPerTf(macd60)}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">MACD (15M):</span>
+              <span class="detail-info-value">${formatMacdPerTf(macd15)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Keterangan:</span>
               <span class="detail-info-value" style="font-size:11px; color:var(--text-muted);">
-                Konfirmasi sinyal pembalikan arah harga (Reversal)
+                Sinyal divergensi konfirmasi pembalikan arah harga (Bull / Bear Reversal)
               </span>
             </div>
           </div>
