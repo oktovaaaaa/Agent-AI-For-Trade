@@ -61,5 +61,6 @@ jobs:
             echo "Tidak ada perubahan data JSON."
           else
             git commit -m "Auto-update database web dashboard (7 hari & 1 bulan 3-dot) [skip ci]"
-            git push
+            git pull --rebase origin main
+            git push origin main
           fi
