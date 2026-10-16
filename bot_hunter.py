@@ -1128,13 +1128,13 @@ async def scan_stock_rallygood(page, stock_info):
             results[tf_code] = {"status": False, "date": None, "error": str(e)}
             
 # ============================================================================
-# TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (7 HARI TERAKHIR & 1 BULAN 3 DOT GREEN)
+# TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (RETENSI 30 HARI / 1 BULAN BERGULIR)
 # ============================================================================
 def simpan_database_json(hasil_deteksi, now_wib):
     """
     Menyimpan hasil analisa ke database JSON untuk Web Statis Dashboard:
-    - 7 hari terakhir untuk semua saham harian (1D, 1H, 15M).
-    - 30 hari (1 bulan terakhir) khusus saham prioritas dengan 3 Dot Green.
+    - Retensi 30 hari (1 bulan bergulir) untuk semua data scan harian.
+    - Data > 30 hari otomatis terhapus saat data hari baru dibuat.
     """
     try:
         data_dir = Path("docs") / "data"

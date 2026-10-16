@@ -60,7 +60,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "Tidak ada perubahan data JSON."
           else
-            git commit -m "Auto-update database web dashboard (7 hari & 1 bulan 3-dot) [skip ci]"
+            git commit -m "Auto-update database scan saham & rotasi data 1 bulan [skip ci]"
             git pull --rebase origin main
             git push origin main
           fi
