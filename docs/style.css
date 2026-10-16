@@ -1227,3 +1227,378 @@ body.dark-theme .btn-chart {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   MODAL DETAIL SAHAM (FULL ANALYSIS POPUP)
+   ========================================================================== */
+
+.stock-card {
+  cursor: pointer;
+  position: relative;
+}
+
+.stock-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--brand-accent);
+}
+
+.card-click-hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand-accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 20, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-dialog {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.modal-backdrop.open .modal-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--bg-card);
+}
+
+.modal-title-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-symbol-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-symbol-text {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.modal-name-text {
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.modal-price-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.modal-price-val {
+  font-family: var(--font-mono);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.modal-close-btn {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: var(--status-red-bg);
+  color: var(--status-red-text);
+  border-color: var(--status-red);
+}
+
+.modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-sec-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.modal-sec-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-mint-light);
+  color: var(--brand-primary);
+  text-transform: none;
+}
+
+/* Timeframes Detail Grid */
+.modal-tf-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.modal-tf-card {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-tf-card.active {
+  border-color: var(--brand-accent);
+  background: var(--brand-mint-subtle);
+}
+
+.modal-tf-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-tf-title {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.modal-tf-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.modal-tf-status.active {
+  background: var(--status-green-bg);
+  color: var(--status-green-text);
+}
+
+.modal-tf-status.inactive {
+  background: var(--border-light);
+  color: var(--text-muted);
+}
+
+.modal-tf-gain-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gain-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.gain-val {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.gain-val.positive {
+  color: var(--status-green);
+}
+
+.gain-val.negative {
+  color: var(--status-red);
+}
+
+.gain-val.neutral {
+  color: var(--text-dim);
+}
+
+.modal-tf-detail-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Indicators Detail Box (DonAlt, Scalping, SMC, MACD) */
+.detail-box-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.detail-info-card {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-info-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.detail-info-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  font-size: 12px;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.detail-info-row:last-child {
+  border-bottom: none;
+}
+
+.detail-info-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.detail-info-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Modal Footer */
+.modal-footer {
+  padding: 16px 28px;
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.modal-tv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--brand-primary);
+  color: #FFFFFF;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: var(--transition);
+  flex: 1;
+}
+
+.modal-tv-btn:hover {
+  background: var(--brand-accent);
+  transform: translateY(-1px);
+}
+
+.modal-close-action-btn {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.modal-close-action-btn:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .modal-tf-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-box-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-dialog {
+    max-height: 95vh;
+  }
+}

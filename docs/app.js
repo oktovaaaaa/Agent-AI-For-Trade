@@ -405,7 +405,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   ` : "";
 
   return `
-    <article class="stock-card ${isVip ? 'is-vip' : ''}">
+    <article class="stock-card ${isVip ? 'is-vip' : ''}" onclick="openStockDetail('${stock.symbol}')" title="Klik untuk melihat analisa detail lengkap">
       
       <!-- Card Header: Symbol & Price -->
       <div class="card-header-row">
@@ -438,7 +438,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
               <span class="tf-name">1D</span>
               <span class="tf-dot"></span>
             </div>
-            <span class="tf-date" title="${tfD.date || '-'}">${tfD.date ? tfD.date.split(',')[0] : '-'}</span>
+            <span class="tf-date" title="${tfD.date || '-'}">${tfD.date ? tfD.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
           </div>
 
           <!-- 1H (60m) -->
@@ -447,7 +447,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
               <span class="tf-name">1H</span>
               <span class="tf-dot"></span>
             </div>
-            <span class="tf-date" title="${tf60.date || '-'}">${tf60.date ? tf60.date.split(',')[0] : '-'}</span>
+            <span class="tf-date" title="${tf60.date || '-'}">${tf60.date ? tf60.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
           </div>
 
           <!-- 15M -->
@@ -456,7 +456,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
               <span class="tf-name">15M</span>
               <span class="tf-dot"></span>
             </div>
-            <span class="tf-date" title="${tf15.date || '-'}">${tf15.date ? tf15.date.split(',')[0] : '-'}</span>
+            <span class="tf-date" title="${tf15.date || '-'}">${tf15.date ? tf15.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
           </div>
         </div>
       </div>
@@ -477,22 +477,375 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         </div>
       </div>
 
-      <!-- Card Footer: Volume & Direct TradingView Button -->
+      <!-- Card Footer: Volume, Hint, & Direct TradingView Button -->
       <div class="card-footer-row">
         <div class="volume-info">
           <span class="vol-label">Volume Transaksi</span>
           <span class="vol-val">${volFormatted}</span>
         </div>
 
-        <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="btn-chart">
-          <span>Chart TV</span>
-          <span>↗</span>
-        </a>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="card-click-hint">Analisa 🔍</span>
+          <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="btn-chart" onclick="event.stopPropagation()">
+            <span>Chart TV</span>
+            <span>↗</span>
+          </a>
+        </div>
       </div>
 
     </article>
   `;
 }
+
+// ============================================================================
+// MODAL DETAIL LENGKAP SAHAM (FULL ANALYSIS POPUP)
+// ============================================================================
+
+function findStockBySymbol(symbol) {
+  // 1. Cek di scan tanggal aktif
+  if (currentMode === "daily" && appData.daily_scans?.[selectedDate]?.stocks) {
+    const found = appData.daily_scans[selectedDate].stocks.find(s => s.symbol === symbol);
+    if (found) return found;
+  }
+  // 2. Cek di daftar VIP
+  if (appData.vip_3dot_history) {
+    const foundVip = appData.vip_3dot_history.find(h => h.symbol === symbol || h.data?.symbol === symbol);
+    if (foundVip) return foundVip.data || foundVip;
+  }
+  // 3. Cek di seluruh riwayat harian
+  for (const dKey of Object.keys(appData.daily_scans || {})) {
+    const list = appData.daily_scans[dKey].stocks || [];
+    const found = list.find(s => s.symbol === symbol);
+    if (found) return found;
+  }
+  return null;
+}
+
+function openStockDetail(symbol) {
+  const stock = findStockBySymbol(symbol);
+  if (!stock) {
+    alert("Data saham " + symbol + " tidak ditemukan.");
+    return;
+  }
+
+  const tf = stock.timeframes || {};
+  const tfD = tf.D || {};
+  const tf60 = tf['60'] || {};
+  const tf15 = tf['15'] || {};
+  const isVip = stock.count_green === 3;
+
+  // Format Harga & Kenaikan
+  const priceFormatted = "Rp " + Number(stock.close || 0).toLocaleString("id-ID");
+  const changeVal = Number(stock.change || 0);
+  const changeSign = changeVal > 0 ? "+" : "";
+  const changeClass = changeVal > 0 ? "positive" : (changeVal < 0 ? "negative" : "flat");
+  const changeFormatted = `${changeSign}${changeVal.toFixed(2)}%`;
+
+  // Volume
+  const volVal = Number(stock.volume || 0);
+  let volFormatted = volVal.toLocaleString("id-ID") + " lembar";
+  if (volVal >= 1000000) {
+    volFormatted = (volVal / 1000000).toFixed(2) + " Juta lembar";
+  }
+
+  // TradingView Link
+  const tvUrl = `${CHART_BASE_URL}?symbol=IDX%3A${stock.symbol}&interval=D`;
+
+  // Helper Parser Gain String
+  function extractGain(dateStr, directGain) {
+    if (directGain != null && typeof directGain === 'number') {
+      return (directGain > 0 ? '+' : '') + directGain.toFixed(2) + '%';
+    }
+    if (!dateStr) return null;
+    const match = dateStr.match(/Kenaikan:\s*([+-]?[\d\.]+%?)/i);
+    if (match) return match[1].includes('%') ? match[1] : match[1] + '%';
+    return null;
+  }
+
+  // Helper Parser Date Clean
+  function cleanDate(dateStr) {
+    if (!dateStr || dateStr === '-') return '-';
+    return dateStr.replace(/\(Kenaikan:.*$/i, '').trim();
+  }
+
+  // Helper Render Timeframe Box
+  function renderTfDetailCard(label, tfObj) {
+    const active = tfObj.status;
+    const dateText = cleanDate(tfObj.date);
+    const gainText = extractGain(tfObj.date, tfObj.gain_pct);
+    let gainClass = "neutral";
+    if (gainText) {
+      gainClass = gainText.startsWith('+') ? "positive" : (gainText.startsWith('-') ? "negative" : "neutral");
+    }
+
+    return `
+      <div class="modal-tf-card ${active ? 'active' : ''}">
+        <div class="modal-tf-card-head">
+          <span class="modal-tf-title">${label}</span>
+          <span class="modal-tf-status ${active ? 'active' : 'inactive'}">
+            ${active ? '🟢 AKTIF' : '⚪ BELUM AKTIF'}
+          </span>
+        </div>
+
+        <div class="modal-tf-gain-box">
+          <span class="gain-label">Kenaikan Setelah Dot Green:</span>
+          <span class="gain-val ${gainClass}">${gainText || (active ? 'Sinyal Baru Terkonfirmasi' : '-')}</span>
+        </div>
+
+        <div class="modal-tf-detail-text">
+          <div><b>Waktu Sinyal:</b> ${dateText}</div>
+          ${tfObj.dot_close ? `<div><b>Harga Saat Sinyal:</b> Rp ${Number(tfObj.dot_close).toLocaleString('id-ID')}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // Evaluasi DonAlt EMA Suite
+  const donaltD = tfD.donalt || {};
+  const donalt60 = tf60.donalt || {};
+  const donalt15 = tf15.donalt || {};
+
+  const golden15 = donalt15.golden?.date || "-";
+  const death15 = donalt15.death?.date || "-";
+  const golden60 = donalt60.golden?.date || "-";
+  const death60 = donalt60.death?.date || "-";
+  const goldenD = donaltD.golden?.date || "-";
+  const deathD = donaltD.death?.date || "-";
+
+  const hasGolden = (golden15 !== "-" || golden60 !== "-" || goldenD !== "-");
+  const hasDeath = (death15 !== "-" || death60 !== "-" || deathD !== "-");
+
+  // Evaluasi Scalping Signal
+  const scalpD = tfD.scalping || {};
+  const scalp60 = tf60.scalping || {};
+  const scalp15 = tf15.scalping || {};
+
+  const scalpTrend = scalp60.trend || scalp15.trend || scalpD.trend || "Netral";
+  const isScalpBuy = scalpTrend.includes("BUY") || scalpTrend.includes("Green");
+
+  // Evaluasi SMC
+  const smcD = tfD.smc?.status_7d || "-";
+  const smc60 = tf60.smc?.status_7d || "-";
+
+  // Evaluasi MACD
+  const macdD = tfD.macd || {};
+  const macd60 = tf60.macd || {};
+  const macd15 = tf15.macd || {};
+  const macdBull = macd15.bull || macd60.bull || macdD.bull || [];
+  const macdBear = macd15.bear || macd60.bear || macdD.bear || [];
+
+  let macdBullText = "-";
+  if (Array.isArray(macdBull) && macdBull.length > 0) {
+    macdBullText = macdBull.map(b => `${b.type || 'Bullish'} (${b.date || ''} @ Rp ${b.price || '-'})`).join(", ");
+  }
+  let macdBearText = "-";
+  if (Array.isArray(macdBear) && macdBear.length > 0) {
+    macdBearText = macdBear.map(b => `${b.type || 'Bearish'} (${b.date || ''} @ Rp ${b.price || '-'})`).join(", ");
+  }
+
+  const modalHtml = `
+    <div class="modal-dialog" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="modal-title-col">
+          <div class="modal-symbol-row">
+            <span class="modal-symbol-text">${stock.symbol}</span>
+            ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">💎 FULL 3-DOT GREEN (VIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">⚡ 2-DOT GREEN (POTENSIAL)</span>` : '')}
+          </div>
+          <span class="modal-name-text">${stock.name || stock.symbol} • Bursa Efek Indonesia (IDX)</span>
+        </div>
+
+        <div style="display:flex; align-items:center;">
+          <div class="modal-price-col">
+            <span class="modal-price-val">${priceFormatted}</span>
+            <span class="change-pill ${changeClass}" style="font-size:13px; padding:4px 10px;">${changeFormatted}</span>
+          </div>
+          <button class="modal-close-btn" onclick="closeModal()" title="Tutup Modal (Esc)">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        
+        <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME -->
+        <div class="modal-section">
+          <div class="modal-sec-title">
+            <span>🟢 Sinyal RallyGood Dot Green & Kenaikan Harga</span>
+            <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe Terpenuhi</span>
+          </div>
+          <div class="modal-tf-grid">
+            ${renderTfDetailCard("Daily (1D)", tfD)}
+            ${renderTfDetailCard("1 Jam (1H / 60m)", tf60)}
+            ${renderTfDetailCard("15 Menit (15M)", tf15)}
+          </div>
+        </div>
+
+        <!-- SECTION 2 & 3: DONALT EMA + SCALPING SIGNAL -->
+        <div class="detail-box-grid">
+          
+          <!-- DonAlt EMA Suite -->
+          <div class="detail-info-card">
+            <div class="detail-info-head">
+              <span>✨ DonAlt EMA Golden & Death Cross</span>
+              <span class="badge-mini">${hasGolden ? 'Bullish' : (hasDeath ? 'Bearish' : 'Netral')}</span>
+            </div>
+            
+            <div class="detail-info-row">
+              <span class="detail-info-label">Golden Cross (15M):</span>
+              <span class="detail-info-value" style="color:var(--status-gold);">${golden15}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Death Cross (15M):</span>
+              <span class="detail-info-value" style="color:var(--status-red);">${death15}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Golden Cross (1H):</span>
+              <span class="detail-info-value" style="color:var(--status-gold);">${golden60}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Death Cross (1H):</span>
+              <span class="detail-info-value" style="color:var(--status-red);">${death60}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">EMA Daily (1D):</span>
+              <span class="detail-info-value">${goldenD !== '-' ? goldenD : (deathD !== '-' ? deathD : 'Sideways / Netral')}</span>
+            </div>
+          </div>
+
+          <!-- Scalping & Trend Signal -->
+          <div class="detail-info-card">
+            <div class="detail-info-head">
+              <span>⚡ Scalping Signal & Trend (Bull/Bear)</span>
+              <span class="modal-tf-status ${isScalpBuy ? 'active' : 'inactive'}">
+                ${isScalpBuy ? '🟢 BUY' : '🔴 SELL'}
+              </span>
+            </div>
+
+            <div class="detail-info-row">
+              <span class="detail-info-label">Status Trend Saat Ini:</span>
+              <span class="detail-info-value" style="color:${isScalpBuy ? 'var(--status-green)' : 'var(--status-red)'}; font-weight:700;">
+                ${scalpTrend}
+              </span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Scalping 15 Menit:</span>
+              <span class="detail-info-value">${scalp15.trend || '-'}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Scalping 1 Jam (1H):</span>
+              <span class="detail-info-value">${scalp60.trend || '-'}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Volume Saham:</span>
+              <span class="detail-info-value">${volFormatted}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Kondisi Pasar:</span>
+              <span class="detail-info-value">${changeVal >= 0 ? 'Menguat (+)' : 'Koreksi (-)'}</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 4 & 5: SMART MONEY CONCEPTS (SMC) & MACD DIVERGENCE -->
+        <div class="detail-box-grid">
+          
+          <!-- Smart Money Concepts -->
+          <div class="detail-info-card">
+            <div class="detail-info-head">
+              <span>🌊 Smart Money Concepts (SMC)</span>
+              <span class="badge-mini">Level Kunci</span>
+            </div>
+
+            <div class="detail-info-row">
+              <span class="detail-info-label">Status SMC (1 Jam):</span>
+              <span class="detail-info-value">${smc60}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Status SMC (Daily):</span>
+              <span class="detail-info-value">${smcD}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Area Supply (Resisten):</span>
+              <span class="detail-info-value" style="color:var(--status-cyan);">${smc60.includes('Supply') ? smc60.split('|')[0] : 'Area Pantau'}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Area Demand (Support):</span>
+              <span class="detail-info-value" style="color:var(--status-green);">${smc60.includes('Demand') ? smc60.split('|')[1] || smc60 : 'Area Pantau'}</span>
+            </div>
+          </div>
+
+          <!-- MACD Divergences -->
+          <div class="detail-info-card">
+            <div class="detail-info-head">
+              <span>📊 MACD Divergences (Momentum)</span>
+              <span class="badge-mini">Divergensi</span>
+            </div>
+
+            <div class="detail-info-row">
+              <span class="detail-info-label">Bullish Divergence:</span>
+              <span class="detail-info-value" style="color:var(--status-green);">${macdBullText}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Bearish Divergence:</span>
+              <span class="detail-info-value" style="color:var(--status-red);">${macdBearText}</span>
+            </div>
+            <div class="detail-info-row">
+              <span class="detail-info-label">Keterangan:</span>
+              <span class="detail-info-value" style="font-size:11px; color:var(--text-muted);">
+                Konfirmasi sinyal pembalikan arah harga (Reversal)
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="modal-tv-btn">
+          <span>Buka Chart Interaktif di TradingView</span>
+          <span>↗</span>
+        </a>
+        <button class="modal-close-action-btn" onclick="closeModal()">Tutup</button>
+      </div>
+
+    </div>
+  `;
+
+  // Pastikan element modal backdrop ada di DOM
+  let modalContainer = document.getElementById("detailModal");
+  if (!modalContainer) {
+    modalContainer = document.createElement("div");
+    modalContainer.id = "detailModal";
+    modalContainer.className = "modal-backdrop";
+    modalContainer.onclick = function(e) {
+      if (e.target === modalContainer) closeModal();
+    };
+    document.body.appendChild(modalContainer);
+  }
+
+  modalContainer.innerHTML = modalHtml;
+  modalContainer.classList.add("open");
+  document.body.style.overflow = "hidden"; // lock background scroll
+}
+
+function closeModal() {
+  const modalContainer = document.getElementById("detailModal");
+  if (modalContainer) {
+    modalContainer.classList.remove("open");
+  }
+  document.body.style.overflow = "";
+}
+
+// Tutup modal dengan tombol Escape keyboard
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    closeModal();
+  }
+});
 
 // Theme Toggle (Light / Dark)
 function initTheme() {
