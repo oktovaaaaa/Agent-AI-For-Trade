@@ -1,0 +1,50 @@
+name: Bot Hunter Daily Scan (16:30 WIB)
+
+on:
+  schedule:
+    # 09:30 UTC = 16:30 WIB (Senin - Jumat pasca tutup bursa IDX)
+    - cron: '30 9 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Batas jumlah saham untuk dianalisis (0 = semua saham)'
+        required: false
+        default: '0'
+
+jobs:
+  run-scan:
+    name: Scan Hunter & Kirim WhatsApp
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout Kode
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependensi & Playwright Chromium
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Jalankan Scan Saham & Kirim ke WhatsApp
+        env:
+          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN || '7ci6H1WRqTDsJUAoFzq5' }}
+          NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '6282111144710' }}
+          TRADINGVIEW_SESSIONID: ${{ secrets.TRADINGVIEW_SESSIONID || '999m9aq36s5hhqv7yw2vfubqvqhxbmj9' }}
+          TZ: 'Asia/Jakarta'
+        run: |
+          LIMIT="${{ github.event.inputs.limit || '0' }}"
+          if [ "$LIMIT" != "0" ] && [ -n "$LIMIT" ]; then
+            echo "Menjalankan scan dengan batas $LIMIT saham..."
+            python bot_hunter.py --now --wa --limit "$LIMIT"
+          else
+            echo "Menjalankan scan seluruh saham Hunter lolos kriteria..."
+            python bot_hunter.py --now --wa
+          fi
