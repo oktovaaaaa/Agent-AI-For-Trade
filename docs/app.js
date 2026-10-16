@@ -609,15 +609,17 @@ function openStockDetail(symbol) {
   // Helper Parser MACD per Timeframe
   function formatMacdPerTf(macdObj) {
     if (!macdObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
-    const bull = macdObj.bull || [];
-    const bear = macdObj.bear || [];
+    const bullRaw = macdObj.bull;
+    const bearRaw = macdObj.bear;
+    const bullList = Array.isArray(bullRaw) ? bullRaw : (bullRaw && bullRaw.date ? [bullRaw] : []);
+    const bearList = Array.isArray(bearRaw) ? bearRaw : (bearRaw && bearRaw.date ? [bearRaw] : []);
     const parts = [];
-    if (Array.isArray(bull) && bull.length > 0) {
-      const bStr = bull.map(b => `${b.type || 'Bullish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
+    if (bullList.length > 0) {
+      const bStr = bullList.map(b => `${b.type || 'Bullish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
       parts.push(`<span style="color:var(--status-green); font-weight:600;">🐂 Bull: ${bStr}</span>`);
     }
-    if (Array.isArray(bear) && bear.length > 0) {
-      const bStr = bear.map(b => `${b.type || 'Bearish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
+    if (bearList.length > 0) {
+      const bStr = bearList.map(b => `${b.type || 'Bearish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
       parts.push(`<span style="color:var(--status-red); font-weight:600;">🐻 Bear: ${bStr}</span>`);
     }
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral / Tidak Ada Divergensi)</span>';
