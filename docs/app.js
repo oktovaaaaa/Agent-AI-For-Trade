@@ -68,7 +68,7 @@ function renderSidebarHistory() {
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Belum ada riwayat harian</div>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">⏳ Menunggu scan 16:30 WIB</div>`;
     return;
   }
 
@@ -165,11 +165,16 @@ function renderDailyView() {
   document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
 
   if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
+    document.getElementById("activeDateDisplay").innerText = "Standby Scan Rutin";
+    document.getElementById("activeTimeDisplay").innerText = "16:30 WIB";
+    document.getElementById("filterResultCount").innerText = "Menunggu data scan jam 16:30 WIB";
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📊</div>
-        <h3>Belum Ada Data Saham untuk Tanggal Ini</h3>
-        <p>Silakan pilih tanggal lain pada riwayat di sidebar kiri.</p>
+        <div class="empty-icon">⏳</div>
+        <h3>Menunggu Jadwal Scan Saham Jam 16:30 WIB</h3>
+        <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
+          Database telah dikosongkan. Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:30 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
+        </p>
       </div>
     `;
     updateTopMetrics(0, 0, 0, 0);
