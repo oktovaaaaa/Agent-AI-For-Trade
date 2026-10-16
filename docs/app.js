@@ -1,10 +1,12 @@
 /**
  * HUNTER RADAR & RALLYGOOD — JAVASCRIPT DASHBOARD ENGINE
- * Mengelola rendering data 7 hari terakhir & 1 bulan khusus 3-Dot Green
+ * Minimalist UI dengan Sidebar History Per Tanggal & Filter Sinyal
+ * Terinspirasi oleh Coinest / Clean Fintech Interface
  */
 
 const CHART_BASE_URL = "https://www.tradingview.com/chart/6B2fiCnc/";
 
+// State Management
 let appData = {
   last_updated: "-",
   daily_scans: {},
@@ -14,28 +16,30 @@ let appData = {
 let currentMode = "daily"; // 'daily' | 'vip'
 let selectedDate = null;
 let searchQuery = "";
-let activeFilter = "all"; // 'all' | '3dot' | '2dot' | 'golden' | 'smc'
+let activeFilter = "all"; // 'all' | '3dot' | '2dot' | 'golden' | 'smc' | 'scalp'
+let currentSort = "dot_desc"; // 'dot_desc' | 'gain_desc' | 'loss_asc' | 'vol_desc' | 'sym_asc'
 
-// Inisialisasi saat halaman selesai dimuat
+// Inisialisasi saat DOM selesai dimuat
 document.addEventListener("DOMContentLoaded", async () => {
+  initTheme();
   await loadDatabase();
 });
 
-// Load database JSON
+// Load Database JSON
 async function loadDatabase() {
   try {
     const response = await fetch("data/history.json?v=" + Date.now());
     if (!response.ok) throw new Error("Gagal mengambil data/history.json");
     appData = await response.json();
     
-    // Update badge last updated
+    // Update footer & header info
     if (appData.last_updated) {
-      document.getElementById("lastUpdatedText").innerText = "Update: " + appData.last_updated;
+      document.getElementById("footerSyncText").innerText = "Update Terakhir: " + appData.last_updated;
     }
     
     // Update VIP badge count
     const vipCount = (appData.vip_3dot_history || []).length;
-    document.getElementById("vipBadgeCount").innerText = vipCount;
+    document.getElementById("vipNavCount").innerText = vipCount;
 
     // Pilih tanggal terbaru secara default
     const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
@@ -43,80 +47,107 @@ async function loadDatabase() {
       selectedDate = availableDates[0];
     }
 
-    renderDatePills();
-    renderView();
+    renderSidebarHistory();
+    renderMainView();
   } catch (error) {
     console.error("Error loading data:", error);
     document.getElementById("stocksGrid").innerHTML = `
       <div class="empty-state">
-        <div style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
+        <div class="empty-icon">⚠️</div>
         <h3>Gagal Memuat Database Saham</h3>
-        <p style="margin-top: 8px;">File data/history.json belum tersedia atau belum selesai dibuat oleh bot.</p>
+        <p>File <code>data/history.json</code> belum dapat diakses atau sedang diperbarui oleh bot scan.</p>
       </div>
     `;
   }
 }
 
-// Render Date Pills (7 Hari Terakhir)
-function renderDatePills() {
-  const container = document.getElementById("datePillsContainer");
+// Render Riwayat Per Tanggal (7 Hari Terakhir) di Left Sidebar
+function renderSidebarHistory() {
+  const container = document.getElementById("sidebarDateList");
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<span style="color: var(--text-dim); font-size: 13px;">Belum ada riwayat harian</span>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Belum ada riwayat harian</div>`;
     return;
   }
 
   let html = "";
   availableDates.forEach((dateKey, index) => {
     const scan = appData.daily_scans[dateKey];
-    const isSelected = dateKey === selectedDate;
-    const label = scan.date_display || dateKey;
-    const isToday = index === 0 ? " (Terbaru)" : "";
+    const isSelected = (currentMode === "daily" && dateKey === selectedDate);
+    const dateLabel = scan.date_display || dateKey;
+    const stockCount = scan.stocks ? scan.stocks.length : (scan.summary?.total_screener || 0);
+
     html += `
-      <button class="date-pill ${isSelected ? 'active' : ''}" onclick="selectDate('${dateKey}')">
-        ${label}${isToday}
+      <button class="history-date-btn ${isSelected ? 'active' : ''}" onclick="selectHistoryDate('${dateKey}')">
+        <div class="history-date-left">
+          <span class="history-date-dot"></span>
+          <span>${dateLabel}</span>
+        </div>
+        <span class="history-badge">${stockCount}</span>
       </button>
     `;
   });
+
   container.innerHTML = html;
 }
 
-// Ganti Tanggal
-function selectDate(dateKey) {
+// Handler Saat Tanggal di Sidebar Diklik
+function selectHistoryDate(dateKey) {
   selectedDate = dateKey;
-  renderDatePills();
-  renderView();
+  currentMode = "daily";
+  
+  // Update state tombol menu utama
+  document.getElementById("menuDailyBtn").classList.add("active");
+  document.getElementById("menuVipBtn").classList.remove("active");
+  
+  renderSidebarHistory();
+  renderMainView();
+  toggleSidebar(false); // Close sidebar on mobile
 }
 
-// Ganti Mode (Daily vs VIP 3-Dot)
-function switchMode(mode) {
+// Handler Ganti Mode Utama (Daily vs VIP 3-Dot)
+function switchMainMode(mode) {
   currentMode = mode;
-  document.getElementById("tabDailyBtn").classList.toggle("active", mode === "daily");
-  document.getElementById("tabVipBtn").classList.toggle("active", mode === "vip");
+  document.getElementById("menuDailyBtn").classList.toggle("active", mode === "daily");
+  document.getElementById("menuVipBtn").classList.toggle("active", mode === "vip");
   
-  // Tampilkan / sembunyikan date pills
-  document.getElementById("datePillsSection").style.display = mode === "daily" ? "flex" : "none";
-  
-  renderView();
+  renderSidebarHistory();
+  renderMainView();
+  toggleSidebar(false);
 }
 
-// Search Handler
+// Handler Filter Sinyal di Sidebar
+function setSidebarFilter(filterKey, element) {
+  activeFilter = filterKey;
+  document.querySelectorAll(".nav-subitem").forEach(item => item.classList.remove("active"));
+  element.classList.add("active");
+  renderMainView();
+  toggleSidebar(false);
+}
+
+// Handler Search Input
 function handleSearch(val) {
   searchQuery = val.trim().toUpperCase();
-  renderView();
+  document.getElementById("searchClearBtn").style.display = searchQuery ? "block" : "none";
+  renderMainView();
 }
 
-// Filter Category
-function filterCategory(filterType, element) {
-  activeFilter = filterType;
-  document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-  element.classList.add("active");
-  renderView();
+function clearSearch() {
+  document.getElementById("globalSearchInput").value = "";
+  searchQuery = "";
+  document.getElementById("searchClearBtn").style.display = "none";
+  renderMainView();
 }
 
-// Main Render Function
-function renderView() {
+// Handler Sort Selector
+function handleSortChange(sortVal) {
+  currentSort = sortVal;
+  renderMainView();
+}
+
+// Main View Render Engine
+function renderMainView() {
   if (currentMode === "daily") {
     renderDailyView();
   } else {
@@ -124,38 +155,58 @@ function renderView() {
   }
 }
 
-// Render Daily Mode (7 Hari)
+// Render Daily Mode (Data Harian)
 function renderDailyView() {
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
-  
+
+  document.getElementById("pageMainHeading").innerText = "Dashboard Rekomendasi Harian";
+  document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
+
   if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div style="font-size: 40px; margin-bottom: 12px;">📊</div>
+        <div class="empty-icon">📊</div>
         <h3>Belum Ada Data Saham untuk Tanggal Ini</h3>
-        <p>Silakan pilih tanggal lain pada daftar di atas.</p>
+        <p>Silakan pilih tanggal lain pada riwayat di sidebar kiri.</p>
       </div>
     `;
-    updateSummaryStats(0, 0, 0);
+    updateTopMetrics(0, 0, 0, 0);
     return;
   }
 
-  // Update Summary Cards
+  // Active Date Bar Info
+  document.getElementById("activeDateDisplay").innerText = scanData.date_display || selectedDate;
+  document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:30 WIB";
+
+  // Hitung jumlah sinyal spesifik
+  let countGolden = 0;
+  scanData.stocks.forEach(s => {
+    const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
+    if (hasGold) countGolden++;
+  });
+
+  // Update Metric Cards
   const summary = scanData.summary || {};
-  updateSummaryStats(
+  updateTopMetrics(
     summary.count_3_dot || 0,
     summary.count_2_dot || 0,
-    summary.total_screener || scanData.stocks.length
+    countGolden,
+    scanData.stocks.length
   );
 
-  // Filter stocks
+  // Update Sidebar Filter Counters
+  document.getElementById("countAllFilter").innerText = scanData.stocks.length;
+  document.getElementById("count3DotFilter").innerText = summary.count_3_dot || 0;
+  document.getElementById("count2DotFilter").innerText = summary.count_2_dot || 0;
+
+  // Filter Saham
   let filtered = scanData.stocks.filter(s => {
-    // 1. Filter Search
+    // 1. Search filter
     if (searchQuery && !s.symbol.includes(searchQuery) && !s.name.includes(searchQuery)) {
       return false;
     }
-    // 2. Filter Category
+    // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
     if (activeFilter === "2dot" && s.count_green !== 2) return false;
     if (activeFilter === "golden") {
@@ -169,42 +220,53 @@ function renderDailyView() {
       });
       if (!isBreakout) return false;
     }
+    if (activeFilter === "scalp") {
+      const isBuy = ['D', '60', '15'].some(tf => {
+        const trend = s.timeframes?.[tf]?.scalping?.trend || "";
+        return trend.includes("BUY") || trend.includes("Green");
+      });
+      if (!isBuy) return false;
+    }
     return true;
   });
 
-  // Update Section Header Texts
-  document.getElementById("sectionTitle").innerHTML = `📅 Analisa ${scanData.date_display} <span style="font-size:14px; font-weight:500; color:var(--text-muted);">(${scanData.time_display || '16:30 WIB'})</span>`;
-  document.getElementById("sectionDesc").innerText = `Menampilkan ${filtered.length} saham yang lolos kriteria screener dan analisa indikator`;
+  // Sorting
+  filtered = sortStocks(filtered);
 
-  // Update filter counters
-  document.getElementById("countAll").innerText = scanData.stocks.length;
-  document.getElementById("count3DotFilter").innerText = summary.count_3_dot || 0;
-  document.getElementById("count2DotFilter").innerText = summary.count_2_dot || 0;
+  // Update Result Count text
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${scanData.stocks.length} saham`;
 
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-        <h3>Tidak Ada Saham yang Cocok</h3>
-        <p>Coba ubah kata kunci pencarian atau filter kategori Anda.</p>
+        <div class="empty-icon">🔍</div>
+        <h3>Tidak Ditemukan Saham yang Cocok</h3>
+        <p>Coba gunakan kata kunci lain atau pilih filter sinyal yang berbeda di sidebar kiri.</p>
       </div>
     `;
     return;
   }
 
-  // Render Stock Cards
-  grid.innerHTML = filtered.map(stock => createStockCardHTML(stock)).join("");
+  // Render Grid Cards
+  grid.innerHTML = filtered.map(s => createStockCardHTML(s)).join("");
 }
 
-// Render VIP 3-Dot Mode (1 Bulan)
+// Render VIP View (1 Bulan 3-Dot Green)
 function renderVipView() {
   const grid = document.getElementById("stocksGrid");
   const vipList = appData.vip_3dot_history || [];
 
-  updateSummaryStats(vipList.length, "-", "30 Hari");
+  document.getElementById("pageMainHeading").innerText = "💎 VIP 3-Dot Green (Riwayat 1 Bulan)";
+  document.getElementById("pageSubHeading").innerText = "Arsip khusus saham yang berhasil mengonfirmasi 3 Timeframe (Daily + 1H + 15M) dalam 30 hari terakhir";
 
-  document.getElementById("sectionTitle").innerHTML = `💎 Rekam Jejak 3-Dot Green (1 Bulan Terakhir)`;
-  document.getElementById("sectionDesc").innerText = `Arsip lengkap seluruh saham yang berhasil mendapatkan konfirmasi 3 Timeframe sekaligus (Daily + 1H + 15M) dalam 30 hari terakhir.`;
+  document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
+  document.getElementById("activeTimeDisplay").innerText = "30 Hari";
+
+  updateTopMetrics(vipList.length, "-", "-", "VIP");
+
+  document.getElementById("countAllFilter").innerText = vipList.length;
+  document.getElementById("count3DotFilter").innerText = vipList.length;
+  document.getElementById("count2DotFilter").innerText = 0;
 
   // Filter VIP list
   let filtered = vipList.filter(item => {
@@ -215,16 +277,17 @@ function renderVipView() {
     return true;
   });
 
-  document.getElementById("countAll").innerText = vipList.length;
-  document.getElementById("count3DotFilter").innerText = vipList.length;
-  document.getElementById("count2DotFilter").innerText = 0;
+  // Sort VIP list
+  filtered.sort((a, b) => new Date(b.detected_at || 0) - new Date(a.detected_at || 0));
+
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} saham Full 3-Dot Green`;
 
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div style="font-size: 40px; margin-bottom: 12px;">🌟</div>
-        <h3>Belum Ada Saham 3 Dot Green dalam 30 Hari Terakhir</h3>
-        <p>Data akan otomatis terisi setiap kali bot menemukan saham dengan konfirmasi 3 Timeframe.</p>
+        <div class="empty-icon">🌟</div>
+        <h3>Belum Ada Riwayat VIP 3-Dot Green</h3>
+        <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Dot Green aktif.</p>
       </div>
     `;
     return;
@@ -235,143 +298,246 @@ function renderVipView() {
   }).join("");
 }
 
-// Helper: Update Top Summary Stats
-function updateSummaryStats(count3, count2, countTotal) {
-  document.getElementById("stat3Dot").innerText = count3;
-  document.getElementById("stat2Dot").innerText = count2;
-  document.getElementById("statTotal").innerText = countTotal;
+// Helper Sorting Logic
+function sortStocks(stocks) {
+  return [...stocks].sort((a, b) => {
+    if (currentSort === "dot_desc") {
+      if ((b.count_green || 0) !== (a.count_green || 0)) {
+        return (b.count_green || 0) - (a.count_green || 0);
+      }
+      return (b.change || 0) - (a.change || 0);
+    }
+    if (currentSort === "gain_desc") {
+      return (b.change || 0) - (a.change || 0);
+    }
+    if (currentSort === "loss_asc") {
+      return (a.change || 0) - (b.change || 0);
+    }
+    if (currentSort === "vol_desc") {
+      return (b.volume || 0) - (a.volume || 0);
+    }
+    if (currentSort === "sym_asc") {
+      return a.symbol.localeCompare(b.symbol);
+    }
+    return 0;
+  });
 }
 
-// Helper: Create HTML Card for a Stock
+// Helper: Update Top Metric Cards
+function updateTopMetrics(vipCount, potCount, goldenCount, totalCount) {
+  document.getElementById("statVipCount").innerText = vipCount;
+  document.getElementById("statPotCount").innerText = potCount;
+  document.getElementById("statGoldenCount").innerText = goldenCount;
+  document.getElementById("statTotalCount").innerText = totalCount;
+}
+
+// Helper: Generate HTML for Minimalist Stock Card
 function createStockCardHTML(stock, vipDateLabel = null) {
   const isVip = stock.count_green === 3;
   const tf = stock.timeframes || {};
-  
-  // Format Price & Change
+
+  // Formatter Harga & Kenaikan
   const priceFormatted = "Rp " + Number(stock.close || 0).toLocaleString("id-ID");
   const changeVal = Number(stock.change || 0);
-  const changeClass = changeVal > 0 ? "change-up" : (changeVal < 0 ? "change-down" : "change-flat");
-  const changeSign = changeVal > 0 ? "+" : "";
+  let changeClass = "flat";
+  let changeSign = "";
+  if (changeVal > 0) {
+    changeClass = "positive";
+    changeSign = "+";
+  } else if (changeVal < 0) {
+    changeClass = "negative";
+  }
   const changeFormatted = `${changeSign}${changeVal.toFixed(2)}%`;
-  const volumeFormatted = Number(stock.volume || 0).toLocaleString("id-ID") + " lbr";
 
-  // Dot Green Timeframes
-  const dotD = tf.D?.status;
-  const dot60 = tf['60']?.status;
-  const dot15 = tf['15']?.status;
+  // Format Volume
+  const volVal = Number(stock.volume || 0);
+  let volFormatted = volVal.toLocaleString("id-ID") + " lbr";
+  if (volVal >= 1000000) {
+    volFormatted = (volVal / 1000000).toFixed(1) + " Juta lbr";
+  }
 
-  // TradingView Direct Link
+  // Timeframe Status
+  const tfD = tf.D || {};
+  const tf60 = tf['60'] || {};
+  const tf15 = tf['15'] || {};
+
+  // TradingView Link
   const tvUrl = `${CHART_BASE_URL}?symbol=IDX%3A${stock.symbol}&interval=D`;
 
-  // SMC Signals
-  const smcStatus = tf.D?.smc?.status_7d || tf['60']?.smc?.status_7d || "";
-  let smcBadgeHTML = "";
+  // Sinyal DonAlt Golden / Death Cross
+  const goldenCross = tf15.donalt?.golden || tf60.donalt?.golden || tfD.donalt?.golden;
+  const deathCross = tf15.donalt?.death || tf60.donalt?.death || tfD.donalt?.death;
+  let donaltChip = `<span class="badge-chip chip-neutral">-</span>`;
+  if (goldenCross) {
+    const gainExtra = goldenCross.gain_pct != null ? ` (+${goldenCross.gain_pct.toFixed(1)}%)` : "";
+    donaltChip = `<span class="badge-chip chip-golden">✨ Golden Cross${gainExtra}</span>`;
+  } else if (deathCross) {
+    donaltChip = `<span class="badge-chip chip-death">⚠️ Death Cross</span>`;
+  }
+
+  // Sinyal SMC (Smart Money Concepts)
+  const smcStatus = tfD.smc?.status_7d || tf60.smc?.status_7d || "";
+  let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (smcStatus) {
     if (smcStatus.includes("BREAKOUT")) {
-      smcBadgeHTML = `<span class="tag-pill pill-smc-breakout">🔥 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-breakout">🔥 ${smcStatus}</span>`;
     } else if (smcStatus.includes("DEMAND") || smcStatus.includes("Pantulan")) {
-      smcBadgeHTML = `<span class="tag-pill pill-smc-demand">🟢 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-demand">🟢 ${smcStatus}</span>`;
     } else {
-      smcBadgeHTML = `<span style="color:var(--text-muted); font-size:11px;">${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-neutral">${smcStatus}</span>`;
     }
   }
 
-  // Golden / Death Cross
-  const goldenCross = tf['15']?.donalt?.golden || tf['60']?.donalt?.golden || tf.D?.donalt?.golden;
-  const deathCross = tf['15']?.donalt?.death || tf['60']?.donalt?.death || tf.D?.donalt?.death;
-  let donaltBadgeHTML = "";
-  if (goldenCross) {
-    const gainExtra = goldenCross.gain_pct != null ? ` (${goldenCross.gain_pct > 0 ? '+' : ''}${goldenCross.gain_pct.toFixed(2)}%)` : "";
-    donaltBadgeHTML = `<span class="tag-pill pill-golden">✨ Golden Cross${gainExtra}</span>`;
-  } else if (deathCross) {
-    donaltBadgeHTML = `<span class="tag-pill pill-death">⚠️ Death Cross</span>`;
-  } else {
-    donaltBadgeHTML = `<span style="color:var(--text-dim); font-size:11px;">-</span>`;
-  }
-
-  // Scalp Trend
-  const scalpTrend = tf['60']?.scalping?.trend || tf['15']?.scalping?.trend || tf.D?.scalping?.trend || "-";
-  let scalpTrendHTML = scalpTrend;
+  // Sinyal Scalping Trend
+  const scalpTrend = tf60.scalping?.trend || tf15.scalping?.trend || tfD.scalping?.trend || "";
+  let scalpChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (scalpTrend.includes("BUY") || scalpTrend.includes("Green")) {
-    scalpTrendHTML = `<span class="tag-pill pill-buy">🟢 ${scalpTrend}</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-buy">🟢 Scalp BUY</span>`;
   } else if (scalpTrend.includes("SELL") || scalpTrend.includes("Red")) {
-    scalpTrendHTML = `<span class="tag-pill pill-sell">🔴 ${scalpTrend}</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-sell">🔴 Scalp SELL</span>`;
   }
 
-  // MACD Divergences
-  const macdBull = tf['15']?.macd?.bull || tf['60']?.macd?.bull || tf.D?.macd?.bull;
-  const macdBear = tf['15']?.macd?.bear || tf['60']?.macd?.bear || tf.D?.macd?.bear;
-  let macdHTML = "-";
-  if (macdBull) {
-    macdHTML = `<span style="color:var(--neon-green); font-weight:600;">🐂 ${macdBull.type || 'Bullish'} (${macdBull.date || ''})</span>`;
-  } else if (macdBear) {
-    macdHTML = `<span style="color:var(--neon-red); font-weight:600;">🐻 ${macdBear.type || 'Bearish'}</span>`;
-  }
-
-  // VIP Date Pill if in VIP mode
-  const vipDateBadge = vipDateLabel ? `<div style="font-size:11px; color:var(--neon-gold); font-family:var(--font-mono); margin-bottom:4px;">📅 Terdeteksi 3-Dot: ${vipDateLabel}</div>` : '';
+  // VIP Date Notification
+  const vipDateRow = vipDateLabel ? `
+    <div style="font-size:11px; font-weight:600; color:var(--status-gold); margin-top:2px;">
+      📅 Terdeteksi VIP: ${vipDateLabel}
+    </div>
+  ` : "";
 
   return `
-    <div class="stock-card ${isVip ? 'is-vip' : ''}">
-      <div class="card-top">
-        <div class="stock-identity">
-          <div class="stock-sym-badge">${stock.symbol}</div>
-          <div>
-            ${vipDateBadge}
-            <div class="stock-meta">${stock.name || stock.symbol} • Vol: ${volumeFormatted}</div>
+    <article class="stock-card ${isVip ? 'is-vip' : ''}">
+      
+      <!-- Card Header: Symbol & Price -->
+      <div class="card-header-row">
+        <div class="symbol-col">
+          <div class="symbol-badge-box">
+            <span class="symbol-text">${stock.symbol}</span>
+            ${isVip ? `<span class="vip-badge-pill">💎 3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">⚡ 2-DOT</span>` : '')}
+          </div>
+          <span class="symbol-name">${stock.name || stock.symbol}</span>
+          ${vipDateRow}
+        </div>
+
+        <div class="price-col">
+          <span class="price-text">${priceFormatted}</span>
+          <span class="change-pill ${changeClass}">${changeFormatted}</span>
+        </div>
+      </div>
+
+      <!-- Timeframe Dot Green Status (1D, 1H, 15M) -->
+      <div class="timeframe-dots-box">
+        <div class="dots-label-row">
+          <span>RALLYGOOD DOT GREEN</span>
+          <span class="dots-status-count">${stock.count_green || 0} / 3 TF Aktif</span>
+        </div>
+
+        <div class="timeframes-grid">
+          <!-- 1D Daily -->
+          <div class="tf-item ${tfD.status ? 'active' : ''}">
+            <div class="tf-header">
+              <span class="tf-name">1D</span>
+              <span class="tf-dot"></span>
+            </div>
+            <span class="tf-date" title="${tfD.date || '-'}">${tfD.date ? tfD.date.split(',')[0] : '-'}</span>
+          </div>
+
+          <!-- 1H (60m) -->
+          <div class="tf-item ${tf60.status ? 'active' : ''}">
+            <div class="tf-header">
+              <span class="tf-name">1H</span>
+              <span class="tf-dot"></span>
+            </div>
+            <span class="tf-date" title="${tf60.date || '-'}">${tf60.date ? tf60.date.split(',')[0] : '-'}</span>
+          </div>
+
+          <!-- 15M -->
+          <div class="tf-item ${tf15.status ? 'active' : ''}">
+            <div class="tf-header">
+              <span class="tf-name">15M</span>
+              <span class="tf-dot"></span>
+            </div>
+            <span class="tf-date" title="${tf15.date || '-'}">${tf15.date ? tf15.date.split(',')[0] : '-'}</span>
           </div>
         </div>
-        <div class="stock-price-block">
-          <div class="stock-price">${priceFormatted}</div>
-          <div class="stock-change ${changeClass}">${changeFormatted}</div>
+      </div>
+
+      <!-- Indicator Highlights Row -->
+      <div class="indicators-list">
+        <div class="indicator-row">
+          <span class="indicator-title">DonAlt EMA:</span>
+          <div class="indicator-val">${donaltChip}</div>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-title">SMC Area:</span>
+          <div class="indicator-val">${smcChip}</div>
+        </div>
+        <div class="indicator-row">
+          <span class="indicator-title">Scalp Signal:</span>
+          <div class="indicator-val">${scalpChip}</div>
         </div>
       </div>
 
-      <!-- 3 Timeframe Dot Green Grid -->
-      <div class="dot-status-grid">
-        <div class="dot-item ${dotD ? 'has-dot' : ''}">
-          <div class="dot-tf">Daily (1D)</div>
-          <div class="dot-badge-text ${dotD ? 'dot-has' : 'dot-none'}">${dotD ? '🟢 ADA DOT' : '⚪ -'}</div>
-          <div class="dot-date-text">${tf.D?.date || '-'}</div>
+      <!-- Card Footer: Volume & Direct TradingView Button -->
+      <div class="card-footer-row">
+        <div class="volume-info">
+          <span class="vol-label">Volume Transaksi</span>
+          <span class="vol-val">${volFormatted}</span>
         </div>
-        <div class="dot-item ${dot60 ? 'has-dot' : ''}">
-          <div class="dot-tf">1 Jam (1H)</div>
-          <div class="dot-badge-text ${dot60 ? 'dot-has' : 'dot-none'}">${dot60 ? '🟢 ADA DOT' : '⚪ -'}</div>
-          <div class="dot-date-text">${tf['60']?.date || '-'}</div>
-        </div>
-        <div class="dot-item ${dot15 ? 'has-dot' : ''}">
-          <div class="dot-tf">15 Menit (15M)</div>
-          <div class="dot-badge-text ${dot15 ? 'dot-has' : 'dot-none'}">${dot15 ? '🟢 ADA DOT' : '⚪ -'}</div>
-          <div class="dot-date-text">${tf['15']?.date || '-'}</div>
-        </div>
-      </div>
 
-      <!-- Indicator Details Table -->
-      <div class="indicator-details">
-        <div class="indicator-row">
-          <span class="ind-label">✨ EMA DonAlt Cross:</span>
-          <span class="ind-val">${donaltBadgeHTML}</span>
-        </div>
-        <div class="indicator-row">
-          <span class="ind-label">🎯 SMC Level & Status:</span>
-          <span class="ind-val">${smcBadgeHTML || '-'}</span>
-        </div>
-        <div class="indicator-row">
-          <span class="ind-label">⚔️ Scalping Trend:</span>
-          <span class="ind-val">${scalpTrendHTML}</span>
-        </div>
-        <div class="indicator-row">
-          <span class="ind-label">📊 MACD Divergence:</span>
-          <span class="ind-val">${macdHTML}</span>
-        </div>
-      </div>
-
-      <!-- Card Action Button -->
-      <div class="card-bottom">
         <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="btn-chart">
-          Buka Chart TradingView ↗
+          <span>Chart TV</span>
+          <span>↗</span>
         </a>
       </div>
-    </div>
+
+    </article>
   `;
+}
+
+// Theme Toggle (Light / Dark)
+function initTheme() {
+  const savedTheme = localStorage.getItem("hunter_theme") || "light";
+  if (savedTheme === "dark") {
+    document.body.classList.remove("light-theme");
+    document.body.classList.add("dark-theme");
+    document.getElementById("themeIcon").innerText = "☀️";
+  } else {
+    document.body.classList.remove("dark-theme");
+    document.body.classList.add("light-theme");
+    document.getElementById("themeIcon").innerText = "🌙";
+  }
+}
+
+function toggleTheme() {
+  if (document.body.classList.contains("dark-theme")) {
+    document.body.classList.remove("dark-theme");
+    document.body.classList.add("light-theme");
+    localStorage.setItem("hunter_theme", "light");
+    document.getElementById("themeIcon").innerText = "🌙";
+  } else {
+    document.body.classList.remove("light-theme");
+    document.body.classList.add("dark-theme");
+    localStorage.setItem("hunter_theme", "dark");
+    document.getElementById("themeIcon").innerText = "☀️";
+  }
+}
+
+// Mobile Sidebar Toggle
+function toggleSidebar(forceState = null) {
+  const sidebar = document.getElementById("appSidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  const shouldOpen = forceState !== null ? forceState : !sidebar.classList.contains("open");
+
+  if (shouldOpen) {
+    sidebar.classList.add("open");
+    backdrop.classList.add("show");
+  } else {
+    sidebar.classList.remove("open");
+    backdrop.classList.remove("show");
+  }
+}
+
+// Reload Dashboard
+function reloadDashboard() {
+  loadDatabase();
 }

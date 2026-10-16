@@ -4,113 +4,252 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hunter Radar & RallyGood — Rekomendasi Saham IDX</title>
-  <meta name="description" content="Dashboard Rekomendasi Saham Hunter IDX dengan Indikator RallyGood, DonAlt EMA Suite, Smart Money Concepts (SMC), dan MACD Divergence.">
+  <meta name="description" content="Dashboard Minimalist Rekomendasi Saham Hunter IDX dengan Indikator RallyGood, DonAlt EMA Suite, Smart Money Concepts (SMC), dan MACD Divergence.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <!-- Ambient background glow elements -->
-  <div class="glow-bg glow-top"></div>
-  <div class="glow-bg glow-bottom"></div>
+<body class="light-theme">
+  <!-- Layout Wrapper with Left Sidebar & Main Content -->
+  <div class="app-layout">
+    
+    <!-- Mobile Header Bar -->
+    <div class="mobile-topbar">
+      <div class="brand-mini">
+        <div class="brand-logo-icon">🏹</div>
+        <span class="brand-title-text">HUNTER<b>RADAR</b></span>
+      </div>
+      <button class="mobile-menu-toggle" id="mobileMenuBtn" aria-label="Buka Menu" onclick="toggleSidebar()">
+        ☰
+      </button>
+    </div>
 
-  <!-- Header -->
-  <header class="navbar">
-    <div class="container nav-content">
-      <div class="brand">
-        <div class="brand-icon">🏹</div>
-        <div>
-          <h1 class="brand-title">HUNTER RADAR <span>RALLY GOD</span></h1>
-          <p class="brand-subtitle">AI Algorithmic IDX Stock Screener & Indicator Analysis</p>
+    <!-- Backdrop for Mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
+
+    <!-- LEFT SIDEBAR: History Per Tanggal & Filter -->
+    <aside class="sidebar" id="appSidebar">
+      <!-- Brand Logo Header -->
+      <div class="sidebar-brand">
+        <div class="brand-logo-icon">🏹</div>
+        <div class="brand-info">
+          <h1 class="brand-title-text">HUNTER<b>RADAR</b></h1>
+          <span class="brand-badge">AI ALGO IDX</span>
         </div>
       </div>
-      <div class="live-status">
-        <span class="pulsing-dot"></span>
-        <span id="lastUpdatedText">Memuat data...</span>
+
+      <!-- Scrollable Navigation Container -->
+      <div class="sidebar-nav-container">
+        
+        <!-- SECTION 1: Navigasi Utama -->
+        <div class="nav-group">
+          <div class="nav-group-title">MENU UTAMA</div>
+          <button class="nav-item active" id="menuDailyBtn" onclick="switchMainMode('daily')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Dashboard Harian</span>
+          </button>
+          <button class="nav-item" id="menuVipBtn" onclick="switchMainMode('vip')">
+            <span class="nav-icon">💎</span>
+            <span class="nav-label">VIP 3-Dot (1 Bulan)</span>
+            <span class="nav-count vip-counter" id="vipNavCount">0</span>
+          </button>
+        </div>
+
+        <!-- SECTION 2: History Per Tanggal (7 Hari Terakhir) -->
+        <div class="nav-group" id="historyNavGroup">
+          <div class="nav-group-title">
+            <span>RIWAYAT TANGGAL</span>
+            <span class="badge-mini">7 Hari</span>
+          </div>
+          <div class="history-list" id="sidebarDateList">
+            <!-- Rendered by JS dynamically -->
+            <div class="loading-placeholder">Memuat riwayat...</div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Filter Sinyal Indikator -->
+        <div class="nav-group">
+          <div class="nav-group-title">FILTER SINYAL</div>
+          <button class="nav-subitem active" data-filter="all" onclick="setSidebarFilter('all', this)">
+            <span class="filter-dot dot-all"></span>
+            <span class="nav-label">Semua Saham</span>
+            <span class="nav-count" id="countAllFilter">0</span>
+          </button>
+          <button class="nav-subitem" data-filter="3dot" onclick="setSidebarFilter('3dot', this)">
+            <span class="filter-dot dot-vip"></span>
+            <span class="nav-label">Full 3-Dot Green</span>
+            <span class="nav-count" id="count3DotFilter">0</span>
+          </button>
+          <button class="nav-subitem" data-filter="2dot" onclick="setSidebarFilter('2dot', this)">
+            <span class="filter-dot dot-pot"></span>
+            <span class="nav-label">Lolos 2-Dot Green</span>
+            <span class="nav-count" id="count2DotFilter">0</span>
+          </button>
+          <button class="nav-subitem" data-filter="golden" onclick="setSidebarFilter('golden', this)">
+            <span class="filter-dot dot-gold"></span>
+            <span class="nav-label">DonAlt Golden Cross</span>
+          </button>
+          <button class="nav-subitem" data-filter="smc" onclick="setSidebarFilter('smc', this)">
+            <span class="filter-dot dot-smc"></span>
+            <span class="nav-label">SMC Breakout Supply</span>
+          </button>
+          <button class="nav-subitem" data-filter="scalp" onclick="setSidebarFilter('scalp', this)">
+            <span class="filter-dot dot-buy"></span>
+            <span class="nav-label">Scalping BUY (Bullish)</span>
+          </button>
+        </div>
+
       </div>
+
+      <!-- SECTION 4: Sidebar Footer (Bot Hunter AI Status Card) -->
+      <div class="sidebar-footer">
+        <div class="bot-card">
+          <div class="bot-card-header">
+            <span class="bot-avatar">🤖</span>
+            <div>
+              <div class="bot-name">Hunter Bot AI</div>
+              <div class="bot-sub">Daily Auto-Scan</div>
+            </div>
+            <span class="status-pulse-dot" title="Sistem Aktif"></span>
+          </div>
+          <p class="bot-desc">Jadwal scan otomatis setiap hari bursa jam <b>16:30 WIB</b>.</p>
+          <div class="bot-badge">● Status: Running Online</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT AREA -->
+    <div class="main-wrapper">
+      
+      <!-- Top Navigation & Search Bar (Minimalist) -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 class="topbar-title" id="pageMainHeading">Dashboard Rekomendasi</h2>
+          <p class="topbar-subtitle" id="pageSubHeading">Analisa Saham Algoritmik RallyGood, DonAlt, SMC, dan Divergence</p>
+        </div>
+        
+        <div class="topbar-right">
+          <!-- Minimalist Search Input -->
+          <div class="search-pill">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="globalSearchInput" placeholder="Cari ticker (misal: BUMI, DEWA, PTMP)..." oninput="handleSearch(this.value)">
+            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" style="display:none;">✕</button>
+          </div>
+
+          <!-- Theme Toggle (Light / Dark) -->
+          <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Ganti Tema (Light/Dark)">
+            <span id="themeIcon">🌙</span>
+          </button>
+
+          <!-- Refresh Data Button -->
+          <button class="refresh-btn" onclick="reloadDashboard()" title="Muat ulang data terbaru">
+            🔄
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content Scrollable Area -->
+      <main class="content-body">
+        
+        <!-- Top Metrics Cards (Inspired by Coinest) -->
+        <section class="metrics-grid">
+          <div class="metric-card metric-gold">
+            <div class="metric-top">
+              <span class="metric-tag tag-gold">💎 VIP PRIORITAS</span>
+              <span class="metric-icon">🔥</span>
+            </div>
+            <div class="metric-number" id="statVipCount">-</div>
+            <div class="metric-meta">
+              <span class="metric-title">Full 3-Timeframe</span>
+              <span class="metric-detail">Konfirmasi Daily + 1H + 15M</span>
+            </div>
+          </div>
+
+          <div class="metric-card metric-cyan">
+            <div class="metric-top">
+              <span class="metric-tag tag-cyan">⚡ RADAR POTENSIAL</span>
+              <span class="metric-icon">🎯</span>
+            </div>
+            <div class="metric-number" id="statPotCount">-</div>
+            <div class="metric-meta">
+              <span class="metric-title">Lolos 2-Timeframe</span>
+              <span class="metric-detail">Siap pantau untuk konfirmasi ke-3</span>
+            </div>
+          </div>
+
+          <div class="metric-card metric-green">
+            <div class="metric-top">
+              <span class="metric-tag tag-green">✨ DONALT CROSS</span>
+              <span class="metric-icon">📈</span>
+            </div>
+            <div class="metric-number" id="statGoldenCount">-</div>
+            <div class="metric-meta">
+              <span class="metric-title">Golden Cross Aktif</span>
+              <span class="metric-detail">EMA Bullish Reversal Signal</span>
+            </div>
+          </div>
+
+          <div class="metric-card metric-slate">
+            <div class="metric-top">
+              <span class="metric-tag tag-slate">📊 TOTAL SCREENER</span>
+              <span class="metric-icon">🛡️</span>
+            </div>
+            <div class="metric-number" id="statTotalCount">-</div>
+            <div class="metric-meta">
+              <span class="metric-title">Saham Lolos Kriteria</span>
+              <span class="metric-detail">Harga Rp 10-1.000 & Vol > Avg 10D</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Action Bar: Active Date Info & Sort Selector -->
+        <section class="action-bar">
+          <div class="action-bar-left">
+            <div class="active-date-badge">
+              <span class="calendar-icon">📅</span>
+              <span id="activeDateDisplay">15 Oktober 2026</span>
+              <span class="time-pill" id="activeTimeDisplay">16:30 WIB</span>
+            </div>
+            <span class="filter-result-count" id="filterResultCount">Menampilkan 0 saham</span>
+          </div>
+
+          <div class="action-bar-right">
+            <!-- Sort Selector -->
+            <div class="sort-wrapper">
+              <span class="sort-label">Urutkan:</span>
+              <select id="sortSelector" onchange="handleSortChange(this.value)" class="sort-dropdown">
+                <option value="dot_desc">🟢 Dot Green Terbanyak</option>
+                <option value="gain_desc">🚀 % Kenaikan Tertinggi</option>
+                <option value="loss_asc">🔻 % Penurunan Terbesar</option>
+                <option value="vol_desc">📊 Volume Terbesar</option>
+                <option value="sym_asc">🔤 Kode Saham (A-Z)</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stock Cards Container Grid -->
+        <section class="stocks-grid-container" id="stocksGrid">
+          <!-- Loading State Skeleton -->
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </section>
+
+      </main>
+
+      <!-- Minimalist Dashboard Footer -->
+      <footer class="dashboard-footer">
+        <div class="footer-content">
+          <span>© 2026 <b>Hunter AI Algorithmic Screener</b> — IDX Trading Automation</span>
+          <span class="footer-sync" id="footerSyncText">Update: -</span>
+        </div>
+      </footer>
+
     </div>
-  </header>
 
-  <main class="container main-content">
-    <!-- Top Summary Banner -->
-    <section class="summary-cards" id="summarySection">
-      <div class="summary-card gold-border">
-        <div class="card-label">🔥 Full 3 Timeframe (VIP)</div>
-        <div class="card-val text-gold" id="stat3Dot">-</div>
-        <div class="card-desc">Prioritas Tertinggi (1D + 1H + 15M)</div>
-      </div>
-      <div class="summary-card cyan-border">
-        <div class="card-label">⚡ Lolos 2 Timeframe</div>
-        <div class="card-val text-cyan" id="stat2Dot">-</div>
-        <div class="card-desc">Radar Potensial Siap Pantau</div>
-      </div>
-      <div class="summary-card green-border">
-        <div class="card-label">📊 Total Screener Lolos</div>
-        <div class="card-val text-green" id="statTotal">-</div>
-        <div class="card-desc">Saham Rp 10-1.000 & Vol > Avg 10D</div>
-      </div>
-    </section>
-
-    <!-- Navigation Tabs & Search Controls -->
-    <div class="controls-toolbar">
-      <!-- Main Mode Switcher -->
-      <div class="mode-tabs">
-        <button class="mode-tab active" id="tabDailyBtn" onclick="switchMode('daily')">
-          📅 Harian (7 Hari Terakhir)
-        </button>
-        <button class="mode-tab" id="tabVipBtn" onclick="switchMode('vip')">
-          💎 3 Dot Green (Riwayat 1 Bulan)
-          <span class="badge-count" id="vipBadgeCount">0</span>
-        </button>
-      </div>
-
-      <!-- Search & Filter Bar -->
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Cari kode saham (misal: BUMI, DYAN, BNBR)..." oninput="handleSearch(this.value)">
-      </div>
-    </div>
-
-    <!-- Date Pills for 7-Day Daily Mode -->
-    <section class="date-pills-wrapper" id="datePillsSection">
-      <span class="pills-label">Pilih Tanggal:</span>
-      <div class="date-pills" id="datePillsContainer">
-        <!-- Rendered by JS -->
-      </div>
-    </section>
-
-    <!-- Active Section Header & Filter Badges -->
-    <div class="section-header">
-      <div>
-        <h2 class="section-title" id="sectionTitle">Memuat Rekomendasi...</h2>
-        <p class="section-desc" id="sectionDesc">Menampilkan data saham yang dianalisa lengkap dengan indikator</p>
-      </div>
-      <div class="filter-badges">
-        <button class="filter-btn active" data-filter="all" onclick="filterCategory('all', this)">Semua (<span id="countAll">0</span>)</button>
-        <button class="filter-btn" data-filter="3dot" onclick="filterCategory('3dot', this)">3 Dot (<span id="count3DotFilter">0</span>)</button>
-        <button class="filter-btn" data-filter="2dot" onclick="filterCategory('2dot', this)">2 Dot (<span id="count2DotFilter">0</span>)</button>
-        <button class="filter-btn" data-filter="golden" onclick="filterCategory('golden', this)">Golden Cross</button>
-        <button class="filter-btn" data-filter="smc" onclick="filterCategory('smc', this)">SMC Breakout</button>
-      </div>
-    </div>
-
-    <!-- Stock Cards Grid Container -->
-    <div class="stocks-grid" id="stocksGrid">
-      <!-- Loading Skeleton -->
-      <div class="loading-state">
-        <div class="spinner"></div>
-        <p>Memuat database rekomendasi saham...</p>
-      </div>
-    </div>
-  </main>
-
-  <footer class="footer">
-    <div class="container footer-content">
-      <p>© 2026 Hunter Radar & RallyGood (IDX). Otomatisasi Cloud Agent 24 Jam.</p>
-      <p class="disclaimer">⚠️ <em>Disclaimer: Data ini dihasilkan secara algoritmik dari indikator TradingView untuk tujuan riset & edukasi, bukan ajakan membeli/menjual saham secara mutlak.</em></p>
-    </div>
-  </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
