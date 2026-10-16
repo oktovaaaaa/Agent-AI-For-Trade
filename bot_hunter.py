@@ -1127,7 +1127,132 @@ async def scan_stock_rallygood(page, stock_info):
             print(f" ⚠️ Error: {e}")
             results[tf_code] = {"status": False, "date": None, "error": str(e)}
             
-    return results
+# ============================================================================
+# TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (7 HARI TERAKHIR & 1 BULAN 3 DOT GREEN)
+# ============================================================================
+def simpan_database_json(hasil_deteksi, now_wib):
+    """
+    Menyimpan hasil analisa ke database JSON untuk Web Statis Dashboard:
+    - 7 hari terakhir untuk semua saham harian (1D, 1H, 15M).
+    - 30 hari (1 bulan terakhir) khusus saham prioritas dengan 3 Dot Green.
+    """
+    try:
+        data_dir = Path("docs") / "data"
+        data_dir.mkdir(parents=True, exist_ok=True)
+        history_file = data_dir / "history.json"
+        
+        # Inisialisasi struktur history
+        history = {
+            "last_updated": now_wib.strftime("%Y-%m-%d %H:%M:%S WIB"),
+            "daily_scans": {},
+            "vip_3dot_history": []
+        }
+        if history_file.exists():
+            try:
+                with open(history_file, "r", encoding="utf-8") as f:
+                    history = json.load(f)
+            except Exception:
+                pass
+                
+        date_key = now_wib.strftime("%Y-%m-%d")
+        tgl_id = format_tanggal_id(now_wib)
+        
+        clean_stocks = []
+        for item in hasil_deteksi:
+            st = item.get('stock', {})
+            tf = item.get('timeframes', {})
+            clean_tf = {}
+            for tf_k in ['D', '60', '15']:
+                tf_v = tf.get(tf_k, {})
+                clean_tf[tf_k] = {
+                    "status": bool(tf_v.get("status", False)),
+                    "date": tf_v.get("date"),
+                    "dot_close": tf_v.get("dot_close"),
+                    "gain_pct": tf_v.get("gain_pct"),
+                    "donalt": tf_v.get("donalt"),
+                    "scalping": tf_v.get("scalping"),
+                    "smc": tf_v.get("smc"),
+                    "macd": tf_v.get("macd")
+                }
+            
+            clean_stocks.append({
+                "symbol": st.get("symbol"),
+                "name": st.get("name", st.get("symbol")),
+                "close": st.get("close"),
+                "change": st.get("change"),
+                "volume": st.get("volume"),
+                "count_green": item.get("count_green", 0),
+                "has_green_dot": item.get("has_green_dot", False),
+                "timeframes": clean_tf
+            })
+            
+        # Urutkan berdasarkan count_green desc, lalu volume desc
+        clean_stocks.sort(key=lambda x: (x.get("count_green", 0), x.get("volume", 0)), reverse=True)
+        
+        saham_3_dot = [s for s in clean_stocks if s["count_green"] == 3]
+        saham_2_dot = [s for s in clean_stocks if s["count_green"] == 2]
+        saham_1_dot = [s for s in clean_stocks if s["count_green"] == 1]
+        saham_0_dot = [s for s in clean_stocks if s["count_green"] == 0]
+        
+        # Simpan scan hari ini
+        history["last_updated"] = now_wib.strftime("%Y-%m-%d %H:%M:%S WIB")
+        if "daily_scans" not in history or not isinstance(history["daily_scans"], dict):
+            history["daily_scans"] = {}
+            
+        history["daily_scans"][date_key] = {
+            "date": date_key,
+            "date_display": tgl_id,
+            "time_display": now_wib.strftime("%H:%M WIB"),
+            "summary": {
+                "total_screener": len(clean_stocks),
+                "count_3_dot": len(saham_3_dot),
+                "count_2_dot": len(saham_2_dot),
+                "count_1_dot": len(saham_1_dot),
+                "count_0_dot": len(saham_0_dot)
+            },
+            "stocks": clean_stocks
+        }
+        
+        # 1. PANGKAS DAILY_SCANS AGAR HANYA 7 HARI TERAKHIR
+        sorted_dates = sorted(history["daily_scans"].keys(), reverse=True)
+        if len(sorted_dates) > 7:
+            for old_date in sorted_dates[7:]:
+                del history["daily_scans"][old_date]
+                
+        # 2. SIMPAN RIWAYAT KHUSUS SAHAM 3 DOT GREEN (1 BULAN TERAKHIR / 30 HARI)
+        if "vip_3dot_history" not in history or not isinstance(history["vip_3dot_history"], list):
+            history["vip_3dot_history"] = []
+            
+        for s3 in saham_3_dot:
+            idx_exist = next((i for i, h in enumerate(history["vip_3dot_history"]) if h.get("symbol") == s3["symbol"] and h.get("scan_date") == date_key), None)
+            record_item = {
+                "symbol": s3["symbol"],
+                "scan_date": date_key,
+                "scan_date_display": tgl_id,
+                "data": s3
+            }
+            if idx_exist is not None:
+                history["vip_3dot_history"][idx_exist] = record_item
+            else:
+                history["vip_3dot_history"].append(record_item)
+                
+        # Pangkas vip_3dot_history agar maksimal 30 hari terakhir
+        cutoff_date = (now_wib - datetime.timedelta(days=30)).strftime("%Y-%m-%d")
+        history["vip_3dot_history"] = [
+            h for h in history["vip_3dot_history"]
+            if h.get("scan_date", "") >= cutoff_date
+        ]
+        
+        # Urutkan vip_3dot_history berdasarkan tanggal terbaru
+        history["vip_3dot_history"].sort(key=lambda x: (x.get("scan_date", ""), x.get("data", {}).get("volume", 0)), reverse=True)
+        
+        # Tulis ke file JSON history.json
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump(history, f, ensure_ascii=False, indent=2, default=str)
+            
+        print(f"💾 [DATABASE WEB] Berhasil menyimpan data 7 hari & riwayat 1 bulan (3 Dot Green) di {history_file}")
+    except Exception as e:
+        print(f"⚠️ [DATABASE WEB ERROR] Gagal menyimpan data JSON: {e}")
 
 # ============================================================================
 # TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.30 WIB)
@@ -1638,6 +1763,9 @@ async def run_daily_scan(send_wa=True):
     else:
         print("ℹ️ Mode Uji Coba: Pengiriman WhatsApp dilewati (hanya mencatat ke file Notepad).")
         
+    # 5. Simpan Data ke Database JSON (Web Statis 7 Hari + 1 Bulan 3 Dot Green)
+    simpan_database_json(hasil_deteksi, now_wib)
+
     # Pastikan seluruh sisa screenshot dibersihkan
     bersihkan_screenshot()
 

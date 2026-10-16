@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hunter Radar & RallyGood — Rekomendasi Saham IDX</title>
+  <meta name="description" content="Dashboard Rekomendasi Saham Hunter IDX dengan Indikator RallyGood, DonAlt EMA Suite, Smart Money Concepts (SMC), dan MACD Divergence.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="glow-bg glow-top"></div>
+  <div class="glow-bg glow-bottom"></div>
+
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="brand">
+        <div class="brand-icon">🏹</div>
+        <div>
+          <h1 class="brand-title">HUNTER RADAR <span>RALLY GOD</span></h1>
+          <p class="brand-subtitle">AI Algorithmic IDX Stock Screener & Indicator Analysis</p>
+        </div>
+      </div>
+      <div class="live-status">
+        <span class="pulsing-dot"></span>
+        <span id="lastUpdatedText">Memuat data...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <!-- Top Summary Banner -->
+    <section class="summary-cards" id="summarySection">
+      <div class="summary-card gold-border">
+        <div class="card-label">🔥 Full 3 Timeframe (VIP)</div>
+        <div class="card-val text-gold" id="stat3Dot">-</div>
+        <div class="card-desc">Prioritas Tertinggi (1D + 1H + 15M)</div>
+      </div>
+      <div class="summary-card cyan-border">
+        <div class="card-label">⚡ Lolos 2 Timeframe</div>
+        <div class="card-val text-cyan" id="stat2Dot">-</div>
+        <div class="card-desc">Radar Potensial Siap Pantau</div>
+      </div>
+      <div class="summary-card green-border">
+        <div class="card-label">📊 Total Screener Lolos</div>
+        <div class="card-val text-green" id="statTotal">-</div>
+        <div class="card-desc">Saham Rp 10-1.000 & Vol > Avg 10D</div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs & Search Controls -->
+    <div class="controls-toolbar">
+      <!-- Main Mode Switcher -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" id="tabDailyBtn" onclick="switchMode('daily')">
+          📅 Harian (7 Hari Terakhir)
+        </button>
+        <button class="mode-tab" id="tabVipBtn" onclick="switchMode('vip')">
+          💎 3 Dot Green (Riwayat 1 Bulan)
+          <span class="badge-count" id="vipBadgeCount">0</span>
+        </button>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Cari kode saham (misal: BUMI, DYAN, BNBR)..." oninput="handleSearch(this.value)">
+      </div>
+    </div>
+
+    <!-- Date Pills for 7-Day Daily Mode -->
+    <section class="date-pills-wrapper" id="datePillsSection">
+      <span class="pills-label">Pilih Tanggal:</span>
+      <div class="date-pills" id="datePillsContainer">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Active Section Header & Filter Badges -->
+    <div class="section-header">
+      <div>
+        <h2 class="section-title" id="sectionTitle">Memuat Rekomendasi...</h2>
+        <p class="section-desc" id="sectionDesc">Menampilkan data saham yang dianalisa lengkap dengan indikator</p>
+      </div>
+      <div class="filter-badges">
+        <button class="filter-btn active" data-filter="all" onclick="filterCategory('all', this)">Semua (<span id="countAll">0</span>)</button>
+        <button class="filter-btn" data-filter="3dot" onclick="filterCategory('3dot', this)">3 Dot (<span id="count3DotFilter">0</span>)</button>
+        <button class="filter-btn" data-filter="2dot" onclick="filterCategory('2dot', this)">2 Dot (<span id="count2DotFilter">0</span>)</button>
+        <button class="filter-btn" data-filter="golden" onclick="filterCategory('golden', this)">Golden Cross</button>
+        <button class="filter-btn" data-filter="smc" onclick="filterCategory('smc', this)">SMC Breakout</button>
+      </div>
+    </div>
+
+    <!-- Stock Cards Grid Container -->
+    <div class="stocks-grid" id="stocksGrid">
+      <!-- Loading Skeleton -->
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Memuat database rekomendasi saham...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>© 2026 Hunter Radar & RallyGood (IDX). Otomatisasi Cloud Agent 24 Jam.</p>
+      <p class="disclaimer">⚠️ <em>Disclaimer: Data ini dihasilkan secara algoritmik dari indikator TradingView untuk tujuan riset & edukasi, bukan ajakan membeli/menjual saham secara mutlak.</em></p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

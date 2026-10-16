@@ -1,0 +1,5531 @@
+{
+  "last_updated": "15 Oktober 2026 15:21:22 WIB",
+  "daily_scans": {
+    "2026-10-13": {
+      "date": "2026-10-13",
+      "date_display": "13 Oktober 2026",
+      "time_display": "16:30 WIB",
+      "summary": {
+        "total_screener": 149,
+        "count_3_dot": 9,
+        "count_2_dot": 66,
+        "count_1_dot": 74,
+        "count_0_dot": 0
+      },
+      "stocks": [
+        {
+          "symbol": "MAXI",
+          "name": "MAXI",
+          "close": 28.0,
+          "change": 12.0,
+          "volume": 82025900.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "12 Oct 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CDIA",
+          "name": "CDIA",
+          "close": 500.0,
+          "change": 0.0,
+          "volume": 51400500.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "12 Oct 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CTRA",
+          "name": "CTRA",
+          "close": 575.0,
+          "change": 6.48,
+          "volume": 31549200.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "06 Oct 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "30 Sep 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "FILM",
+          "name": "FILM",
+          "close": 555.0,
+          "change": 0.0,
+          "volume": 14410600.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "12 Oct 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PTMP",
+          "name": "PTMP",
+          "close": 49.0,
+          "change": 2.08,
+          "volume": 9674300.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SMBR",
+          "name": "SMBR",
+          "close": 150.0,
+          "change": 0.0,
+          "volume": 3448000.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 14:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "APIC",
+          "name": "APIC",
+          "close": 400.0,
+          "change": -0.99,
+          "volume": 841100.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "16 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "17 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BESS",
+          "name": "BESS",
+          "close": 835.0,
+          "change": -0.6,
+          "volume": 472700.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "LPLI",
+          "name": "LPLI",
+          "close": 204.0,
+          "change": 0.0,
+          "volume": 282600.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "06 Oct 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "06 Oct 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BUMI",
+          "name": "BUMI",
+          "close": 167.0,
+          "change": 1.21,
+          "volume": 1957984900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DSSA",
+          "name": "DSSA",
+          "close": 940.0,
+          "change": -2.59,
+          "volume": 540945000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CUAN",
+          "name": "CUAN",
+          "close": 665.0,
+          "change": 1.53,
+          "volume": 434856000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ESIP",
+          "name": "ESIP",
+          "close": 103.0,
+          "change": 10.75,
+          "volume": 389400800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "VKTR",
+          "name": "VKTR",
+          "close": 570.0,
+          "change": -10.24,
+          "volume": 222017200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "16 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CTTH",
+          "name": "CTTH",
+          "close": 99.0,
+          "change": 11.24,
+          "volume": 209880400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BRMS",
+          "name": "BRMS",
+          "close": 555.0,
+          "change": 0.0,
+          "volume": 208222500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "02 Oct 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "VIVA",
+          "name": "VIVA",
+          "close": 42.0,
+          "change": -6.67,
+          "volume": 188581900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GMFI",
+          "name": "GMFI",
+          "close": 51.0,
+          "change": 4.08,
+          "volume": 160725600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "02 Oct 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BKSL",
+          "name": "BKSL",
+          "close": 53.0,
+          "change": -1.85,
+          "volume": 148403200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CPRO",
+          "name": "CPRO",
+          "close": 39.0,
+          "change": 2.63,
+          "volume": 132629700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "30 Sep 2026"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TRIN",
+          "name": "TRIN",
+          "close": 159.0,
+          "change": -8.62,
+          "volume": 127852600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BAPA",
+          "name": "BAPA",
+          "close": 101.0,
+          "change": -10.62,
+          "volume": 120930200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TOWR",
+          "name": "TOWR",
+          "close": 452.0,
+          "change": -1.31,
+          "volume": 95147900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PICO",
+          "name": "PICO",
+          "close": 194.0,
+          "change": 28.48,
+          "volume": 64733400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RANS",
+          "name": "RANS",
+          "close": 181.0,
+          "change": 4.62,
+          "volume": 57080600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "07 Oct 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ACES",
+          "name": "ACES",
+          "close": 324.0,
+          "change": 1.89,
+          "volume": 53855100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "06 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SMRA",
+          "name": "SMRA",
+          "close": 256.0,
+          "change": 4.92,
+          "volume": 53825100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "07 Oct 2026"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "07 Oct 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ZATA",
+          "name": "ZATA",
+          "close": 48.0,
+          "change": 2.13,
+          "volume": 43199500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MAPA",
+          "name": "MAPA",
+          "close": 620.0,
+          "change": -0.8,
+          "volume": 41235200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "OMED",
+          "name": "OMED",
+          "close": 230.0,
+          "change": 0.88,
+          "volume": 31438000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "23 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASPR",
+          "name": "ASPR",
+          "close": 156.0,
+          "change": 1.3,
+          "volume": 30981600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HATM",
+          "name": "HATM",
+          "close": 605.0,
+          "change": 4.31,
+          "volume": 28377500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DYAN",
+          "name": "DYAN",
+          "close": 81.0,
+          "change": 3.85,
+          "volume": 28034800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GTSI",
+          "name": "GTSI",
+          "close": 121.0,
+          "change": 1.68,
+          "volume": 23101500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CNMA",
+          "name": "CNMA",
+          "close": 86.0,
+          "change": 0.0,
+          "volume": 19635500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "UNTD",
+          "name": "UNTD",
+          "close": 69.0,
+          "change": 0.0,
+          "volume": 19187300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HMSP",
+          "name": "HMSP",
+          "close": 645.0,
+          "change": 0.78,
+          "volume": 18406500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ELSA",
+          "name": "ELSA",
+          "close": 655.0,
+          "change": 4.8,
+          "volume": 16878200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "01 Oct 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASLC",
+          "name": "ASLC",
+          "close": 53.0,
+          "change": -1.85,
+          "volume": 13507400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DGWG",
+          "name": "DGWG",
+          "close": 322.0,
+          "change": 0.62,
+          "volume": 12990200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KOCI",
+          "name": "KOCI",
+          "close": 101.0,
+          "change": 2.02,
+          "volume": 12867800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "OKAS",
+          "name": "OKAS",
+          "close": 97.0,
+          "change": -3.0,
+          "volume": 12446400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "02 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PPRE",
+          "name": "PPRE",
+          "close": 85.0,
+          "change": 2.41,
+          "volume": 11076600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "FIRE",
+          "name": "FIRE",
+          "close": 102.0,
+          "change": 2.0,
+          "volume": 10656700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AVIA",
+          "name": "AVIA",
+          "close": 354.0,
+          "change": 1.14,
+          "volume": 10067800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "OASA",
+          "name": "OASA",
+          "close": 224.0,
+          "change": 2.75,
+          "volume": 8869300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HRUM",
+          "name": "HRUM",
+          "close": 835.0,
+          "change": 1.83,
+          "volume": 8707900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "02 Oct 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "05 Oct 2026, 14:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "APEX",
+          "name": "APEX",
+          "close": 167.0,
+          "change": -1.18,
+          "volume": 7699900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PBSA",
+          "name": "PBSA",
+          "close": 845.0,
+          "change": 3.05,
+          "volume": 6206000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "LUCK",
+          "name": "LUCK",
+          "close": 104.0,
+          "change": 0.97,
+          "volume": 5920400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASRI",
+          "name": "ASRI",
+          "close": 115.0,
+          "change": -0.86,
+          "volume": 5325500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ZONE",
+          "name": "ZONE",
+          "close": 780.0,
+          "change": -3.7,
+          "volume": 5247800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "05 Oct 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BCIP",
+          "name": "BCIP",
+          "close": 56.0,
+          "change": -3.45,
+          "volume": 4303000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BJBR",
+          "name": "BJBR",
+          "close": 755.0,
+          "change": 1.34,
+          "volume": 4026100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ISSP",
+          "name": "ISSP",
+          "close": 422.0,
+          "change": 1.93,
+          "volume": 4024700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "23 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "JKON",
+          "name": "JKON",
+          "close": 81.0,
+          "change": 1.25,
+          "volume": 3910000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RMKO",
+          "name": "RMKO",
+          "close": 234.0,
+          "change": 0.0,
+          "volume": 3526900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MAIN",
+          "name": "MAIN",
+          "close": 605.0,
+          "change": 0.0,
+          "volume": 2835700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "09 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "08 Oct 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ERTX",
+          "name": "ERTX",
+          "close": 160.0,
+          "change": -1.23,
+          "volume": 2816800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "NIKL",
+          "name": "NIKL",
+          "close": 177.0,
+          "change": -1.12,
+          "volume": 2719700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SATU",
+          "name": "SATU",
+          "close": 242.0,
+          "change": -1.63,
+          "volume": 2589800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "16 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "24 Sep 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "INDS",
+          "name": "INDS",
+          "close": 242.0,
+          "change": 0.0,
+          "volume": 2447000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "FORE",
+          "name": "FORE",
+          "close": 745.0,
+          "change": 2.05,
+          "volume": 2393700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "NAIK",
+          "name": "NAIK",
+          "close": 81.0,
+          "change": -2.41,
+          "volume": 2003300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DWGL",
+          "name": "DWGL",
+          "close": 200.0,
+          "change": -0.99,
+          "volume": 1852700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Oct 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DRMA",
+          "name": "DRMA",
+          "close": 950.0,
+          "change": -1.04,
+          "volume": 1645100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "21 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PJHB",
+          "name": "PJHB",
+          "close": 153.0,
+          "change": -0.65,
+          "volume": 1343800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "30 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RUIS",
+          "name": "RUIS",
+          "close": 195.0,
+          "change": 1.56,
+          "volume": 1258200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MHKI",
+          "name": "MHKI",
+          "close": 118.0,
+          "change": 0.0,
+          "volume": 1126100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BABY",
+          "name": "BABY",
+          "close": 191.0,
+          "change": 2.69,
+          "volume": 998700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "UFOE",
+          "name": "UFOE",
+          "close": 137.0,
+          "change": 2.24,
+          "volume": 939200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "23 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "25 Sep 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ECII",
+          "name": "ECII",
+          "close": 156.0,
+          "change": 1.3,
+          "volume": 819600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AWAN",
+          "name": "AWAN",
+          "close": 152.0,
+          "change": 3.4,
+          "volume": 371700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Oct 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CSRA",
+          "name": "CSRA",
+          "close": 720.0,
+          "change": 5.11,
+          "volume": 298800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "02 Oct 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "IDPR",
+          "name": "IDPR",
+          "close": 234.0,
+          "change": -1.68,
+          "volume": 276200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "09 Oct 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "09 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SQMI",
+          "name": "SQMI",
+          "close": 95.0,
+          "change": 5.56,
+          "volume": 597115500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASMI",
+          "name": "ASMI",
+          "close": 29.0,
+          "change": -14.71,
+          "volume": 304417000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DKHH",
+          "name": "DKHH",
+          "close": 97.0,
+          "change": 8.99,
+          "volume": 204125200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "POLA",
+          "name": "POLA",
+          "close": 90.0,
+          "change": -14.29,
+          "volume": 174333100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GRPH",
+          "name": "GRPH",
+          "close": 110.0,
+          "change": 34.15,
+          "volume": 145513400.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BLTA",
+          "name": "BLTA",
+          "close": 39.0,
+          "change": 0.0,
+          "volume": 140129100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SBMA",
+          "name": "SBMA",
+          "close": 144.0,
+          "change": 29.73,
+          "volume": 93805200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KDTN",
+          "name": "KDTN",
+          "close": 346.0,
+          "change": -13.93,
+          "volume": 83606200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SMIL",
+          "name": "SMIL",
+          "close": 488.0,
+          "change": 0.0,
+          "volume": 79208700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MGNA",
+          "name": "MGNA",
+          "close": 160.0,
+          "change": -9.09,
+          "volume": 73145000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 14:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PWON",
+          "name": "PWON",
+          "close": 278.0,
+          "change": 2.96,
+          "volume": 68869600.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BWPT",
+          "name": "BWPT",
+          "close": 101.0,
+          "change": 1.0,
+          "volume": 64745000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 14:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SGER",
+          "name": "SGER",
+          "close": 770.0,
+          "change": 0.65,
+          "volume": 61588000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KETR",
+          "name": "KETR",
+          "close": 850.0,
+          "change": 9.68,
+          "volume": 57470200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GPRA",
+          "name": "GPRA",
+          "close": 97.0,
+          "change": -2.02,
+          "volume": 47639900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "08 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MITI",
+          "name": "MITI",
+          "close": 332.0,
+          "change": 5.06,
+          "volume": 41794700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MMIX",
+          "name": "MMIX",
+          "close": 970.0,
+          "change": 0.52,
+          "volume": 30325000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SOCI",
+          "name": "SOCI",
+          "close": 530.0,
+          "change": -1.85,
+          "volume": 28802100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GULA",
+          "name": "GULA",
+          "close": 795.0,
+          "change": -3.64,
+          "volume": 26554900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AYLS",
+          "name": "AYLS",
+          "close": 212.0,
+          "change": 11.58,
+          "volume": 25792700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TOSK",
+          "name": "TOSK",
+          "close": 82.0,
+          "change": 1.23,
+          "volume": 22446200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MAHA",
+          "name": "MAHA",
+          "close": 148.0,
+          "change": 0.68,
+          "volume": 20013100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MIDI",
+          "name": "MIDI",
+          "close": 282.0,
+          "change": 5.22,
+          "volume": 18516700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "JATI",
+          "name": "JATI",
+          "close": 103.0,
+          "change": -4.63,
+          "volume": 17777000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SNLK",
+          "name": "SNLK",
+          "close": 234.0,
+          "change": 0.0,
+          "volume": 16832700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BSML",
+          "name": "BSML",
+          "close": 565.0,
+          "change": 0.89,
+          "volume": 16175600.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "INPC",
+          "name": "INPC",
+          "close": 150.0,
+          "change": 4.9,
+          "volume": 14331700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SAPX",
+          "name": "SAPX",
+          "close": 404.0,
+          "change": 8.6,
+          "volume": 13390300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SWID",
+          "name": "SWID",
+          "close": 101.0,
+          "change": 4.12,
+          "volume": 11365000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BAJA",
+          "name": "BAJA",
+          "close": 260.0,
+          "change": 3.17,
+          "volume": 11045100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BLES",
+          "name": "BLES",
+          "close": 200.0,
+          "change": -0.99,
+          "volume": 10559300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PGEO",
+          "name": "PGEO",
+          "close": 985.0,
+          "change": 0.0,
+          "volume": 8851600.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PSKT",
+          "name": "PSKT",
+          "close": 214.0,
+          "change": 1.9,
+          "volume": 8282900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Oct 2026, 11:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MINE",
+          "name": "MINE",
+          "close": 302.0,
+          "change": -5.62,
+          "volume": 8253300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "EKAD",
+          "name": "EKAD",
+          "close": 372.0,
+          "change": 2.2,
+          "volume": 5202300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "POWR",
+          "name": "POWR",
+          "close": 970.0,
+          "change": 2.65,
+          "volume": 5109000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BTPS",
+          "name": "BTPS",
+          "close": 990.0,
+          "change": 1.54,
+          "volume": 4943300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AISA",
+          "name": "AISA",
+          "close": 110.0,
+          "change": -1.79,
+          "volume": 4876300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BJTM",
+          "name": "BJTM",
+          "close": 510.0,
+          "change": 0.0,
+          "volume": 4853900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 14:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ARII",
+          "name": "ARII",
+          "close": 458.0,
+          "change": 12.25,
+          "volume": 4840300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "25 Sep 2026, 10:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ERAL",
+          "name": "ERAL",
+          "close": 314.0,
+          "change": 2.61,
+          "volume": 4752100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BOLA",
+          "name": "BOLA",
+          "close": 184.0,
+          "change": 7.6,
+          "volume": 4344200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BNII",
+          "name": "BNII",
+          "close": 187.0,
+          "change": -0.53,
+          "volume": 3848700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BATR",
+          "name": "BATR",
+          "close": 95.0,
+          "change": 3.26,
+          "volume": 3414100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "JAYA",
+          "name": "JAYA",
+          "close": 146.0,
+          "change": 1.39,
+          "volume": 2665200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 11:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "IPOL",
+          "name": "IPOL",
+          "close": 113.0,
+          "change": 0.0,
+          "volume": 2611800.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "25 Sep 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TLDN",
+          "name": "TLDN",
+          "close": 570.0,
+          "change": -5.0,
+          "volume": 1840300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "IMJS",
+          "name": "IMJS",
+          "close": 168.0,
+          "change": -0.59,
+          "volume": 1775300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RALS",
+          "name": "RALS",
+          "close": 376.0,
+          "change": -0.53,
+          "volume": 1567800.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "NICE",
+          "name": "NICE",
+          "close": 322.0,
+          "change": 0.0,
+          "volume": 1503300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ZYRX",
+          "name": "ZYRX",
+          "close": 129.0,
+          "change": 0.0,
+          "volume": 1322400.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SDPC",
+          "name": "SDPC",
+          "close": 196.0,
+          "change": 1.03,
+          "volume": 1297300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TBLA",
+          "name": "TBLA",
+          "close": 600.0,
+          "change": 0.0,
+          "volume": 1206200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PALM",
+          "name": "PALM",
+          "close": 272.0,
+          "change": -0.73,
+          "volume": 1160700.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "TRIS",
+          "name": "TRIS",
+          "close": 167.0,
+          "change": -1.18,
+          "volume": 1135300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "URBN",
+          "name": "URBN",
+          "close": 310.0,
+          "change": 0.65,
+          "volume": 1129400.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "05 Oct 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PTPS",
+          "name": "PTPS",
+          "close": 150.0,
+          "change": 1.35,
+          "volume": 1120100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AKPI",
+          "name": "AKPI",
+          "close": 515.0,
+          "change": -0.96,
+          "volume": 1110900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "22 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KOBX",
+          "name": "KOBX",
+          "close": 166.0,
+          "change": 1.22,
+          "volume": 1104800.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BRNA",
+          "name": "BRNA",
+          "close": 610.0,
+          "change": 0.83,
+          "volume": 979600.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MTDL",
+          "name": "MTDL",
+          "close": 496.0,
+          "change": -0.8,
+          "volume": 975000.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SDRA",
+          "name": "SDRA",
+          "close": 198.0,
+          "change": -1.0,
+          "volume": 948500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "24 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SSTM",
+          "name": "SSTM",
+          "close": 400.0,
+          "change": -2.91,
+          "volume": 816800.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "01 Oct 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "LMPI",
+          "name": "LMPI",
+          "close": 156.0,
+          "change": -1.89,
+          "volume": 772300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "07 Oct 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BTON",
+          "name": "BTON",
+          "close": 388.0,
+          "change": -7.18,
+          "volume": 708500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MDLA",
+          "name": "MDLA",
+          "close": 206.0,
+          "change": -0.96,
+          "volume": 651300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BNBA",
+          "name": "BNBA",
+          "close": 785.0,
+          "change": -1.26,
+          "volume": 621500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "06 Oct 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BUDI",
+          "name": "BUDI",
+          "close": 226.0,
+          "change": 2.73,
+          "volume": 367500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "22 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PSGO",
+          "name": "PSGO",
+          "close": 192.0,
+          "change": 0.52,
+          "volume": 303300.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "22 Sep 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AMOR",
+          "name": "AMOR",
+          "close": 368.0,
+          "change": 2.22,
+          "volume": 221900.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PDPP",
+          "name": "PDPP",
+          "close": 326.0,
+          "change": -0.61,
+          "volume": 140500.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASJT",
+          "name": "ASJT",
+          "close": 160.0,
+          "change": 0.0,
+          "volume": 128600.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "16 Sep 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SIPD",
+          "name": "SIPD",
+          "close": 720.0,
+          "change": -0.69,
+          "volume": 120100.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "02 Oct 2026, 10:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "WOMF",
+          "name": "WOMF",
+          "close": 278.0,
+          "change": 2.21,
+          "volume": 57200.0,
+          "count_green": 1,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "17 Sep 2026, 15:15 WIB"
+            }
+          }
+        }
+      ]
+    },
+    "2026-10-14": {
+      "date": "2026-10-14",
+      "date_display": "14 Oktober 2026",
+      "time_display": "16:30 WIB",
+      "summary": {
+        "total_screener": 56,
+        "count_3_dot": 8,
+        "count_2_dot": 48,
+        "count_1_dot": 0,
+        "count_0_dot": 0
+      },
+      "stocks": [
+        {
+          "symbol": "REAL",
+          "name": "REAL",
+          "close": 45.0,
+          "change": 2.27,
+          "volume": 136173000.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "1 Okt 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "1 Okt 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 14:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MAXI",
+          "name": "MAXI",
+          "close": 26.0,
+          "change": -7.14,
+          "volume": 105257900.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "12 Okt 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Okt 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SMRA",
+          "name": "SMRA",
+          "close": 264.0,
+          "change": 3.12,
+          "volume": 90416400.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "7 Okt 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "7 Okt 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "7 Okt 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BEER",
+          "name": "BEER",
+          "close": 64.0,
+          "change": 4.92,
+          "volume": 26624900.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CTRA",
+          "name": "CTRA",
+          "close": 585.0,
+          "change": 1.74,
+          "volume": 21630100.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "6 Okt 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "30 Sep 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 13:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "GPSO",
+          "name": "GPSO",
+          "close": 234.0,
+          "change": 1.74,
+          "volume": 17447000.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "7 Okt 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SOLA",
+          "name": "SOLA",
+          "close": 73.0,
+          "change": -2.67,
+          "volume": 9586900.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 14:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PNSE",
+          "name": "PNSE",
+          "close": 450.0,
+          "change": 6.64,
+          "volume": 40500.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "6 Okt 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "6 Okt 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "6 Okt 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "STRK",
+          "name": "STRK",
+          "close": 107.0,
+          "change": 18.89,
+          "volume": 711265200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "29 Sep 2026"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": false,
+              "date": "-"
+            }
+          }
+        },
+        {
+          "symbol": "TRON",
+          "name": "TRON",
+          "close": 101.0,
+          "change": 34.67,
+          "volume": 391661900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BUVA",
+          "name": "BUVA",
+          "close": 520.0,
+          "change": -11.86,
+          "volume": 119209400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "FOLK",
+          "name": "FOLK",
+          "close": 103.0,
+          "change": -11.21,
+          "volume": 106458700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KBLV",
+          "name": "KBLV",
+          "close": 116.0,
+          "change": 18.37,
+          "volume": 86502800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SDMU",
+          "name": "SDMU",
+          "close": 66.0,
+          "change": 1.54,
+          "volume": 69545500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CTTH",
+          "name": "CTTH",
+          "close": 100.0,
+          "change": 1.01,
+          "volume": 64294800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PART",
+          "name": "PART",
+          "close": 111.0,
+          "change": 0.91,
+          "volume": 62025200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "15 Sep 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PICO",
+          "name": "PICO",
+          "close": 177.0,
+          "change": -8.76,
+          "volume": 61303800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "LAJU",
+          "name": "LAJU",
+          "close": 57.0,
+          "change": 3.64,
+          "volume": 58946000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SCMA",
+          "name": "SCMA",
+          "close": 173.0,
+          "change": -1.7,
+          "volume": 51061800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 13:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RANS",
+          "name": "RANS",
+          "close": 178.0,
+          "change": -1.66,
+          "volume": 44602300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "7 Okt 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "MSIN",
+          "name": "MSIN",
+          "close": 173.0,
+          "change": 0.0,
+          "volume": 41899000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CDIA",
+          "name": "CDIA",
+          "close": 500.0,
+          "change": 0.0,
+          "volume": 35585800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SLIS",
+          "name": "SLIS",
+          "close": 72.0,
+          "change": 2.86,
+          "volume": 31221900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "NICL",
+          "name": "NICL",
+          "close": 356.0,
+          "change": 3.49,
+          "volume": 28714200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "VTNY",
+          "name": "VTNY",
+          "close": 52.0,
+          "change": -1.89,
+          "volume": 26008600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RGAS",
+          "name": "RGAS",
+          "close": 86.0,
+          "change": 0.0,
+          "volume": 22824600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ELSA",
+          "name": "ELSA",
+          "close": 680.0,
+          "change": 3.82,
+          "volume": 22352000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "1 Okt 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PPRE",
+          "name": "PPRE",
+          "close": 86.0,
+          "change": 1.18,
+          "volume": 22311900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Okt 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "KUAS",
+          "name": "KUAS",
+          "close": 89.0,
+          "change": 2.3,
+          "volume": 21841300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HATM",
+          "name": "HATM",
+          "close": 670.0,
+          "change": 10.74,
+          "volume": 21601100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "6 Okt 2026, 11:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HDIT",
+          "name": "HDIT",
+          "close": 39.0,
+          "change": 2.63,
+          "volume": 17921400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "5 Okt 2026, 13:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 10:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PRDL",
+          "name": "PRDL",
+          "close": 168.0,
+          "change": 4.35,
+          "volume": 16692000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Okt 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "NTBK",
+          "name": "NTBK",
+          "close": 64.0,
+          "change": -1.54,
+          "volume": 16675400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "5 Okt 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AGRS",
+          "name": "AGRS",
+          "close": 59.0,
+          "change": 1.72,
+          "volume": 14687400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ASRI",
+          "name": "ASRI",
+          "close": 115.0,
+          "change": 0.0,
+          "volume": 14032900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "8 Okt 2026, 09:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AVIA",
+          "name": "AVIA",
+          "close": 350.0,
+          "change": -1.13,
+          "volume": 12796200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 15:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CENT",
+          "name": "CENT",
+          "close": 89.0,
+          "change": -1.11,
+          "volume": 12484200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "RBMS",
+          "name": "RBMS",
+          "close": 45.0,
+          "change": 2.27,
+          "volume": 12006000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 14:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "FWCT",
+          "name": "FWCT",
+          "close": 82.0,
+          "change": -2.38,
+          "volume": 11197800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 11:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "OASA",
+          "name": "OASA",
+          "close": 220.0,
+          "change": -1.79,
+          "volume": 10724700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "13 Okt 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 14:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ENZO",
+          "name": "ENZO",
+          "close": 60.0,
+          "change": -1.64,
+          "volume": 10462400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 09:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 09:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SUPA",
+          "name": "SUPA",
+          "close": 458.0,
+          "change": -2.97,
+          "volume": 9998300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 15:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "WBSA",
+          "name": "WBSA",
+          "close": 555.0,
+          "change": -0.89,
+          "volume": 9523800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 14:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 14:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PBSA",
+          "name": "PBSA",
+          "close": 384.0,
+          "change": -54.56,
+          "volume": 9332000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 10:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "BINO",
+          "name": "BINO",
+          "close": 98.0,
+          "change": -5.77,
+          "volume": 5962600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "14 Okt 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "14 Okt 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PEVE",
+          "name": "PEVE",
+          "close": 374.0,
+          "change": 5.65,
+          "volume": 5447400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "15 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "HDFA",
+          "name": "HDFA",
+          "close": 93.0,
+          "change": 0.0,
+          "volume": 3896800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 09:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "WTON",
+          "name": "WTON",
+          "close": 72.0,
+          "change": 0.0,
+          "volume": 2845100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "1 Okt 2026"
+            },
+            "60": {
+              "status": false,
+              "date": "-"
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SOTS",
+          "name": "SOTS",
+          "close": 650.0,
+          "change": 1.56,
+          "volume": 2725800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "SATU",
+          "name": "SATU",
+          "close": 244.0,
+          "change": 0.83,
+          "volume": 2562800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "16 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "24 Sep 2026, 15:15 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "PJHB",
+          "name": "PJHB",
+          "close": 153.0,
+          "change": 0.0,
+          "volume": 1403300.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "30 Sep 2026, 16:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "30 Sep 2026, 16:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "INTD",
+          "name": "INTD",
+          "close": 314.0,
+          "change": -1.88,
+          "volume": 1371500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 14:00 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "ECII",
+          "name": "ECII",
+          "close": 155.0,
+          "change": -0.64,
+          "volume": 1086600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "29 Sep 2026, 10:30 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "DRMA",
+          "name": "DRMA",
+          "close": 945.0,
+          "change": -0.53,
+          "volume": 1006800.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "21 Sep 2026, 11:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "7 Okt 2026, 11:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "CSRA",
+          "name": "CSRA",
+          "close": 715.0,
+          "change": -0.69,
+          "volume": 263600.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "2 Okt 2026, 15:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 15:45 WIB"
+            }
+          }
+        },
+        {
+          "symbol": "AWAN",
+          "name": "AWAN",
+          "close": 148.0,
+          "change": -2.63,
+          "volume": 239700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-"
+            },
+            "60": {
+              "status": true,
+              "date": "12 Okt 2026, 10:00 WIB"
+            },
+            "15": {
+              "status": true,
+              "date": "28 Sep 2026, 09:30 WIB"
+            }
+          }
+        }
+      ]
+    },
+    "2026-10-15": {
+      "date": "2026-10-15",
+      "date_display": "15 Oktober 2026",
+      "time_display": "16:30 WIB",
+      "summary": {
+        "total_screener": 5,
+        "count_3_dot": 1,
+        "count_2_dot": 4,
+        "count_1_dot": 0,
+        "count_0_dot": 0
+      },
+      "stocks": [
+        {
+          "symbol": "BNBR",
+          "name": "BNBR",
+          "close": 61.0,
+          "change": 1.67,
+          "volume": 633942800.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "2 Okt 2026",
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 62)"
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "15 Okt 2026, 10:00 WIB (Kenaikan: +1.67%",
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "Supply: Rp 67 (+9.84%) | Demand: Rp 62 (+1.64%)"
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "15 Okt 2026, 11:30 WIB",
+              "scalping": {
+                "trend": "SELL (Red)"
+              }
+            }
+          }
+        },
+        {
+          "symbol": "DEWA",
+          "name": "DEWA",
+          "close": 302.0,
+          "change": 0.67,
+          "volume": 542127700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-",
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "28 Sep 2026 @ Rp 350"
+                }
+              },
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 328)"
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "15 Okt 2026, 14:00 WIB (Kenaikan: +0.67%",
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "Supply: Rp 344 (+13.91%) | Demand: Rp 328 (+8.61%)"
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "15 Okt 2026, 14:45 WIB",
+              "donalt": {
+                "golden": {
+                  "date": "6 Okt 2026, 14:45 WIB @ Rp 364 (Kenaikan: -7.14% s/d Death)"
+                },
+                "death": {
+                  "date": "12 Okt 2026, 14:00 WIB @ Rp 338"
+                }
+              },
+              "scalping": {
+                "trend": "SELL (Red)"
+              }
+            }
+          }
+        },
+        {
+          "symbol": "ACES",
+          "name": "ACES",
+          "close": 358.0,
+          "change": 10.49,
+          "volume": 246157500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-",
+              "scalping": {
+                "trend": "BUY (Green)"
+              },
+              "smc": {
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS"
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "6 Okt 2026, 16:00 WIB (Kenaikan: +10.49%",
+              "scalping": {
+                "trend": "BUY (Green)"
+              },
+              "smc": {
+                "status_7d": "Supply: Rp 367 (+2.65%) | Demand: Rp 311 (-13.22%)"
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "6 Okt 2026, 15:15 WIB",
+              "donalt": {
+                "golden": {
+                  "date": "14 Okt 2026, 14:00 WIB @ Rp 336 (Kenaikan: +6.55%)"
+                },
+                "death": null
+              },
+              "scalping": {
+                "trend": "BUY (Green)"
+              }
+            }
+          }
+        },
+        {
+          "symbol": "DYAN",
+          "name": "DYAN",
+          "close": 81.0,
+          "change": 8.0,
+          "volume": 210940000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-",
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "8 Okt 2026 @ Rp 80"
+                }
+              },
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "⚡ Menguji Area Supply (Dekat Resisten)"
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 16:00 WIB (Kenaikan: +8.00%",
+              "donalt": {
+                "golden": {
+                  "date": "22 Sep 2026, 09:00 WIB @ Rp 100 (Kenaikan: -23.00% s/d Death)"
+                },
+                "death": {
+                  "date": "28 Sep 2026, 11:00 WIB @ Rp 77"
+                }
+              },
+              "scalping": {
+                "trend": "BUY (Green)"
+              },
+              "smc": {
+                "status_7d": "Supply: Rp 82 (+1.23%) | Demand: Rp 79 (-2.47%)"
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "1 Okt 2026, 14:45 WIB",
+              "donalt": {
+                "golden": {
+                  "date": "5 Okt 2026, 13:45 WIB @ Rp 85 (Kenaikan: -3.53% s/d Death)"
+                },
+                "death": {
+                  "date": "8 Okt 2026, 10:45 WIB @ Rp 82"
+                }
+              },
+              "scalping": {
+                "trend": "BUY (Green)"
+              }
+            }
+          }
+        },
+        {
+          "symbol": "VKTR",
+          "name": "VKTR",
+          "close": 434.0,
+          "change": 1.39,
+          "volume": 209931500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": "-",
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 540)"
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "15 Okt 2026, 14:00 WIB (Kenaikan: +1.39%",
+              "donalt": {
+                "golden": {
+                  "date": "6 Okt 2026, 14:00 WIB @ Rp 631 (Kenaikan: -10.41% s/d Death)"
+                },
+                "death": {
+                  "date": "13 Okt 2026, 13:00 WIB @ Rp 565"
+                }
+              },
+              "scalping": {
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "status_7d": "Supply: Rp 585 (+33.56%) | Demand: Rp 540 (+23.29%)"
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "15 Okt 2026, 14:45 WIB",
+              "donalt": {
+                "golden": {
+                  "date": "30 Sep 2026, 14:00 WIB @ Rp 601 (Kenaikan: -0.94% s/d Death)"
+                },
+                "death": {
+                  "date": "12 Okt 2026, 11:15 WIB @ Rp 595"
+                }
+              },
+              "scalping": {
+                "trend": "SELL (Red)"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "vip_3dot_history": [
+    {
+      "symbol": "BNBR",
+      "scan_date": "2026-10-15",
+      "scan_date_display": "15 Oktober 2026",
+      "data": {
+        "symbol": "BNBR",
+        "name": "BNBR",
+        "close": 61.0,
+        "change": 1.67,
+        "volume": 633942800.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "2 Okt 2026",
+            "scalping": {
+              "trend": "SELL (Red)"
+            },
+            "smc": {
+              "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 62)"
+            }
+          },
+          "60": {
+            "status": true,
+            "date": "15 Okt 2026, 10:00 WIB (Kenaikan: +1.67%",
+            "scalping": {
+              "trend": "SELL (Red)"
+            },
+            "smc": {
+              "status_7d": "Supply: Rp 67 (+9.84%) | Demand: Rp 62 (+1.64%)"
+            }
+          },
+          "15": {
+            "status": true,
+            "date": "15 Okt 2026, 11:30 WIB",
+            "scalping": {
+              "trend": "SELL (Red)"
+            }
+          }
+        }
+      }
+    },
+    {
+      "symbol": "REAL",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "REAL",
+        "name": "REAL",
+        "close": 45.0,
+        "change": 2.27,
+        "volume": 136173000.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "1 Okt 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "1 Okt 2026, 14:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "1 Okt 2026, 14:45 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "MAXI",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "MAXI",
+        "name": "MAXI",
+        "close": 26.0,
+        "change": -7.14,
+        "volume": 105257900.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "12 Okt 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "13 Okt 2026, 11:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "13 Okt 2026, 10:00 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "SMRA",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "SMRA",
+        "name": "SMRA",
+        "close": 264.0,
+        "change": 3.12,
+        "volume": 90416400.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "7 Okt 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "7 Okt 2026, 14:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "7 Okt 2026, 11:30 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "BEER",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "BEER",
+        "name": "BEER",
+        "close": 64.0,
+        "change": 4.92,
+        "volume": 26624900.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "29 Sep 2026, 09:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "2 Okt 2026, 16:00 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "CTRA",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "CTRA",
+        "name": "CTRA",
+        "close": 585.0,
+        "change": 1.74,
+        "volume": 21630100.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "6 Okt 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "30 Sep 2026, 13:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "30 Sep 2026, 13:45 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "GPSO",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "GPSO",
+        "name": "GPSO",
+        "close": 234.0,
+        "change": 1.74,
+        "volume": 17447000.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "28 Sep 2026, 09:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "7 Okt 2026, 09:30 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "SOLA",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "SOLA",
+        "name": "SOLA",
+        "close": 73.0,
+        "change": -2.67,
+        "volume": 9586900.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "28 Sep 2026, 09:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "2 Okt 2026, 14:15 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "PNSE",
+      "scan_date": "2026-10-14",
+      "scan_date_display": "14 Oktober 2026",
+      "data": {
+        "symbol": "PNSE",
+        "name": "PNSE",
+        "close": 450.0,
+        "change": 6.64,
+        "volume": 40500.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "6 Okt 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "6 Okt 2026, 15:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "6 Okt 2026, 15:00 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "MAXI",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "MAXI",
+        "name": "MAXI",
+        "close": 28.0,
+        "change": 12.0,
+        "volume": 82025900.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "12 Oct 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "13 Oct 2026, 11:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "13 Oct 2026, 10:00 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "CDIA",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "CDIA",
+        "name": "CDIA",
+        "close": 500.0,
+        "change": 0.0,
+        "volume": 51400500.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "12 Oct 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "12 Oct 2026, 16:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "13 Oct 2026, 09:15 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "CTRA",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "CTRA",
+        "name": "CTRA",
+        "close": 575.0,
+        "change": 6.48,
+        "volume": 31549200.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "06 Oct 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "30 Sep 2026, 13:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "30 Sep 2026, 13:45 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "FILM",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "FILM",
+        "name": "FILM",
+        "close": 555.0,
+        "change": 0.0,
+        "volume": 14410600.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "12 Oct 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "13 Oct 2026, 09:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "13 Oct 2026, 09:45 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "PTMP",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "PTMP",
+        "name": "PTMP",
+        "close": 49.0,
+        "change": 2.08,
+        "volume": 9674300.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "29 Sep 2026, 09:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "29 Sep 2026, 11:30 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "SMBR",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "SMBR",
+        "name": "SMBR",
+        "close": 150.0,
+        "change": 0.0,
+        "volume": 3448000.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "28 Sep 2026, 14:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "06 Oct 2026, 14:15 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "APIC",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "APIC",
+        "name": "APIC",
+        "close": 400.0,
+        "change": -0.99,
+        "volume": 841100.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "16 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "17 Sep 2026, 10:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "29 Sep 2026, 10:30 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "BESS",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "BESS",
+        "name": "BESS",
+        "close": 835.0,
+        "change": -0.6,
+        "volume": 472700.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "28 Sep 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "29 Sep 2026, 11:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "29 Sep 2026, 11:30 WIB"
+          }
+        }
+      }
+    },
+    {
+      "symbol": "LPLI",
+      "scan_date": "2026-10-13",
+      "scan_date_display": "13 Oktober 2026",
+      "data": {
+        "symbol": "LPLI",
+        "name": "LPLI",
+        "close": 204.0,
+        "change": 0.0,
+        "volume": 282600.0,
+        "count_green": 3,
+        "has_green_dot": true,
+        "timeframes": {
+          "D": {
+            "status": true,
+            "date": "06 Oct 2026"
+          },
+          "60": {
+            "status": true,
+            "date": "06 Oct 2026, 15:00 WIB"
+          },
+          "15": {
+            "status": true,
+            "date": "06 Oct 2026, 15:45 WIB"
+          }
+        }
+      }
+    }
+  ]
+}

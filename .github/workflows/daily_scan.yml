@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Kode
         uses: actions/checkout@v4
@@ -47,4 +50,16 @@ jobs:
           else
             echo "Menjalankan scan seluruh saham Hunter lolos kriteria..."
             python bot_hunter.py --now --wa
+          fi
+
+      - name: Commit & Push Data Web Dashboard
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add docs/data/history.json
+          if git diff --staged --quiet; then
+            echo "Tidak ada perubahan data JSON."
+          else
+            git commit -m "Auto-update database web dashboard (7 hari & 1 bulan 3-dot) [skip ci]"
+            git push
           fi
