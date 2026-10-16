@@ -41,10 +41,11 @@ async function loadDatabase() {
     const vipCount = (appData.vip_3dot_history || []).length;
     document.getElementById("vipNavCount").innerText = vipCount;
 
-    // Pilih tanggal terbaru secara default
+    // Pilih tanggal terbaru secara default yang memiliki data saham
     const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
-    if (availableDates.length > 0) {
-      selectedDate = availableDates[0];
+    const latestWithStocks = availableDates.find(d => (appData.daily_scans[d]?.stocks || []).length > 0) || availableDates[0];
+    if (latestWithStocks) {
+      selectedDate = latestWithStocks;
     }
 
     renderSidebarHistory();
