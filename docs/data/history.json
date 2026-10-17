@@ -1,5 +1,19 @@
 {
-  "last_updated": "-",
-  "daily_scans": {},
+  "last_updated": "2026-10-17 17:55:13 WIB",
+  "daily_scans": {
+    "2026-10-17": {
+      "date": "2026-10-17",
+      "date_display": "17 Oktober 2026",
+      "time_display": "17:55 WIB",
+      "summary": {
+        "total_screener": 0,
+        "count_3_dot": 0,
+        "count_2_dot": 0,
+        "count_1_dot": 0,
+        "count_0_dot": 0
+      },
+      "stocks": []
+    }
+  },
   "vip_3dot_history": []
 }
