@@ -609,6 +609,40 @@ body.dark-theme .nav-subitem.active {
   transform: translateY(-1px);
 }
 
+.theme-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-btn .theme-svg {
+  display: block;
+  stroke: var(--text-secondary);
+  transition: stroke 0.2s ease, transform 0.25s ease;
+}
+
+.theme-toggle-btn:hover .theme-svg {
+  stroke: var(--brand-primary);
+}
+
+body.dark-theme .theme-toggle-btn .sun-svg {
+  stroke: #FBBF24;
+}
+
+body.dark-theme .theme-toggle-btn:hover .sun-svg {
+  stroke: #FDE047;
+  transform: rotate(45deg);
+}
+
+body.light-theme .theme-toggle-btn .moon-svg {
+  stroke: #4B5563;
+}
+
+body.light-theme .theme-toggle-btn:hover .moon-svg {
+  stroke: #059669;
+  transform: rotate(-12deg);
+}
+
 /* ==========================================================================
    CONTENT BODY & TOP METRIC CARDS (Coinest Reference)
    ========================================================================== */
