@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard AI Agent for Trade by Oktovaaaaa</title>
-  <link rel="icon" type="image/png" href="aiagentokto.png">
-  <link rel="shortcut icon" type="image/png" href="aiagentokto.png">
-  <link rel="apple-touch-icon" href="aiagentokto.png">
+  <title>Aranter</title>
+  <link rel="icon" type="image/png" href="Aranter.png">
+  <link rel="shortcut icon" type="image/png" href="Aranter.png">
+  <link rel="apple-touch-icon" href="Aranter.png">
   <meta name="description" content="Dashboard Minimalist Rekomendasi Saham Hunter IDX dengan Indikator RallyGood, DonAlt EMA Suite, Smart Money Concepts (SMC), dan MACD Divergence.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,6 +98,7 @@ body.dark-theme {
   --text-muted: #6B7280;
   --text-dim: #4B5563;
   
+  --brand-primary: #FFFFFF;
   --brand-mint-light: rgba(34, 197, 94, 0.16);
   --brand-mint-subtle: rgba(34, 197, 94, 0.08);
   
@@ -122,6 +123,16 @@ body.dark-theme {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+::selection {
+  background: var(--brand-mint-light);
+  color: var(--text-primary);
+}
+
+body.dark-theme ::selection {
+  background: rgba(34, 197, 94, 0.45);
+  color: #FFFFFF;
 }
 
 body {
@@ -1617,6 +1628,11 @@ body.dark-theme .btn-chart {
   text-transform: none;
 }
 
+body.dark-theme .modal-sec-badge {
+  background: rgba(34, 197, 94, 0.22);
+  color: #FFFFFF !important;
+}
+
 /* Timeframes Detail Grid */
 .modal-tf-grid {
   display: grid;
@@ -1832,10 +1848,10 @@ body.dark-theme .btn-chart {
     <div class="mobile-topbar">
       <div class="brand-mini" onclick="window.scrollTo({top:0, behavior:'smooth'})">
         <div class="brand-logo-icon mobile-brand-icon">
-          <img src="aiagentokto.png" alt="Agent AI" class="brand-logo-img">
+          <img src="Aranter.png" alt="Aranter" class="brand-logo-img">
         </div>
         <div class="brand-info">
-          <span class="brand-title-text" style="font-size:16px;">AGENT <b>AI</b></span>
+          <span class="brand-title-text" style="font-size:16px;"><b>Aranter</b></span>
           <span class="brand-badge" style="font-size:9px;">HUNTER RADAR</span>
         </div>
       </div>
@@ -1861,10 +1877,10 @@ body.dark-theme .btn-chart {
       <!-- Brand Logo Header & Mobile Close Button -->
       <div class="sidebar-brand">
         <div class="brand-logo-icon">
-          <img src="aiagentokto.png" alt="Agent AI Logo" class="brand-logo-img">
+          <img src="Aranter.png" alt="Aranter Logo" class="brand-logo-img">
         </div>
         <div class="brand-info">
-          <h1 class="brand-title-text">AGENT <b>AI</b></h1>
+          <h1 class="brand-title-text"><b>Aranter</b></h1>
           <span class="brand-badge">HUNTER RADAR IDX</span>
         </div>
         <button class="sidebar-close-btn" onclick="toggleSidebar(false)" aria-label="Tutup Menu" title="Tutup Menu">✕</button>
@@ -2016,15 +2032,15 @@ body.dark-theme .btn-chart {
 
           <div class="metric-card metric-slate">
             <div class="metric-top">
-              <span class="metric-tag tag-slate">TOTAL SCREENER</span>
+              <span class="metric-tag tag-slate">SAHAM PILIHAN</span>
               <span class="metric-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
               </span>
             </div>
             <div class="metric-number" id="statTotalCount">-</div>
             <div class="metric-meta">
-              <span class="metric-title">Saham Lolos Kriteria</span>
-              <span class="metric-detail">Harga Rp 10-1.000 & Vol > Avg 10D</span>
+              <span class="metric-title">Lolos Seleksi Sinyal</span>
+              <span class="metric-detail">Siap Pantau & Trading (Min. 2-Dot)</span>
             </div>
           </div>
         </section>
@@ -2865,11 +2881,11 @@ function openStockDetail(symbol) {
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
 
-  // Helper Parser SMC per Timeframe (Menampilkan Level Supply & Demand beserta % dari Harga Sekarang)
+  // Helper Parser SMC per Timeframe (Menampilkan Level Resisten & Support beserta % dari Harga Sekarang)
   function formatSmcPerTf(smcObj, curPrice) {
-    if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
     const statusText = typeof smcObj === 'string' ? smcObj : (smcObj.status_7d || '-');
-    if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
 
     const sup = typeof smcObj === 'object' && smcObj.supply ? smcObj.supply : null;
     const dem = typeof smcObj === 'object' && smcObj.demand ? smcObj.demand : null;
@@ -2887,11 +2903,15 @@ function openStockDetail(symbol) {
     const levels = [];
     if (sup) {
       const supPctStr = pctSup != null ? ` (${pctSup >= 0 ? '+' : ''}${pctSup.toFixed(1)}% dari harga sekarang)` : '';
-      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Supply: Rp ${Number(sup).toLocaleString('id-ID')}${supPctStr}</span>`);
+      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Resisten (Supply): Rp ${Number(sup).toLocaleString('id-ID')}${supPctStr}</span>`);
+    } else {
+      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Resisten (Supply): Area Pantau Tertinggi</span>`);
     }
     if (dem) {
       const demPctStr = pctDem != null ? ` (${pctDem >= 0 ? '+' : ''}${pctDem.toFixed(1)}% dari harga sekarang)` : '';
-      levels.push(`<span style="color:var(--status-green); font-weight:600;">Demand: Rp ${Number(dem).toLocaleString('id-ID')}${demPctStr}</span>`);
+      levels.push(`<span style="color:var(--status-green); font-weight:600;">Support (Demand): Rp ${Number(dem).toLocaleString('id-ID')}${demPctStr}</span>`);
+    } else {
+      levels.push(`<span style="color:var(--status-green); font-weight:600;">Support (Demand): Area Pantau Terendah</span>`);
     }
 
     if (levels.length > 0) {
@@ -3045,28 +3065,6 @@ function openStockDetail(symbol) {
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (15M):</span>
               <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close)}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Area Supply (Resisten):</span>
-              <span class="detail-info-value" style="color:var(--status-cyan); font-weight:600;">
-                ${(() => {
-                  const s = smc60.supply || smcD.supply || smc15.supply;
-                  if (!s) return 'Area Pantau';
-                  const pct = stock.close ? ((s - stock.close) / stock.close * 100) : null;
-                  return `Rp ${Number(s).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
-                })()}
-              </span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Area Demand (Support):</span>
-              <span class="detail-info-value" style="color:var(--status-green); font-weight:600;">
-                ${(() => {
-                  const d = smc60.demand || smcD.demand || smc15.demand;
-                  if (!d) return 'Area Pantau';
-                  const pct = stock.close ? ((d - stock.close) / stock.close * 100) : null;
-                  return `Rp ${Number(d).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
-                })()}
-              </span>
             </div>
           </div>
 

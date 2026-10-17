@@ -780,11 +780,11 @@ function openStockDetail(symbol) {
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
 
-  // Helper Parser SMC per Timeframe (Menampilkan Level Supply & Demand beserta % dari Harga Sekarang)
+  // Helper Parser SMC per Timeframe (Menampilkan Level Resisten & Support beserta % dari Harga Sekarang)
   function formatSmcPerTf(smcObj, curPrice) {
-    if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
     const statusText = typeof smcObj === 'string' ? smcObj : (smcObj.status_7d || '-');
-    if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
 
     const sup = typeof smcObj === 'object' && smcObj.supply ? smcObj.supply : null;
     const dem = typeof smcObj === 'object' && smcObj.demand ? smcObj.demand : null;
@@ -802,11 +802,15 @@ function openStockDetail(symbol) {
     const levels = [];
     if (sup) {
       const supPctStr = pctSup != null ? ` (${pctSup >= 0 ? '+' : ''}${pctSup.toFixed(1)}% dari harga sekarang)` : '';
-      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Supply: Rp ${Number(sup).toLocaleString('id-ID')}${supPctStr}</span>`);
+      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Resisten (Supply): Rp ${Number(sup).toLocaleString('id-ID')}${supPctStr}</span>`);
+    } else {
+      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Resisten (Supply): Area Pantau Tertinggi</span>`);
     }
     if (dem) {
       const demPctStr = pctDem != null ? ` (${pctDem >= 0 ? '+' : ''}${pctDem.toFixed(1)}% dari harga sekarang)` : '';
-      levels.push(`<span style="color:var(--status-green); font-weight:600;">Demand: Rp ${Number(dem).toLocaleString('id-ID')}${demPctStr}</span>`);
+      levels.push(`<span style="color:var(--status-green); font-weight:600;">Support (Demand): Rp ${Number(dem).toLocaleString('id-ID')}${demPctStr}</span>`);
+    } else {
+      levels.push(`<span style="color:var(--status-green); font-weight:600;">Support (Demand): Area Pantau Terendah</span>`);
     }
 
     if (levels.length > 0) {
@@ -960,28 +964,6 @@ function openStockDetail(symbol) {
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (15M):</span>
               <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close)}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Area Supply (Resisten):</span>
-              <span class="detail-info-value" style="color:var(--status-cyan); font-weight:600;">
-                ${(() => {
-                  const s = smc60.supply || smcD.supply || smc15.supply;
-                  if (!s) return 'Area Pantau';
-                  const pct = stock.close ? ((s - stock.close) / stock.close * 100) : null;
-                  return `Rp ${Number(s).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
-                })()}
-              </span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-info-label">Area Demand (Support):</span>
-              <span class="detail-info-value" style="color:var(--status-green); font-weight:600;">
-                ${(() => {
-                  const d = smc60.demand || smcD.demand || smc15.demand;
-                  if (!d) return 'Area Pantau';
-                  const pct = stock.close ? ((d - stock.close) / stock.close * 100) : null;
-                  return `Rp ${Number(d).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
-                })()}
-              </span>
             </div>
           </div>
 

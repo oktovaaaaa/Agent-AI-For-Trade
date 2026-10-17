@@ -84,6 +84,7 @@ body.dark-theme {
   --text-muted: #6B7280;
   --text-dim: #4B5563;
   
+  --brand-primary: #FFFFFF;
   --brand-mint-light: rgba(34, 197, 94, 0.16);
   --brand-mint-subtle: rgba(34, 197, 94, 0.08);
   
@@ -108,6 +109,16 @@ body.dark-theme {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+::selection {
+  background: var(--brand-mint-light);
+  color: var(--text-primary);
+}
+
+body.dark-theme ::selection {
+  background: rgba(34, 197, 94, 0.45);
+  color: #FFFFFF;
 }
 
 body {
@@ -1601,6 +1612,11 @@ body.dark-theme .btn-chart {
   background: var(--brand-mint-light);
   color: var(--brand-primary);
   text-transform: none;
+}
+
+body.dark-theme .modal-sec-badge {
+  background: rgba(34, 197, 94, 0.22);
+  color: #FFFFFF !important;
 }
 
 /* Timeframes Detail Grid */

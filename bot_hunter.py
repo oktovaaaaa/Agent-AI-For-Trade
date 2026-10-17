@@ -108,6 +108,14 @@ def calculate_smc_levels_fallback(bars, cur_close):
     dem_below = [p for p in pivot_lows if p < cur_close]
     nearest_demand = max(dem_below) if dem_below else (min(pivot_lows) if pivot_lows else None)
     
+    # Jaminan selalu ada level harga Resisten (Supply) dan Support (Demand) dari candle bar
+    if not nearest_supply and bars:
+        highs = [b['high'] for b in bars if b.get('high') and b['high'] > cur_close]
+        nearest_supply = min(highs) if highs else max(b['high'] for b in bars if b.get('high'))
+    if not nearest_demand and bars:
+        lows = [b['low'] for b in bars if b.get('low') and b['low'] < cur_close]
+        nearest_demand = max(lows) if lows else min(b['low'] for b in bars if b.get('low'))
+        
     pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
     pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
     
@@ -157,6 +165,15 @@ def parse_real_smc_levels(smc_data, cur_close, recent_bars=None):
             nearest_demand = min(d['mid'] for d in demands)
         else:
             nearest_demand = None
+            
+        # Jika salah satu supply atau demand kosong dari TV, lengkapi dari candlestick bar
+        if (not nearest_supply or not nearest_demand) and recent_bars:
+            fb = calculate_smc_levels_fallback(recent_bars, cur_close)
+            if fb:
+                if not nearest_supply and fb.get('supply'):
+                    nearest_supply = fb['supply']
+                if not nearest_demand and fb.get('demand'):
+                    nearest_demand = fb['demand']
             
         pct_to_supply = ((nearest_supply - cur_close) / cur_close) * 100 if nearest_supply else 0
         pct_to_demand = -((cur_close - nearest_demand) / cur_close) * 100 if nearest_demand else 0
@@ -1731,7 +1748,7 @@ async def run_daily_scan(send_wa=True):
             f"Untuk melihat analisa mendalam, chart TradingView interaktif, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
             f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n\n"
             f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
-            f"🤖 _Dashboard AI Agent for Trade by Oktovaaaaa_"
+            f"🤖 _Dashboard Aranter for Trade by Oktovaaaaa_"
         )
         kirim_whatsapp(pesan_wa)
     else:
