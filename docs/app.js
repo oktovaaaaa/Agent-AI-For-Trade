@@ -480,9 +480,31 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   // TradingView Link
   const tvUrl = `${CHART_BASE_URL}?symbol=IDX%3A${stock.symbol}&interval=D`;
 
-  // Sinyal DonAlt Golden / Death Cross
-  const goldenCross = tf15.donalt?.golden || tf60.donalt?.golden || tfD.donalt?.golden;
-  const deathCross = tf15.donalt?.death || tf60.donalt?.death || tfD.donalt?.death;
+  // Sinyal DonAlt Golden / Death Cross & Timeframe
+  let donaltTfLabel = "";
+  let goldenCross = null;
+  let deathCross = null;
+
+  if (tf15.donalt?.golden) {
+    goldenCross = tf15.donalt.golden;
+    donaltTfLabel = "15M";
+  } else if (tf60.donalt?.golden) {
+    goldenCross = tf60.donalt.golden;
+    donaltTfLabel = "1H";
+  } else if (tfD.donalt?.golden) {
+    goldenCross = tfD.donalt.golden;
+    donaltTfLabel = "1D";
+  } else if (tf15.donalt?.death) {
+    deathCross = tf15.donalt.death;
+    donaltTfLabel = "15M";
+  } else if (tf60.donalt?.death) {
+    deathCross = tf60.donalt.death;
+    donaltTfLabel = "1H";
+  } else if (tfD.donalt?.death) {
+    deathCross = tfD.donalt.death;
+    donaltTfLabel = "1D";
+  }
+
   let donaltChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (goldenCross) {
     const gainExtra = goldenCross.gain_pct != null ? ` (+${goldenCross.gain_pct.toFixed(1)}%)` : "";
@@ -491,8 +513,17 @@ function createStockCardHTML(stock, vipDateLabel = null) {
     donaltChip = `<span class="badge-chip chip-death">Death Cross</span>`;
   }
 
-  // Sinyal SMC (Smart Money Concepts)
-  const smcStatus = tfD.smc?.status_7d || tf60.smc?.status_7d || "";
+  // Sinyal SMC (Smart Money Concepts) & Timeframe
+  let smcTfLabel = "1D";
+  let smcStatus = tfD.smc?.status_7d || "";
+  if (!smcStatus && tf60.smc?.status_7d) {
+    smcStatus = tf60.smc.status_7d;
+    smcTfLabel = "1H";
+  } else if (!smcStatus && tf15.smc?.status_7d) {
+    smcStatus = tf15.smc.status_7d;
+    smcTfLabel = "15M";
+  }
+
   let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (smcStatus) {
     if (smcStatus.includes("BREAKOUT")) {
@@ -504,8 +535,17 @@ function createStockCardHTML(stock, vipDateLabel = null) {
     }
   }
 
-  // Sinyal Scalping Trend
-  const scalpTrend = tf60.scalping?.trend || tf15.scalping?.trend || tfD.scalping?.trend || "";
+  // Sinyal Scalping Trend & Timeframe
+  let scalpTfLabel = "1H";
+  let scalpTrend = tf60.scalping?.trend || "";
+  if (!scalpTrend && tf15.scalping?.trend) {
+    scalpTrend = tf15.scalping.trend;
+    scalpTfLabel = "15M";
+  } else if (!scalpTrend && tfD.scalping?.trend) {
+    scalpTrend = tfD.scalping.trend;
+    scalpTfLabel = "1D";
+  }
+
   let scalpChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (scalpTrend.includes("BUY") || scalpTrend.includes("Green")) {
     scalpChip = `<span class="badge-chip chip-scalp-buy">Scalp BUY</span>`;
@@ -580,15 +620,15 @@ function createStockCardHTML(stock, vipDateLabel = null) {
       <!-- Indicator Highlights Row -->
       <div class="indicators-list">
         <div class="indicator-row">
-          <span class="indicator-title">DonAlt EMA:</span>
+          <span class="indicator-title">DonAlt EMA${donaltTfLabel ? ` (${donaltTfLabel})` : ''}:</span>
           <div class="indicator-val">${donaltChip}</div>
         </div>
         <div class="indicator-row">
-          <span class="indicator-title">SMC Area:</span>
+          <span class="indicator-title">SMC Area (${smcTfLabel}):</span>
           <div class="indicator-val">${smcChip}</div>
         </div>
         <div class="indicator-row">
-          <span class="indicator-title">Scalp Signal:</span>
+          <span class="indicator-title">Scalp Signal (${scalpTfLabel}):</span>
           <div class="indicator-val">${scalpChip}</div>
         </div>
       </div>

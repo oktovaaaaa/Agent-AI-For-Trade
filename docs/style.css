@@ -1078,7 +1078,8 @@ body.dark-theme .stock-card.is-vip {
 .indicator-title {
   color: var(--text-muted);
   font-size: 11.5px;
-  min-width: 100px;
+  min-width: 110px;
+  flex-shrink: 0;
 }
 
 .indicator-val {
