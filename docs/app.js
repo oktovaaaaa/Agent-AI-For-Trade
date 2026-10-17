@@ -54,7 +54,9 @@ async function loadDatabase() {
     console.error("Error loading data:", error);
     document.getElementById("stocksGrid").innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⚠️</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="alert-svg"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </div>
         <h3>Gagal Memuat Database Saham</h3>
         <p>File <code>data/history.json</code> belum dapat diakses atau sedang diperbarui oleh bot scan.</p>
       </div>
@@ -170,7 +172,9 @@ function renderDailyView() {
     document.getElementById("filterResultCount").innerText = "Menunggu data scan jam 16:21 WIB";
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">⏳</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
         <h3>Menunggu Jadwal Scan Saham Jam 16:21 WIB</h3>
         <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
           Database telah dikosongkan. Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:21 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
@@ -245,7 +249,9 @@ function renderDailyView() {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🔍</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        </div>
         <h3>Tidak Ditemukan Saham yang Cocok</h3>
         <p>Coba gunakan kata kunci lain atau pilih filter sinyal yang berbeda di sidebar kiri.</p>
       </div>
@@ -291,7 +297,9 @@ function renderVipView() {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🌟</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        </div>
         <h3>Belum Ada Riwayat VIP 3-Dot Green</h3>
         <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Dot Green aktif.</p>
       </div>

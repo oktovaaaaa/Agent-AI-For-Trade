@@ -155,7 +155,7 @@ body {
 .brand-logo-icon {
   width: 44px;
   height: 44px;
-  background: #FFFFFF;
+  background: var(--bg-card);
   border: 1px solid var(--border-light);
   display: flex;
   align-items: center;
@@ -164,6 +164,13 @@ body {
   overflow: hidden;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+body.dark-theme .brand-logo-icon {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .brand-logo-img {
@@ -561,6 +568,15 @@ body.dark-theme .nav-subitem.active {
 .search-icon {
   font-size: 14px;
   color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.search-icon .search-svg {
+  display: block;
+  stroke: var(--text-muted);
 }
 
 .search-pill input {
@@ -671,7 +687,6 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
 }
 
 .metric-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-card-hover);
   border-color: var(--border-hover);
 }
@@ -838,7 +853,6 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
 }
 
 .stock-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-card-hover);
   border-color: var(--border-hover);
 }
@@ -1413,7 +1427,6 @@ body.dark-theme .btn-chart {
 }
 
 .stock-card:hover {
-  transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
   border-color: var(--brand-accent);
 }
