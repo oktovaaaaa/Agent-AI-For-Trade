@@ -1001,7 +1001,7 @@ function openStockDetail(symbol) {
       <!-- Modal Footer -->
       <div class="modal-footer">
         <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="modal-tv-btn">
-          <span>Buka Chart Interaktif di TradingView</span>
+          <span>Buka Chart di TradingView</span>
           <span>↗</span>
         </a>
         <button class="modal-close-action-btn" onclick="closeModal()">Tutup</button>

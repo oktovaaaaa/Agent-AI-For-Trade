@@ -98,7 +98,7 @@ body.dark-theme {
   --text-muted: #6B7280;
   --text-dim: #4B5563;
   
-  --brand-primary: #FFFFFF;
+  --brand-primary: #16A34A;
   --brand-mint-light: rgba(34, 197, 94, 0.16);
   --brand-mint-subtle: rgba(34, 197, 94, 0.08);
   
@@ -1793,20 +1793,35 @@ body.dark-theme .modal-sec-badge {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--brand-primary);
-  color: #FFFFFF;
+  background: #16A34A;
+  color: #FFFFFF !important;
   padding: 12px 24px;
   border-radius: var(--radius-pill);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   text-decoration: none;
   transition: var(--transition);
   flex: 1;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
 }
 
 .modal-tv-btn:hover {
-  background: var(--brand-accent);
+  background: #15803D;
+  color: #FFFFFF !important;
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}
+
+body.dark-theme .modal-tv-btn {
+  background: #16A34A;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 10px rgba(22, 163, 74, 0.3);
+}
+
+body.dark-theme .modal-tv-btn:hover {
+  background: #22C55E;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.45);
 }
 
 .modal-close-action-btn {
@@ -3102,7 +3117,7 @@ function openStockDetail(symbol) {
       <!-- Modal Footer -->
       <div class="modal-footer">
         <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="modal-tv-btn">
-          <span>Buka Chart Interaktif di TradingView</span>
+          <span>Buka Chart di TradingView</span>
           <span>↗</span>
         </a>
         <button class="modal-close-action-btn" onclick="closeModal()">Tutup</button>

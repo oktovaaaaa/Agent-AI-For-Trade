@@ -1686,7 +1686,7 @@ async def run_daily_scan(send_wa=True):
     # 5. Susun Pesan Rangkuman WhatsApp (HANYA MINIMAL 2 TIMEFRAME)
     if send_wa:
         pesan_wa = (
-            f"📊 *RADAR SAHAM HUNTER (RALLY GOD)*\n"
+            f"📊 *Aranter*\n"
             f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
             f"🎯 *Filter*: Rp 10–1.000 | Vol > 10D | Pre-mkt > 500%\n"
             f"⏱️ *Rentang Sinyal*: 30 Hari Terakhir\n"
@@ -1745,7 +1745,7 @@ async def run_daily_scan(send_wa=True):
             f"• ⚪ Saham Lainnya     : {len(saham_1_dot) + len(saham_0_dot)} Saham (Netral)\n"
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"🌐 *DASHBOARD & DATA LENGKAP:*\n"
-            f"Untuk melihat analisa mendalam, chart TradingView interaktif, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
+            f"Untuk melihat analisa mendalam, chart TradingView, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
             f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n\n"
             f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
             f"🤖 _Dashboard Aranter for Trade by Oktovaaaaa_"
