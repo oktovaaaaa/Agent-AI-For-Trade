@@ -68,7 +68,7 @@ function renderSidebarHistory() {
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">⏳ Menunggu scan 16:30 WIB</div>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">⏳ Menunggu scan 16:21 WIB</div>`;
     return;
   }
 
@@ -166,14 +166,14 @@ function renderDailyView() {
 
   if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
     document.getElementById("activeDateDisplay").innerText = "Standby Scan Rutin";
-    document.getElementById("activeTimeDisplay").innerText = "16:30 WIB";
-    document.getElementById("filterResultCount").innerText = "Menunggu data scan jam 16:30 WIB";
+    document.getElementById("activeTimeDisplay").innerText = "16:21 WIB";
+    document.getElementById("filterResultCount").innerText = "Menunggu data scan jam 16:21 WIB";
     grid.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">⏳</div>
-        <h3>Menunggu Jadwal Scan Saham Jam 16:30 WIB</h3>
+        <h3>Menunggu Jadwal Scan Saham Jam 16:21 WIB</h3>
         <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
-          Database telah dikosongkan. Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:30 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
+          Database telah dikosongkan. Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:21 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
         </p>
       </div>
     `;
@@ -183,7 +183,7 @@ function renderDailyView() {
 
   // Active Date Bar Info
   document.getElementById("activeDateDisplay").innerText = scanData.date_display || selectedDate;
-  document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:30 WIB";
+  document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:21 WIB";
 
   // Hitung jumlah sinyal spesifik
   let countGolden = 0;

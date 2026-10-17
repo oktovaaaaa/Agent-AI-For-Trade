@@ -1,9 +1,9 @@
-name: Bot Hunter Daily Scan (16:30 WIB)
+name: Bot Hunter Daily Scan (16:21 WIB)
 
 on:
   schedule:
-    # 09:30 UTC = 16:30 WIB (Senin - Jumat pasca tutup bursa IDX)
-    - cron: '30 9 * * 1-5'
+    # 09:21 UTC = 16:21 WIB (Senin - Jumat pasca tutup bursa IDX)
+    - cron: '21 9 * * 1-5'
   workflow_dispatch:
     inputs:
       limit:
@@ -15,7 +15,7 @@ jobs:
   run-scan:
     name: Scan Hunter & Kirim WhatsApp
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
 
     permissions:
       contents: write
@@ -53,6 +53,7 @@ jobs:
           fi
 
       - name: Commit & Push Data Web Dashboard
+        if: always()
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"

@@ -11,7 +11,7 @@ services:
       - TRADINGVIEW_SESSIONID=999m9aq36s5hhqv7yw2vfubqvqhxbmj9
       - TZ=Asia/Jakarta
       - JAM_SCAN_WIB=16
-      - MENIT_SCAN_WIB=30
+      - MENIT_SCAN_WIB=21
     volumes:
       # Simpan cache data internal (opsional)
       - ./reports:/app/reports:z

@@ -34,9 +34,9 @@ TRADINGVIEW_SESSIONID = os.environ.get("TRADINGVIEW_SESSIONID", "999m9aq36s5hhqv
 # URL Layout Chart TradingView Anda tempat indikator (人•ᴗ•)RallyGood terpasang
 CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
 
-# Jadwal & Parameter Analisis (Default: Pukul 16.30 WIB / 04:30 Sore pasca tutup bursa)
+# Jadwal & Parameter Analisis (Default: Pukul 16.21 WIB / 04:21 Sore pasca tutup bursa)
 JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
-MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 30))
+MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
 
@@ -1260,7 +1260,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
         print(f"⚠️ [DATABASE WEB ERROR] Gagal menyimpan data JSON: {e}")
 
 # ============================================================================
-# TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.30 WIB)
+# TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.21 WIB)
 # ============================================================================
 async def run_daily_scan(send_wa=True):
     now_wib = datetime.datetime.now(WIB_TZ)
@@ -1775,7 +1775,7 @@ async def run_daily_scan(send_wa=True):
     bersihkan_screenshot()
 
 # ============================================================================
-# MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.30 WIB
+# MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.21 WIB
 # ============================================================================
 def main():
     print("================================================================")
