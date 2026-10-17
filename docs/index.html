@@ -291,7 +291,18 @@ body.dark-theme .nav-item.active {
 }
 
 .nav-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 .nav-label {
@@ -723,7 +734,13 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
 .tag-slate { background: var(--border-light); color: var(--text-secondary); }
 
 .metric-icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon svg {
+  display: block;
 }
 
 .metric-number {
@@ -1857,12 +1874,16 @@ body.dark-theme .btn-chart {
         <div class="nav-group">
           <div class="nav-group-title">MENU UTAMA</div>
           <button class="nav-item active" id="menuDailyBtn" onclick="switchMainMode('daily')">
-            <span class="nav-icon">📊</span>
-            <span class="nav-label">Dashboard Harian</span>
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
+            </span>
+            <span class="nav-label">Screener</span>
           </button>
           <button class="nav-item" id="menuVipBtn" onclick="switchMainMode('vip')">
-            <span class="nav-icon">💎</span>
-            <span class="nav-label">VIP 3-Dot (1 Bulan)</span>
+            <span class="nav-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            </span>
+            <span class="nav-label">VVIP 3-Dot (1 Bulan)</span>
             <span class="nav-count vip-counter" id="vipNavCount">0</span>
           </button>
         </div>
@@ -1920,7 +1941,7 @@ body.dark-theme .btn-chart {
       <!-- Top Navigation & Search Bar (Minimalist) -->
       <header class="topbar">
         <div class="topbar-left">
-          <h2 class="topbar-title" id="pageMainHeading">Dashboard Rekomendasi</h2>
+          <h2 class="topbar-title" id="pageMainHeading">Screener ARA Hunter</h2>
           <p class="topbar-subtitle" id="pageSubHeading">Analisa Saham Algoritmik RallyGood, DonAlt, SMC, dan Divergence</p>
         </div>
         
@@ -1951,7 +1972,9 @@ body.dark-theme .btn-chart {
           <div class="metric-card metric-gold">
             <div class="metric-top">
               <span class="metric-tag tag-gold">VVIP</span>
-              <span class="metric-icon">🔥</span>
+              <span class="metric-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+              </span>
             </div>
             <div class="metric-number" id="statVipCount">-</div>
             <div class="metric-meta">
@@ -1962,8 +1985,10 @@ body.dark-theme .btn-chart {
 
           <div class="metric-card metric-cyan">
             <div class="metric-top">
-              <span class="metric-tag tag-cyan">⚡ RADAR POTENSIAL</span>
-              <span class="metric-icon">🎯</span>
+              <span class="metric-tag tag-cyan">RADAR POTENSIAL</span>
+              <span class="metric-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284C7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" x2="18" y1="12" y2="12"></line><line x1="6" x2="2" y1="12" y2="12"></line><line x1="12" x2="12" y1="6" y2="2"></line><line x1="12" x2="12" y1="22" y2="18"></line></svg>
+              </span>
             </div>
             <div class="metric-number" id="statPotCount">-</div>
             <div class="metric-meta">
@@ -1974,8 +1999,10 @@ body.dark-theme .btn-chart {
 
           <div class="metric-card metric-green">
             <div class="metric-top">
-              <span class="metric-tag tag-green">✨ DONALT CROSS</span>
-              <span class="metric-icon">📈</span>
+              <span class="metric-tag tag-green">DONALT CROSS</span>
+              <span class="metric-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+              </span>
             </div>
             <div class="metric-number" id="statGoldenCount">-</div>
             <div class="metric-meta">
@@ -1986,8 +2013,10 @@ body.dark-theme .btn-chart {
 
           <div class="metric-card metric-slate">
             <div class="metric-top">
-              <span class="metric-tag tag-slate">📊 TOTAL SCREENER</span>
-              <span class="metric-icon">🛡️</span>
+              <span class="metric-tag tag-slate">TOTAL SCREENER</span>
+              <span class="metric-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+              </span>
             </div>
             <div class="metric-number" id="statTotalCount">-</div>
             <div class="metric-meta">
@@ -2001,7 +2030,9 @@ body.dark-theme .btn-chart {
         <section class="action-bar">
           <div class="action-bar-left">
             <div class="active-date-badge">
-              <span class="calendar-icon">📅</span>
+              <span class="calendar-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+              </span>
               <span id="activeDateDisplay">15 Oktober 2026</span>
               <span class="time-pill" id="activeTimeDisplay">16:21 WIB</span>
             </div>
@@ -2013,11 +2044,11 @@ body.dark-theme .btn-chart {
             <div class="sort-wrapper">
               <span class="sort-label">Urutkan:</span>
               <select id="sortSelector" onchange="handleSortChange(this.value)" class="sort-dropdown">
-                <option value="dot_desc">🟢 Dot Green Terbanyak</option>
-                <option value="gain_desc">🚀 % Kenaikan Tertinggi</option>
-                <option value="loss_asc">🔻 % Penurunan Terbesar</option>
-                <option value="vol_desc">📊 Volume Terbesar</option>
-                <option value="sym_asc">🔤 Kode Saham (A-Z)</option>
+                <option value="dot_desc">Dot Green Terbanyak</option>
+                <option value="gain_desc">% Kenaikan Tertinggi</option>
+                <option value="loss_asc">% Penurunan Terbesar</option>
+                <option value="vol_desc">Volume Terbesar</option>
+                <option value="sym_asc">Kode Saham (A-Z)</option>
               </select>
             </div>
           </div>
@@ -2121,7 +2152,7 @@ function renderSidebarHistory() {
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">⏳ Menunggu scan 16:21 WIB</div>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Menunggu scan 16:21 WIB</div>`;
     return;
   }
 
@@ -2214,7 +2245,7 @@ function renderDailyView() {
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
 
-  document.getElementById("pageMainHeading").innerText = "Dashboard Rekomendasi Harian";
+  document.getElementById("pageMainHeading").innerText = "Screener ARA Hunter";
   document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
 
   if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
@@ -2319,7 +2350,7 @@ function renderVipView() {
   const grid = document.getElementById("stocksGrid");
   const vipList = appData.vip_3dot_history || [];
 
-  document.getElementById("pageMainHeading").innerText = "💎 VIP 3-Dot Green (Riwayat 1 Bulan)";
+  document.getElementById("pageMainHeading").innerText = "VVIP 3-Dot Green (Riwayat 1 Bulan)";
   document.getElementById("pageSubHeading").innerText = "Arsip khusus saham yang berhasil mengonfirmasi 3 Timeframe (Daily + 1H + 15M) dalam 30 hari terakhir";
 
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
@@ -2435,9 +2466,9 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   let donaltChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (goldenCross) {
     const gainExtra = goldenCross.gain_pct != null ? ` (+${goldenCross.gain_pct.toFixed(1)}%)` : "";
-    donaltChip = `<span class="badge-chip chip-golden">✨ Golden Cross${gainExtra}</span>`;
+    donaltChip = `<span class="badge-chip chip-golden">Golden Cross${gainExtra}</span>`;
   } else if (deathCross) {
-    donaltChip = `<span class="badge-chip chip-death">⚠️ Death Cross</span>`;
+    donaltChip = `<span class="badge-chip chip-death">Death Cross</span>`;
   }
 
   // Sinyal SMC (Smart Money Concepts)
@@ -2445,9 +2476,9 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (smcStatus) {
     if (smcStatus.includes("BREAKOUT")) {
-      smcChip = `<span class="badge-chip chip-smc-breakout">🔥 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-breakout">${smcStatus}</span>`;
     } else if (smcStatus.includes("DEMAND") || smcStatus.includes("Pantulan")) {
-      smcChip = `<span class="badge-chip chip-smc-demand">🟢 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-demand">${smcStatus}</span>`;
     } else {
       smcChip = `<span class="badge-chip chip-neutral">${smcStatus}</span>`;
     }
@@ -2457,15 +2488,15 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   const scalpTrend = tf60.scalping?.trend || tf15.scalping?.trend || tfD.scalping?.trend || "";
   let scalpChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (scalpTrend.includes("BUY") || scalpTrend.includes("Green")) {
-    scalpChip = `<span class="badge-chip chip-scalp-buy">🟢 Scalp BUY</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-buy">Scalp BUY</span>`;
   } else if (scalpTrend.includes("SELL") || scalpTrend.includes("Red")) {
-    scalpChip = `<span class="badge-chip chip-scalp-sell">🔴 Scalp SELL</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-sell">Scalp SELL</span>`;
   }
 
   // VIP Date Notification
   const vipDateRow = vipDateLabel ? `
     <div style="font-size:11px; font-weight:600; color:var(--status-gold); margin-top:2px;">
-      📅 Terdeteksi VIP: ${vipDateLabel}
+      Terdeteksi VIP: ${vipDateLabel}
     </div>
   ` : "";
 
@@ -2477,7 +2508,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         <div class="symbol-col">
           <div class="symbol-badge-box">
             <span class="symbol-text">${stock.symbol}</span>
-            ${isVip ? `<span class="vip-badge-pill">💎 3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">⚡ 2-DOT</span>` : '')}
+            ${isVip ? `<span class="vip-badge-pill">3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">2-DOT</span>` : '')}
           </div>
           <span class="symbol-name">${stock.name || stock.symbol}</span>
           ${vipDateRow}
@@ -2550,7 +2581,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
-          <span class="card-click-hint">Analisa 🔍</span>
+          <span class="card-click-hint">Detail Analisa</span>
           <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="btn-chart" onclick="event.stopPropagation()">
             <span>Chart TV</span>
             <span>↗</span>
@@ -2648,7 +2679,7 @@ function openStockDetail(symbol) {
         <div class="modal-tf-card-head">
           <span class="modal-tf-title">${label}</span>
           <span class="modal-tf-status ${active ? 'active' : 'inactive'}">
-            ${active ? '🟢 AKTIF' : '⚪ BELUM AKTIF'}
+            ${active ? 'AKTIF' : 'BELUM AKTIF'}
           </span>
         </div>
 
@@ -2675,11 +2706,11 @@ function openStockDetail(symbol) {
     const parts = [];
     if (bullList.length > 0) {
       const bStr = bullList.map(b => `${b.type || 'Bullish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
-      parts.push(`<span style="color:var(--status-green); font-weight:600;">🐂 Bull: ${bStr}</span>`);
+      parts.push(`<span style="color:var(--status-green); font-weight:600;">Bull: ${bStr}</span>`);
     }
     if (bearList.length > 0) {
       const bStr = bearList.map(b => `${b.type || 'Bearish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
-      parts.push(`<span style="color:var(--status-red); font-weight:600;">🐻 Bear: ${bStr}</span>`);
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">Bear: ${bStr}</span>`);
     }
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral / Tidak Ada Divergensi)</span>';
   }
@@ -2692,10 +2723,10 @@ function openStockDetail(symbol) {
     const parts = [];
     if (g && g.date) {
       const gainExtra = g.gain_pct != null ? ` (+${g.gain_pct.toFixed(1)}%)` : '';
-      parts.push(`<span style="color:var(--status-gold); font-weight:600;">✨ Golden: ${g.date}${gainExtra}</span>`);
+      parts.push(`<span style="color:var(--status-gold); font-weight:600;">Golden: ${g.date}${gainExtra}</span>`);
     }
     if (d && d.date) {
-      parts.push(`<span style="color:var(--status-red); font-weight:600;">⚠️ Death: ${d.date}</span>`);
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">Death: ${d.date}</span>`);
     }
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
@@ -2706,10 +2737,10 @@ function openStockDetail(symbol) {
     const trend = scalpObj.trend || '';
     if (!trend || trend === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
     if (trend.includes('BUY') || trend.includes('Green')) {
-      return `<span style="color:var(--status-green); font-weight:700;">🟢 ${trend}</span>`;
+      return `<span style="color:var(--status-green); font-weight:700;">${trend}</span>`;
     }
     if (trend.includes('SELL') || trend.includes('Red')) {
-      return `<span style="color:var(--status-red); font-weight:700;">🔴 ${trend}</span>`;
+      return `<span style="color:var(--status-red); font-weight:700;">${trend}</span>`;
     }
     return `<span style="color:var(--text-secondary);">${trend}</span>`;
   }
@@ -2719,10 +2750,10 @@ function openStockDetail(symbol) {
     const status = typeof smcObj === 'string' ? smcObj : (smcObj?.status_7d || '-');
     if (!status || status === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
     if (status.includes('BREAKOUT')) {
-      return `<span style="color:var(--status-cyan); font-weight:700;">🔥 ${status}</span>`;
+      return `<span style="color:var(--status-cyan); font-weight:700;">${status}</span>`;
     }
     if (status.includes('DEMAND') || status.includes('Pantulan')) {
-      return `<span style="color:var(--status-green); font-weight:600;">🟢 ${status}</span>`;
+      return `<span style="color:var(--status-green); font-weight:600;">${status}</span>`;
     }
     return `<span style="color:var(--text-secondary); font-size:11.5px;">${status}</span>`;
   }
@@ -2761,7 +2792,7 @@ function openStockDetail(symbol) {
         <div class="modal-title-col">
           <div class="modal-symbol-row">
             <span class="modal-symbol-text">${stock.symbol}</span>
-            ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">💎 FULL 3-DOT GREEN (VIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">⚡ 2-DOT GREEN (POTENSIAL)</span>` : '')}
+            ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">FULL 3-DOT GREEN (VVIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">2-DOT GREEN (POTENSIAL)</span>` : '')}
           </div>
           <span class="modal-name-text">${stock.name || stock.symbol} • Bursa Efek Indonesia (IDX)</span>
         </div>
@@ -2781,7 +2812,7 @@ function openStockDetail(symbol) {
         <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 15M) -->
         <div class="modal-section">
           <div class="modal-sec-title">
-            <span>🟢 Sinyal RallyGood Dot Green & Kenaikan Harga</span>
+            <span>Sinyal RallyGood Dot Green & Kenaikan Harga</span>
             <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe (1D, 1H, 15M)</span>
           </div>
           <div class="modal-tf-grid">
@@ -2797,7 +2828,7 @@ function openStockDetail(symbol) {
           <!-- DonAlt EMA Suite (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>✨ DonAlt EMA Golden & Death Cross</span>
+              <span>DonAlt EMA Golden & Death Cross</span>
               <span class="badge-mini">${hasGolden ? 'Bullish' : (hasDeath ? 'Bearish' : 'Netral')}</span>
             </div>
             
@@ -2818,9 +2849,9 @@ function openStockDetail(symbol) {
           <!-- Scalping & Trend Signal (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>⚡ Scalping Signal & Trend</span>
+              <span>Scalping Signal & Trend</span>
               <span class="modal-tf-status ${isScalpBuy ? 'active' : 'inactive'}">
-                ${isScalpBuy ? '🟢 BUY' : '🔴 SELL'}
+                ${isScalpBuy ? 'BUY' : 'SELL'}
               </span>
             </div>
 
@@ -2856,7 +2887,7 @@ function openStockDetail(symbol) {
           <!-- Smart Money Concepts (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>🌊 Smart Money Concepts (SMC)</span>
+              <span>Smart Money Concepts (SMC)</span>
               <span class="badge-mini">Supply & Demand</span>
             </div>
 
@@ -2885,7 +2916,7 @@ function openStockDetail(symbol) {
           <!-- MACD Divergences (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>📊 MACD Divergences</span>
+              <span>MACD Divergences</span>
               <span class="badge-mini">1D • 1H • 15M</span>
             </div>
 

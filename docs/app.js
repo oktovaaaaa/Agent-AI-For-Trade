@@ -70,7 +70,7 @@ function renderSidebarHistory() {
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">⏳ Menunggu scan 16:21 WIB</div>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Menunggu scan 16:21 WIB</div>`;
     return;
   }
 
@@ -163,7 +163,7 @@ function renderDailyView() {
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
 
-  document.getElementById("pageMainHeading").innerText = "Dashboard Rekomendasi Harian";
+  document.getElementById("pageMainHeading").innerText = "Screener ARA Hunter";
   document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
 
   if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
@@ -268,7 +268,7 @@ function renderVipView() {
   const grid = document.getElementById("stocksGrid");
   const vipList = appData.vip_3dot_history || [];
 
-  document.getElementById("pageMainHeading").innerText = "💎 VIP 3-Dot Green (Riwayat 1 Bulan)";
+  document.getElementById("pageMainHeading").innerText = "VVIP 3-Dot Green (Riwayat 1 Bulan)";
   document.getElementById("pageSubHeading").innerText = "Arsip khusus saham yang berhasil mengonfirmasi 3 Timeframe (Daily + 1H + 15M) dalam 30 hari terakhir";
 
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
@@ -384,9 +384,9 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   let donaltChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (goldenCross) {
     const gainExtra = goldenCross.gain_pct != null ? ` (+${goldenCross.gain_pct.toFixed(1)}%)` : "";
-    donaltChip = `<span class="badge-chip chip-golden">✨ Golden Cross${gainExtra}</span>`;
+    donaltChip = `<span class="badge-chip chip-golden">Golden Cross${gainExtra}</span>`;
   } else if (deathCross) {
-    donaltChip = `<span class="badge-chip chip-death">⚠️ Death Cross</span>`;
+    donaltChip = `<span class="badge-chip chip-death">Death Cross</span>`;
   }
 
   // Sinyal SMC (Smart Money Concepts)
@@ -394,9 +394,9 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (smcStatus) {
     if (smcStatus.includes("BREAKOUT")) {
-      smcChip = `<span class="badge-chip chip-smc-breakout">🔥 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-breakout">${smcStatus}</span>`;
     } else if (smcStatus.includes("DEMAND") || smcStatus.includes("Pantulan")) {
-      smcChip = `<span class="badge-chip chip-smc-demand">🟢 ${smcStatus}</span>`;
+      smcChip = `<span class="badge-chip chip-smc-demand">${smcStatus}</span>`;
     } else {
       smcChip = `<span class="badge-chip chip-neutral">${smcStatus}</span>`;
     }
@@ -406,15 +406,15 @@ function createStockCardHTML(stock, vipDateLabel = null) {
   const scalpTrend = tf60.scalping?.trend || tf15.scalping?.trend || tfD.scalping?.trend || "";
   let scalpChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (scalpTrend.includes("BUY") || scalpTrend.includes("Green")) {
-    scalpChip = `<span class="badge-chip chip-scalp-buy">🟢 Scalp BUY</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-buy">Scalp BUY</span>`;
   } else if (scalpTrend.includes("SELL") || scalpTrend.includes("Red")) {
-    scalpChip = `<span class="badge-chip chip-scalp-sell">🔴 Scalp SELL</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-sell">Scalp SELL</span>`;
   }
 
   // VIP Date Notification
   const vipDateRow = vipDateLabel ? `
     <div style="font-size:11px; font-weight:600; color:var(--status-gold); margin-top:2px;">
-      📅 Terdeteksi VIP: ${vipDateLabel}
+      Terdeteksi VIP: ${vipDateLabel}
     </div>
   ` : "";
 
@@ -426,7 +426,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         <div class="symbol-col">
           <div class="symbol-badge-box">
             <span class="symbol-text">${stock.symbol}</span>
-            ${isVip ? `<span class="vip-badge-pill">💎 3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">⚡ 2-DOT</span>` : '')}
+            ${isVip ? `<span class="vip-badge-pill">3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">2-DOT</span>` : '')}
           </div>
           <span class="symbol-name">${stock.name || stock.symbol}</span>
           ${vipDateRow}
@@ -499,7 +499,7 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         </div>
 
         <div style="display:flex; align-items:center; gap:8px;">
-          <span class="card-click-hint">Analisa 🔍</span>
+          <span class="card-click-hint">Detail Analisa</span>
           <a href="${tvUrl}" target="_blank" rel="noopener noreferrer" class="btn-chart" onclick="event.stopPropagation()">
             <span>Chart TV</span>
             <span>↗</span>
@@ -597,7 +597,7 @@ function openStockDetail(symbol) {
         <div class="modal-tf-card-head">
           <span class="modal-tf-title">${label}</span>
           <span class="modal-tf-status ${active ? 'active' : 'inactive'}">
-            ${active ? '🟢 AKTIF' : '⚪ BELUM AKTIF'}
+            ${active ? 'AKTIF' : 'BELUM AKTIF'}
           </span>
         </div>
 
@@ -624,11 +624,11 @@ function openStockDetail(symbol) {
     const parts = [];
     if (bullList.length > 0) {
       const bStr = bullList.map(b => `${b.type || 'Bullish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
-      parts.push(`<span style="color:var(--status-green); font-weight:600;">🐂 Bull: ${bStr}</span>`);
+      parts.push(`<span style="color:var(--status-green); font-weight:600;">Bull: ${bStr}</span>`);
     }
     if (bearList.length > 0) {
       const bStr = bearList.map(b => `${b.type || 'Bearish'} (${b.date || ''}${b.price ? ' @ Rp ' + b.price : ''})`).join(', ');
-      parts.push(`<span style="color:var(--status-red); font-weight:600;">🐻 Bear: ${bStr}</span>`);
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">Bear: ${bStr}</span>`);
     }
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral / Tidak Ada Divergensi)</span>';
   }
@@ -641,10 +641,10 @@ function openStockDetail(symbol) {
     const parts = [];
     if (g && g.date) {
       const gainExtra = g.gain_pct != null ? ` (+${g.gain_pct.toFixed(1)}%)` : '';
-      parts.push(`<span style="color:var(--status-gold); font-weight:600;">✨ Golden: ${g.date}${gainExtra}</span>`);
+      parts.push(`<span style="color:var(--status-gold); font-weight:600;">Golden: ${g.date}${gainExtra}</span>`);
     }
     if (d && d.date) {
-      parts.push(`<span style="color:var(--status-red); font-weight:600;">⚠️ Death: ${d.date}</span>`);
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">Death: ${d.date}</span>`);
     }
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
@@ -655,10 +655,10 @@ function openStockDetail(symbol) {
     const trend = scalpObj.trend || '';
     if (!trend || trend === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
     if (trend.includes('BUY') || trend.includes('Green')) {
-      return `<span style="color:var(--status-green); font-weight:700;">🟢 ${trend}</span>`;
+      return `<span style="color:var(--status-green); font-weight:700;">${trend}</span>`;
     }
     if (trend.includes('SELL') || trend.includes('Red')) {
-      return `<span style="color:var(--status-red); font-weight:700;">🔴 ${trend}</span>`;
+      return `<span style="color:var(--status-red); font-weight:700;">${trend}</span>`;
     }
     return `<span style="color:var(--text-secondary);">${trend}</span>`;
   }
@@ -668,10 +668,10 @@ function openStockDetail(symbol) {
     const status = typeof smcObj === 'string' ? smcObj : (smcObj?.status_7d || '-');
     if (!status || status === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
     if (status.includes('BREAKOUT')) {
-      return `<span style="color:var(--status-cyan); font-weight:700;">🔥 ${status}</span>`;
+      return `<span style="color:var(--status-cyan); font-weight:700;">${status}</span>`;
     }
     if (status.includes('DEMAND') || status.includes('Pantulan')) {
-      return `<span style="color:var(--status-green); font-weight:600;">🟢 ${status}</span>`;
+      return `<span style="color:var(--status-green); font-weight:600;">${status}</span>`;
     }
     return `<span style="color:var(--text-secondary); font-size:11.5px;">${status}</span>`;
   }
@@ -710,7 +710,7 @@ function openStockDetail(symbol) {
         <div class="modal-title-col">
           <div class="modal-symbol-row">
             <span class="modal-symbol-text">${stock.symbol}</span>
-            ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">💎 FULL 3-DOT GREEN (VIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">⚡ 2-DOT GREEN (POTENSIAL)</span>` : '')}
+            ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">FULL 3-DOT GREEN (VVIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">2-DOT GREEN (POTENSIAL)</span>` : '')}
           </div>
           <span class="modal-name-text">${stock.name || stock.symbol} • Bursa Efek Indonesia (IDX)</span>
         </div>
@@ -730,7 +730,7 @@ function openStockDetail(symbol) {
         <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 15M) -->
         <div class="modal-section">
           <div class="modal-sec-title">
-            <span>🟢 Sinyal RallyGood Dot Green & Kenaikan Harga</span>
+            <span>Sinyal RallyGood Dot Green & Kenaikan Harga</span>
             <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe (1D, 1H, 15M)</span>
           </div>
           <div class="modal-tf-grid">
@@ -746,7 +746,7 @@ function openStockDetail(symbol) {
           <!-- DonAlt EMA Suite (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>✨ DonAlt EMA Golden & Death Cross</span>
+              <span>DonAlt EMA Golden & Death Cross</span>
               <span class="badge-mini">${hasGolden ? 'Bullish' : (hasDeath ? 'Bearish' : 'Netral')}</span>
             </div>
             
@@ -767,9 +767,9 @@ function openStockDetail(symbol) {
           <!-- Scalping & Trend Signal (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>⚡ Scalping Signal & Trend</span>
+              <span>Scalping Signal & Trend</span>
               <span class="modal-tf-status ${isScalpBuy ? 'active' : 'inactive'}">
-                ${isScalpBuy ? '🟢 BUY' : '🔴 SELL'}
+                ${isScalpBuy ? 'BUY' : 'SELL'}
               </span>
             </div>
 
@@ -805,7 +805,7 @@ function openStockDetail(symbol) {
           <!-- Smart Money Concepts (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>🌊 Smart Money Concepts (SMC)</span>
+              <span>Smart Money Concepts (SMC)</span>
               <span class="badge-mini">Supply & Demand</span>
             </div>
 
@@ -834,7 +834,7 @@ function openStockDetail(symbol) {
           <!-- MACD Divergences (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>📊 MACD Divergences</span>
+              <span>MACD Divergences</span>
               <span class="badge-mini">1D • 1H • 15M</span>
             </div>
 

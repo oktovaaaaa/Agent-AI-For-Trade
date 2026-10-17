@@ -280,7 +280,18 @@ body.dark-theme .nav-item.active {
 }
 
 .nav-icon {
-  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.nav-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 .nav-label {
@@ -712,7 +723,13 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
 .tag-slate { background: var(--border-light); color: var(--text-secondary); }
 
 .metric-icon {
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-icon svg {
+  display: block;
 }
 
 .metric-number {

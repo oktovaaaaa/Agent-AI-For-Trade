@@ -1127,6 +1127,8 @@ async def scan_stock_rallygood(page, stock_info):
             print(f" ⚠️ Error: {e}")
             results[tf_code] = {"status": False, "date": None, "error": str(e)}
             
+    return results
+            
 # ============================================================================
 # TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (RETENSI 30 HARI / 1 BULAN BERGULIR)
 # ============================================================================
@@ -1396,6 +1398,8 @@ async def run_daily_scan(send_wa=True):
             for attempt in range(1, MAX_RETRIES + 1):
                 try:
                     tf_results = await scan_stock_rallygood(page, stock)
+                    if not tf_results:
+                        tf_results = {}
                     
                     # Cek apakah ada minimal satu timeframe dengan Dot Green
                     any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
@@ -1778,6 +1782,18 @@ async def run_daily_scan(send_wa=True):
 # MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.21 WIB
 # ============================================================================
 def main():
+    import signal
+    def handle_exit_signal(sig, frame):
+        print(f"\n[TERMINATION] Sinyal pembatalan diterima ({sig}). Menghentikan bot seketika...")
+        sys.exit(0)
+
+    try:
+        signal.signal(signal.SIGINT, handle_exit_signal)
+        if hasattr(signal, 'SIGTERM'):
+            signal.signal(signal.SIGTERM, handle_exit_signal)
+    except Exception as e:
+        print(f"[SIGNAL WARNING] Tidak dapat memasang signal handler: {e}")
+
     print("================================================================")
     print("🚀 BOT HUNTER + RALLY GOD (OKTOVAAAAA) DIAKTIFKAN")
     print(f"⏰ Jadwal Rutin: Setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
