@@ -1670,9 +1670,13 @@ async def run_daily_scan(send_wa=True):
         
         if not saham_3_dot:
             pesan_wa += (
-                f"\nℹ️ *TIDAK ADA SAHAM 3 TIMEFRAME (3-DOT)*\n"
-                f"Hasil scan malam ini belum ada saham yang mengonfirmasi 3 Timeframe sekaligus.\n"
-                f"*(Saham dengan 2 Timeframe dapat dipantau langsung di Website)*\n"
+                f"\n━━━━━━━━━━━━━━━━━━━━\n"
+                f"ℹ️ *STATUS: 0 SAHAM 3-DOT MALAM INI*\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"Hasil scan malam ini belum ada saham yang mengonfirmasi 3 Timeframe (Daily + 1H + 15M) sekaligus.\n\n"
+                f"👀 *Pantau Saham Potensial (2 Timeframe):*\n"
+                f"Tersedia *{len(saham_2_dot)} saham* yang lolos 2-Dot Green dan siap dipantau langsung di website:\n"
+                f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n"
             )
         else:
             pesan_wa += (
@@ -1711,13 +1715,15 @@ async def run_daily_scan(send_wa=True):
             f"\n━━━━━━━━━━━━━━━━━━━━\n"
             f"📈 *REKAPITULASI PEMINDAIAN*:\n"
             f"• Total Saham Screener : {len(hasil_deteksi)} Saham\n"
-            f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (Dikirim ke WA)\n"
-            f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Tersedia di Web)\n"
-            f"• ⚪ 1 Timeframe Saja  : {len(saham_1_dot)} Saham\n"
-            f"• ⚪ 0 Timeframe       : {len(saham_0_dot)} Saham\n\n"
-            f"🌐 *Web Screener*: https://oktovaaaaa.github.io/Agent-AI-ForTrade/\n"
-            f"_(Daftar saham 3-Dot & 2-Dot lengkap tersimpan di website)_\n\n"
-            f"🤖 _Bot Agent Okto 24 Jam Otomatis_"
+            f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (VVIP Prioritas)\n"
+            f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Radar Potensial)\n"
+            f"• ⚪ Saham Lainnya     : {len(saham_1_dot) + len(saham_0_dot)} Saham (Netral)\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🌐 *DASHBOARD & DATA LENGKAP:*\n"
+            f"Untuk melihat analisa mendalam, chart TradingView interaktif, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
+            f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n\n"
+            f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
+            f"🤖 _Agent AI For Trade • IDX Algorithmic Automation 24 Jam_"
         )
         kirim_whatsapp(pesan_wa)
     else:
