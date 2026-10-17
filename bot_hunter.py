@@ -1812,9 +1812,11 @@ def main():
             now_wib = datetime.datetime.now(WIB_TZ)
             hari_ini = now_wib.date()
             
-            # Cek jadwal: Sabtu pukul 16:10 WIB, Senin-Jumat pukul 16:21 WIB
-            target_menit = 10 if now_wib.weekday() == 5 else MENIT_SCAN_WIB
-            if (now_wib.hour == JAM_SCAN_WIB and 
+            # Cek jadwal: Sabtu pukul 19:08 WIB, Senin-Jumat pukul 16:21 WIB
+            is_saturday = (now_wib.weekday() == 5)
+            target_jam = 19 if is_saturday else JAM_SCAN_WIB
+            target_menit = 8 if is_saturday else MENIT_SCAN_WIB
+            if (now_wib.hour == target_jam and 
                 now_wib.minute >= target_menit and 
                 scan_terakhir_tanggal != hari_ini):
                 
