@@ -277,6 +277,45 @@ function renderMainView() {
   }
 }
 
+// Helper Deteksi DonAlt Golden Cross
+function checkHasGolden(s) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => s.timeframes[tf]?.donalt?.golden);
+}
+
+// Helper Deteksi SMC Breakout Supply (BOS, CHoCH, Breakout Supply, atau Menguji Resisten)
+function checkHasSmcBreakout(s) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => {
+    const smc = s.timeframes[tf]?.smc;
+    const st = smc?.status_7d || "";
+    return st.includes("BREAKOUT") || 
+           st.includes("BOS") || 
+           st.includes("CHoCH") || 
+           (st.includes("Supply") && !st.includes("Di Antara Demand & Supply"));
+  });
+}
+
+// Helper Deteksi Scalping BUY (Bullish Trend atau histori sinyal BUY dari riwayat)
+function checkHasScalpBuy(s, isVipMode = false) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => {
+    const sc = s.timeframes[tf]?.scalping;
+    if (!sc) return false;
+    const trend = sc.trend || "";
+    const isTrendBuy = trend.includes("BUY") || trend.includes("Green");
+    const isUnreversedBuy = sc.buy != null && !sc.buy.reversed;
+    const hasAnyBuy = sc.buy != null && Boolean(sc.buy.date || sc.buy.price);
+    
+    // Di mode VIP (Riwayat 30 Hari), saham yang memiliki histori sinyal BUY dari periode 30 hari ditampilkan
+    if (isVipMode) {
+      return isTrendBuy || hasAnyBuy;
+    }
+    // Di mode Daily scan, prioritaskan trend aktif BUY atau sinyal BUY yang belum reversal
+    return isTrendBuy || isUnreversedBuy;
+  });
+}
+
 // Render Daily Mode (Data Harian)
 function renderDailyView() {
   const scanData = appData.daily_scans[selectedDate];
@@ -329,9 +368,12 @@ function renderDailyView() {
 
   // Hitung jumlah sinyal spesifik
   let countGolden = 0;
+  let countSmc = 0;
+  let countScalp = 0;
   scanData.stocks.forEach(s => {
-    const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
-    if (hasGold) countGolden++;
+    if (checkHasGolden(s)) countGolden++;
+    if (checkHasSmcBreakout(s)) countSmc++;
+    if (checkHasScalpBuy(s, false)) countScalp++;
   });
 
   // Update Metric Cards
@@ -347,6 +389,12 @@ function renderDailyView() {
   document.getElementById("countAllFilter").innerText = scanData.stocks.length;
   document.getElementById("count3DotFilter").innerText = summary.count_3_dot || 0;
   document.getElementById("count2DotFilter").innerText = summary.count_2_dot || 0;
+  const countGoldEl = document.getElementById("countGoldenFilter");
+  if (countGoldEl) countGoldEl.innerText = countGolden;
+  const countSmcEl = document.getElementById("countSmcFilter");
+  if (countSmcEl) countSmcEl.innerText = countSmc;
+  const countScalpEl = document.getElementById("countScalpFilter");
+  if (countScalpEl) countScalpEl.innerText = countScalp;
 
   // Filter Saham
   let filtered = scanData.stocks.filter(s => {
@@ -357,24 +405,9 @@ function renderDailyView() {
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
     if (activeFilter === "2dot" && s.count_green !== 2) return false;
-    if (activeFilter === "golden") {
-      const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
-      if (!hasGold) return false;
-    }
-    if (activeFilter === "smc") {
-      const isBreakout = ['D', '60', '15'].some(tf => {
-        const smc = s.timeframes?.[tf]?.smc;
-        return smc?.status_7d && smc.status_7d.includes("BREAKOUT");
-      });
-      if (!isBreakout) return false;
-    }
-    if (activeFilter === "scalp") {
-      const isBuy = ['D', '60', '15'].some(tf => {
-        const trend = s.timeframes?.[tf]?.scalping?.trend || "";
-        return trend.includes("BUY") || trend.includes("Green");
-      });
-      if (!isBuy) return false;
-    }
+    if (activeFilter === "golden" && !checkHasGolden(s)) return false;
+    if (activeFilter === "smc" && !checkHasSmcBreakout(s)) return false;
+    if (activeFilter === "scalp" && !checkHasScalpBuy(s, false)) return false;
     return true;
   });
 
@@ -418,12 +451,15 @@ function renderVipView() {
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
   document.getElementById("activeTimeDisplay").innerText = "30 Hari";
 
-  // Hitung metric top
+  // Hitung metric top & sidebar
   let countGolden = 0;
+  let countSmc = 0;
+  let countScalp = 0;
   vipList.forEach(item => {
     const s = item.data || {};
-    const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
-    if (hasGold) countGolden++;
+    if (checkHasGolden(s)) countGolden++;
+    if (checkHasSmcBreakout(s)) countSmc++;
+    if (checkHasScalpBuy(s, true)) countScalp++;
   });
 
   updateTopMetrics(vipList.length, "-", countGolden, "VIP");
@@ -438,6 +474,12 @@ function renderVipView() {
   document.getElementById("countAllFilter").innerText = vipList.length;
   document.getElementById("count3DotFilter").innerText = vipList.length;
   document.getElementById("count2DotFilter").innerText = 0;
+  const countGoldEl = document.getElementById("countGoldenFilter");
+  if (countGoldEl) countGoldEl.innerText = countGolden;
+  const countSmcEl = document.getElementById("countSmcFilter");
+  if (countSmcEl) countSmcEl.innerText = countSmc;
+  const countScalpEl = document.getElementById("countScalpFilter");
+  if (countScalpEl) countScalpEl.innerText = countScalp;
 
   // Filter VIP list berdasarkan search query & sinyal aktif
   let filtered = vipList.filter(item => {
@@ -449,24 +491,9 @@ function renderVipView() {
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
     if (activeFilter === "2dot" && s.count_green !== 2) return false;
-    if (activeFilter === "golden") {
-      const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
-      if (!hasGold) return false;
-    }
-    if (activeFilter === "smc") {
-      const isBreakout = ['D', '60', '15'].some(tf => {
-        const smc = s.timeframes?.[tf]?.smc;
-        return smc?.status_7d && smc.status_7d.includes("BREAKOUT");
-      });
-      if (!isBreakout) return false;
-    }
-    if (activeFilter === "scalp") {
-      const isBuy = ['D', '60', '15'].some(tf => {
-        const trend = s.timeframes?.[tf]?.scalping?.trend || "";
-        return trend.includes("BUY") || trend.includes("Green");
-      });
-      if (!isBuy) return false;
-    }
+    if (activeFilter === "golden" && !checkHasGolden(s)) return false;
+    if (activeFilter === "smc" && !checkHasSmcBreakout(s)) return false;
+    if (activeFilter === "scalp" && !checkHasScalpBuy(s, true)) return false;
     return true;
   });
 
