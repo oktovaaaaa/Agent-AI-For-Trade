@@ -899,16 +899,24 @@ window.addEventListener("keydown", (e) => {
 });
 
 // Theme Toggle (Light / Dark)
+function updateThemeIcon(isDark) {
+  const icon = isDark ? "☀️" : "🌙";
+  const desk = document.getElementById("themeIcon");
+  if (desk) desk.innerText = icon;
+  const mob = document.getElementById("themeIconMobile");
+  if (mob) mob.innerText = icon;
+}
+
 function initTheme() {
   const savedTheme = localStorage.getItem("hunter_theme") || "light";
   if (savedTheme === "dark") {
     document.body.classList.remove("light-theme");
     document.body.classList.add("dark-theme");
-    document.getElementById("themeIcon").innerText = "☀️";
+    updateThemeIcon(true);
   } else {
     document.body.classList.remove("dark-theme");
     document.body.classList.add("light-theme");
-    document.getElementById("themeIcon").innerText = "🌙";
+    updateThemeIcon(false);
   }
 }
 
@@ -917,12 +925,12 @@ function toggleTheme() {
     document.body.classList.remove("dark-theme");
     document.body.classList.add("light-theme");
     localStorage.setItem("hunter_theme", "light");
-    document.getElementById("themeIcon").innerText = "🌙";
+    updateThemeIcon(false);
   } else {
     document.body.classList.remove("light-theme");
     document.body.classList.add("dark-theme");
     localStorage.setItem("hunter_theme", "dark");
-    document.getElementById("themeIcon").innerText = "☀️";
+    updateThemeIcon(true);
   }
 }
 
@@ -930,14 +938,19 @@ function toggleTheme() {
 function toggleSidebar(forceState = null) {
   const sidebar = document.getElementById("appSidebar");
   const backdrop = document.getElementById("sidebarBackdrop");
+  if (!sidebar || !backdrop) return;
   const shouldOpen = forceState !== null ? forceState : !sidebar.classList.contains("open");
 
   if (shouldOpen) {
     sidebar.classList.add("open");
     backdrop.classList.add("show");
+    document.body.style.overflow = "hidden";
   } else {
     sidebar.classList.remove("open");
     backdrop.classList.remove("show");
+    if (!document.getElementById("detailModal")?.classList.contains("open")) {
+      document.body.style.overflow = "";
+    }
   }
 }
 
