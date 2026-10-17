@@ -597,8 +597,8 @@ body.dark-theme .nav-subitem.active {
   padding: 2px;
 }
 
-/* Theme Toggle & Refresh Buttons */
-.theme-toggle-btn, .refresh-btn {
+/* Theme Toggle Button */
+.theme-toggle-btn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -613,7 +613,7 @@ body.dark-theme .nav-subitem.active {
   transition: var(--transition);
 }
 
-.theme-toggle-btn:hover, .refresh-btn:hover {
+.theme-toggle-btn:hover {
   background: var(--brand-mint-subtle);
   border-color: var(--brand-accent);
   color: var(--brand-primary);
@@ -1357,6 +1357,10 @@ body.dark-theme .btn-chart {
     gap: 8px;
   }
 
+  .topbar-right .theme-toggle-btn {
+    display: none;
+  }
+
   .search-pill {
     width: 100%;
   }
@@ -1882,11 +1886,6 @@ body.dark-theme .btn-chart {
           <!-- Theme Toggle (Light / Dark) -->
           <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Ganti Tema (Light/Dark)">
             <span id="themeIcon">🌙</span>
-          </button>
-
-          <!-- Refresh Data Button -->
-          <button class="refresh-btn" onclick="reloadDashboard()" title="Muat ulang data terbaru">
-            🔄
           </button>
         </div>
       </header>
