@@ -1,11 +1,6 @@
 name: Bot Hunter Daily Scan
 
 on:
-  schedule:
-    # 09:21 UTC = 16:21 WIB (Senin - Jumat pasca tutup bursa IDX)
-    - cron: '21 9 * * 1-5'
-    # 12:08 UTC = 19:08 WIB (Sabtu)
-    - cron: '8 12 * * 6'
   workflow_dispatch:
     inputs:
       limit:

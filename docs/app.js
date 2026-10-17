@@ -64,7 +64,39 @@ async function loadDatabase() {
   }
 }
 
-// Render Riwayat Per Tanggal (7 Hari Terakhir) di Left Sidebar
+// Dropdown state for history dates (jika > 4 tanggal)
+let isHistoryDropdownOpen = false;
+
+function toggleHistoryDropdown(event) {
+  if (event) event.stopPropagation();
+  isHistoryDropdownOpen = !isHistoryDropdownOpen;
+  const menu = document.getElementById("historyDropdownMenu");
+  const chevron = document.getElementById("historyDropdownChevron");
+  if (menu) {
+    menu.classList.toggle("open", isHistoryDropdownOpen);
+  }
+  if (chevron) {
+    chevron.classList.toggle("open", isHistoryDropdownOpen);
+  }
+}
+
+function closeHistoryDropdown() {
+  isHistoryDropdownOpen = false;
+  const menu = document.getElementById("historyDropdownMenu");
+  const chevron = document.getElementById("historyDropdownChevron");
+  if (menu) menu.classList.remove("open");
+  if (chevron) chevron.classList.remove("open");
+}
+
+// Global click-outside listener untuk menutup dropdown riwayat
+document.addEventListener("click", (e) => {
+  const wrapper = document.getElementById("historyDropdownWrapper");
+  if (wrapper && !wrapper.contains(e.target) && isHistoryDropdownOpen) {
+    closeHistoryDropdown();
+  }
+});
+
+// Render Riwayat Per Tanggal (Maks 4 tombol langsung, selebihnya masuk dropdown khusus)
 function renderSidebarHistory() {
   const container = document.getElementById("sidebarDateList");
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
@@ -74,8 +106,41 @@ function renderSidebarHistory() {
     return;
   }
 
+  // Jika tanggal <= 4, tampilkan semua secara langsung
+  if (availableDates.length <= 4) {
+    let html = "";
+    availableDates.forEach((dateKey) => {
+      const scan = appData.daily_scans[dateKey];
+      const isSelected = (currentMode === "daily" && dateKey === selectedDate);
+      const dateLabel = scan.date_display || dateKey;
+      const stockCount = scan.stocks ? scan.stocks.length : (scan.summary?.total_screener || 0);
+
+      html += `
+        <button class="history-date-btn ${isSelected ? 'active' : ''}" onclick="selectHistoryDate('${dateKey}')">
+          <div class="history-date-left">
+            <span class="history-date-dot"></span>
+            <span>${dateLabel}</span>
+          </div>
+          <span class="history-badge">${stockCount}</span>
+        </button>
+      `;
+    });
+    container.innerHTML = html;
+    return;
+  }
+
+  // Jika tanggal > 4: 4 tanggal pertama tampil langsung, sisanya masuk ke dropdown khusus
+  const primaryDates = availableDates.slice(0, 4);
+  const extraDates = availableDates.slice(4);
+
+  // Cek apakah tanggal yang sedang aktif berada di dalam dropdown (extraDates)
+  const isExtraActive = (currentMode === "daily" && extraDates.includes(selectedDate));
+  const activeExtraScan = isExtraActive ? appData.daily_scans[selectedDate] : null;
+
   let html = "";
-  availableDates.forEach((dateKey, index) => {
+
+  // 1. Render 4 tanggal teratas
+  primaryDates.forEach((dateKey) => {
     const scan = appData.daily_scans[dateKey];
     const isSelected = (currentMode === "daily" && dateKey === selectedDate);
     const dateLabel = scan.date_display || dateKey;
@@ -92,6 +157,59 @@ function renderSidebarHistory() {
     `;
   });
 
+  // 2. Render dropdown khusus untuk tanggal ke-5 dan seterusnya
+  const triggerTitle = isExtraActive
+    ? (activeExtraScan?.date_display || selectedDate)
+    : `Riwayat Lainnya`;
+  const triggerBadge = isExtraActive
+    ? (activeExtraScan?.stocks ? activeExtraScan.stocks.length : (activeExtraScan?.summary?.total_screener || 0))
+    : null;
+
+  let extraItemsHtml = "";
+  extraDates.forEach((dateKey) => {
+    const scan = appData.daily_scans[dateKey];
+    const isSelected = (currentMode === "daily" && dateKey === selectedDate);
+    const dateLabel = scan.date_display || dateKey;
+    const stockCount = scan.stocks ? scan.stocks.length : (scan.summary?.total_screener || 0);
+
+    extraItemsHtml += `
+      <button class="history-date-btn history-dropdown-item ${isSelected ? 'active' : ''}" onclick="selectHistoryDate('${dateKey}')">
+        <div class="history-date-left">
+          <span class="history-date-dot"></span>
+          <span>${dateLabel}</span>
+        </div>
+        <span class="history-badge">${stockCount}</span>
+      </button>
+    `;
+  });
+
+  html += `
+    <div class="history-dropdown-wrapper" id="historyDropdownWrapper">
+      <button type="button" class="history-dropdown-trigger ${isExtraActive ? 'active' : ''}" onclick="toggleHistoryDropdown(event)" title="Buka pilihan tanggal lainnya">
+        <div class="history-dropdown-trigger-left">
+          <svg class="history-dropdown-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="18" y2="10"></line>
+          </svg>
+          <span class="history-dropdown-title">${triggerTitle}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+          ${triggerBadge !== null ? `<span class="history-badge">${triggerBadge}</span>` : `<span class="badge-mini" style="font-size:9.5px; padding:2px 5px;">+${extraDates.length}</span>`}
+          <svg class="history-dropdown-chevron ${isHistoryDropdownOpen ? 'open' : ''}" id="historyDropdownChevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </button>
+      <div class="history-dropdown-menu ${isHistoryDropdownOpen ? 'open' : ''}" id="historyDropdownMenu">
+        <div class="history-dropdown-menu-inner">
+          ${extraItemsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
   container.innerHTML = html;
 }
 
@@ -104,6 +222,7 @@ function selectHistoryDate(dateKey) {
   document.getElementById("menuDailyBtn").classList.add("active");
   document.getElementById("menuVipBtn").classList.remove("active");
   
+  closeHistoryDropdown();
   renderSidebarHistory();
   renderMainView();
   toggleSidebar(false); // Close sidebar on mobile

@@ -385,6 +385,114 @@ body.dark-theme .nav-item.active {
   font-family: var(--font-mono);
 }
 
+/* History Dropdown Component (Aktif jika > 4 tanggal) */
+.history-dropdown-wrapper {
+  position: relative;
+  margin-top: 4px;
+}
+
+.history-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.history-dropdown-trigger:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.history-dropdown-trigger.active {
+  background: var(--bg-card);
+  border-color: var(--brand-accent);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-dropdown-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-dropdown-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.history-dropdown-trigger.active .history-dropdown-icon {
+  color: var(--brand-accent);
+}
+
+.history-dropdown-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+
+.history-dropdown-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.history-dropdown-chevron.open {
+  transform: rotate(180deg);
+}
+
+.history-dropdown-menu {
+  display: none;
+  margin-top: 6px;
+  padding: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.history-dropdown-menu.open {
+  display: block;
+}
+
+.history-dropdown-menu-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.history-dropdown-menu-inner::-webkit-scrollbar {
+  width: 4px;
+}
+.history-dropdown-menu-inner::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+.history-dropdown-item {
+  padding: 8px 10px;
+  font-size: 12.5px;
+}
+
 /* Sub-items for Filter Sinyal */
 .nav-subitem {
   display: flex;
