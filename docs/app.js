@@ -668,31 +668,69 @@ function openStockDetail(symbol) {
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
 
-  // Helper Parser Scalping per Timeframe
+  // Helper Parser Scalping per Timeframe (Menampilkan Waktu, Harga, dan Sinyal SELL/BUY)
   function formatScalpPerTf(scalpObj) {
     if (!scalpObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
     const trend = scalpObj.trend || '';
-    if (!trend || trend === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
-    if (trend.includes('BUY') || trend.includes('Green')) {
-      return `<span style="color:var(--status-green); font-weight:700;">${trend}</span>`;
+    const sell = scalpObj.sell;
+    const buy = scalpObj.buy;
+
+    const parts = [];
+    if (trend && trend !== '-') {
+      const isBuy = trend.includes('BUY') || trend.includes('Green');
+      const isSell = trend.includes('SELL') || trend.includes('Red');
+      const trendColor = isBuy ? 'var(--status-green)' : (isSell ? 'var(--status-red)' : 'var(--text-secondary)');
+      parts.push(`<span style="color:${trendColor}; font-weight:700;">Trend: ${trend}</span>`);
     }
-    if (trend.includes('SELL') || trend.includes('Red')) {
-      return `<span style="color:var(--status-red); font-weight:700;">${trend}</span>`;
+
+    if (sell && sell.date) {
+      const priceStr = sell.price ? ` @ Rp ${Number(sell.price).toLocaleString('id-ID')}` : '';
+      parts.push(`<span style="color:var(--status-red); font-weight:600;">SELL: ${sell.date}${priceStr}</span>`);
     }
-    return `<span style="color:var(--text-secondary);">${trend}</span>`;
+
+    if (buy && buy.date) {
+      const priceStr = buy.price ? ` @ Rp ${Number(buy.price).toLocaleString('id-ID')}` : '';
+      const gainStr = buy.gain_pct != null ? ` (${buy.gain_pct >= 0 ? '+' : ''}${buy.gain_pct.toFixed(1)}%)` : '';
+      parts.push(`<span style="color:var(--status-green); font-weight:600;">BUY: ${buy.date}${priceStr}${gainStr}</span>`);
+    }
+
+    return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
 
-  // Helper Parser SMC per Timeframe
-  function formatSmcPerTf(smcObj) {
-    const status = typeof smcObj === 'string' ? smcObj : (smcObj?.status_7d || '-');
-    if (!status || status === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
-    if (status.includes('BREAKOUT')) {
-      return `<span style="color:var(--status-cyan); font-weight:700;">${status}</span>`;
+  // Helper Parser SMC per Timeframe (Menampilkan Level Supply & Demand beserta % dari Harga Sekarang)
+  function formatSmcPerTf(smcObj, curPrice) {
+    if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+    const statusText = typeof smcObj === 'string' ? smcObj : (smcObj.status_7d || '-');
+    if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Area Normal)</span>';
+
+    const sup = typeof smcObj === 'object' && smcObj.supply ? smcObj.supply : null;
+    const dem = typeof smcObj === 'object' && smcObj.demand ? smcObj.demand : null;
+    const pctSup = typeof smcObj === 'object' && smcObj.pct_to_supply != null ? smcObj.pct_to_supply : (sup && curPrice ? ((sup - curPrice) / curPrice * 100) : null);
+    const pctDem = typeof smcObj === 'object' && smcObj.pct_to_demand != null ? smcObj.pct_to_demand : (dem && curPrice ? ((dem - curPrice) / curPrice * 100) : null);
+
+    let statusColor = "var(--text-secondary)";
+    if (statusText.includes("BREAKOUT")) statusColor = "var(--status-cyan)";
+    else if (statusText.includes("DEMAND") || statusText.includes("Pantulan")) statusColor = "var(--status-green)";
+    else if (statusText.includes("BREAKDOWN")) statusColor = "var(--status-red)";
+
+    const parts = [];
+    parts.push(`<div style="color:${statusColor}; font-weight:700;">${statusText}</div>`);
+
+    const levels = [];
+    if (sup) {
+      const supPctStr = pctSup != null ? ` (${pctSup >= 0 ? '+' : ''}${pctSup.toFixed(1)}% dari harga sekarang)` : '';
+      levels.push(`<span style="color:var(--status-cyan); font-weight:600;">Supply: Rp ${Number(sup).toLocaleString('id-ID')}${supPctStr}</span>`);
     }
-    if (status.includes('DEMAND') || status.includes('Pantulan')) {
-      return `<span style="color:var(--status-green); font-weight:600;">${status}</span>`;
+    if (dem) {
+      const demPctStr = pctDem != null ? ` (${pctDem >= 0 ? '+' : ''}${pctDem.toFixed(1)}% dari harga sekarang)` : '';
+      levels.push(`<span style="color:var(--status-green); font-weight:600;">Demand: Rp ${Number(dem).toLocaleString('id-ID')}${demPctStr}</span>`);
     }
-    return `<span style="color:var(--text-secondary); font-size:11.5px;">${status}</span>`;
+
+    if (levels.length > 0) {
+      parts.push(`<div style="font-size:11px; margin-top:3px; line-height:1.45;">${levels.join('<br>')}</div>`);
+    }
+
+    return parts.join('');
   }
 
   // Evaluasi DonAlt EMA Suite
@@ -712,9 +750,9 @@ function openStockDetail(symbol) {
   const isScalpBuy = scalpTrend.includes("BUY") || scalpTrend.includes("Green");
 
   // Evaluasi SMC
-  const smcD = tfD.smc?.status_7d || "-";
-  const smc60 = tf60.smc?.status_7d || "-";
-  const smc15 = tf15.smc?.status_7d || "-";
+  const smcD = tfD.smc || {};
+  const smc60 = tf60.smc || {};
+  const smc15 = tf15.smc || {};
 
   // Evaluasi MACD
   const macdD = tfD.macd || {};
@@ -830,23 +868,37 @@ function openStockDetail(symbol) {
 
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (1D):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smcD)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smcD, stock.close)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (1H):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smc60)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc60, stock.close)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (15M):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smc15)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Area Supply (Resisten):</span>
-              <span class="detail-info-value" style="color:var(--status-cyan);">${smc60.includes('Supply') ? smc60.split('|')[0] : 'Area Pantau'}</span>
+              <span class="detail-info-value" style="color:var(--status-cyan); font-weight:600;">
+                ${(() => {
+                  const s = smc60.supply || smcD.supply || smc15.supply;
+                  if (!s) return 'Area Pantau';
+                  const pct = stock.close ? ((s - stock.close) / stock.close * 100) : null;
+                  return `Rp ${Number(s).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
+                })()}
+              </span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Area Demand (Support):</span>
-              <span class="detail-info-value" style="color:var(--status-green);">${smc60.includes('Demand') ? smc60.split('|')[1] || smc60 : 'Area Pantau'}</span>
+              <span class="detail-info-value" style="color:var(--status-green); font-weight:600;">
+                ${(() => {
+                  const d = smc60.demand || smcD.demand || smc15.demand;
+                  if (!d) return 'Area Pantau';
+                  const pct = stock.close ? ((d - stock.close) / stock.close * 100) : null;
+                  return `Rp ${Number(d).toLocaleString('id-ID')}${pct != null ? ` (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% dari harga sekarang)` : ''}`;
+                })()}
+              </span>
             </div>
           </div>
 

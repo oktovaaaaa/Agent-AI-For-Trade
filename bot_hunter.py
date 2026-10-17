@@ -1037,9 +1037,9 @@ async def scan_stock_rallygood(page, stock_info):
                 "trend": scalping_raw.get('trend')
             }
             
-            # 4. Olah Ultimate SMC Suite (Supply & Demand, Status 7D) untuk Daily (1D) dan 1 Jam (1H)
+            # 4. Olah Ultimate SMC Suite (Supply & Demand, Status 7D) untuk Daily (1D), 1 Jam (1H), dan 15 Menit (15M)
             smc_res = None
-            if tf_code in ['D', '60']:
+            if tf_code in ['D', '60', '15']:
                 smc_res = parse_real_smc_levels(smc_raw, cur_close, recent_bars)
 
             # 5. Olah MACD Divergences (Bull & Bear Divergence - 30 hari terakhir)
@@ -1723,7 +1723,7 @@ async def run_daily_scan(send_wa=True):
             f"Untuk melihat analisa mendalam, chart TradingView interaktif, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
             f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n\n"
             f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
-            f"🤖 _Agent AI For Trade • IDX Algorithmic Automation 24 Jam_"
+            f"🤖 _Dashboard AI Agent for Trade by Oktovaaaaa_"
         )
         kirim_whatsapp(pesan_wa)
     else:
