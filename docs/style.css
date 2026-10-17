@@ -1139,6 +1139,18 @@ body.dark-theme .btn-chart {
   gap: 8px;
 }
 
+.footer-portfolio-link {
+  color: var(--brand-accent);
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-portfolio-link:hover {
+  text-decoration: underline;
+  color: var(--brand-primary);
+}
+
 /* ==========================================================================
    MOBILE & RESPONSIVE BREAKPOINTS
    ========================================================================== */
