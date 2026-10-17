@@ -1233,9 +1233,17 @@ def simpan_database_json(hasil_deteksi, now_wib):
         # 2. SIMPAN RIWAYAT KHUSUS SAHAM 3 DOT GREEN (1 BULAN TERAKHIR / 30 HARI)
         if "vip_3dot_history" not in history or not isinstance(history["vip_3dot_history"], list):
             history["vip_3dot_history"] = []
-            
+
+        # Refresh data harga & indikator saham VVIP yang sudah ada jika ikut ter-scan hari ini
+        stock_lookup = {s["symbol"]: s for s in clean_stocks}
+        for h in history["vip_3dot_history"]:
+            sym = h.get("symbol")
+            if sym in stock_lookup:
+                h["data"] = stock_lookup[sym]
+
+        # Simpan / Perbarui saham 3-Dot Green (1 emiten = 1 card, anti-duplikasi antar hari)
         for s3 in saham_3_dot:
-            idx_exist = next((i for i, h in enumerate(history["vip_3dot_history"]) if h.get("symbol") == s3["symbol"] and h.get("scan_date") == date_key), None)
+            idx_exist = next((i for i, h in enumerate(history["vip_3dot_history"]) if h.get("symbol") == s3["symbol"]), None)
             record_item = {
                 "symbol": s3["symbol"],
                 "scan_date": date_key,

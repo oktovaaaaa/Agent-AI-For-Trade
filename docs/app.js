@@ -243,7 +243,7 @@ function renderDailyView() {
       if (!hasGold) return false;
     }
     if (activeFilter === "smc") {
-      const isBreakout = ['D', '60'].some(tf => {
+      const isBreakout = ['D', '60', '15'].some(tf => {
         const smc = s.timeframes?.[tf]?.smc;
         return smc?.status_7d && smc.status_7d.includes("BREAKOUT");
       });
@@ -258,6 +258,12 @@ function renderDailyView() {
     }
     return true;
   });
+
+  // Sinkronisasi value dropdown urutkan di UI
+  const sortSel = document.getElementById("sortSelector");
+  if (sortSel && sortSel.value !== currentSort) {
+    sortSel.value = currentSort;
+  }
 
   // Sorting
   filtered = sortStocks(filtered);
@@ -293,36 +299,85 @@ function renderVipView() {
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
   document.getElementById("activeTimeDisplay").innerText = "30 Hari";
 
-  updateTopMetrics(vipList.length, "-", "-", "VIP");
+  // Hitung metric top
+  let countGolden = 0;
+  vipList.forEach(item => {
+    const s = item.data || {};
+    const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
+    if (hasGold) countGolden++;
+  });
 
+  updateTopMetrics(vipList.length, "-", countGolden, "VIP");
+
+  // Sinkronisasi value dropdown urutkan di UI
+  const sortSel = document.getElementById("sortSelector");
+  if (sortSel && sortSel.value !== currentSort) {
+    sortSel.value = currentSort;
+  }
+
+  // Update Sidebar Filter Counters
   document.getElementById("countAllFilter").innerText = vipList.length;
   document.getElementById("count3DotFilter").innerText = vipList.length;
   document.getElementById("count2DotFilter").innerText = 0;
 
-  // Filter VIP list
+  // Filter VIP list berdasarkan search query & sinyal aktif
   let filtered = vipList.filter(item => {
-    const s = item.data;
-    if (searchQuery && !s.symbol.includes(searchQuery) && !s.name.includes(searchQuery)) {
+    const s = item.data || {};
+    // 1. Search filter
+    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
       return false;
+    }
+    // 2. Sinyal filter
+    if (activeFilter === "3dot" && s.count_green !== 3) return false;
+    if (activeFilter === "2dot" && s.count_green !== 2) return false;
+    if (activeFilter === "golden") {
+      const hasGold = ['D', '60', '15'].some(tf => s.timeframes?.[tf]?.donalt?.golden);
+      if (!hasGold) return false;
+    }
+    if (activeFilter === "smc") {
+      const isBreakout = ['D', '60', '15'].some(tf => {
+        const smc = s.timeframes?.[tf]?.smc;
+        return smc?.status_7d && smc.status_7d.includes("BREAKOUT");
+      });
+      if (!isBreakout) return false;
+    }
+    if (activeFilter === "scalp") {
+      const isBuy = ['D', '60', '15'].some(tf => {
+        const trend = s.timeframes?.[tf]?.scalping?.trend || "";
+        return trend.includes("BUY") || trend.includes("Green");
+      });
+      if (!isBuy) return false;
     }
     return true;
   });
 
-  // Sort VIP list
-  filtered.sort((a, b) => new Date(b.detected_at || 0) - new Date(a.detected_at || 0));
+  // Sort VIP list sesuai opsi dropdown "Urutkan"
+  filtered = sortVipList(filtered);
 
-  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} saham Full 3-Dot Green`;
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${vipList.length} saham Full 3-Dot Green`;
 
   if (filtered.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+    if (vipList.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <h3>Belum Ada Riwayat VIP 3-Dot Green</h3>
+          <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Dot Green aktif.</p>
         </div>
-        <h3>Belum Ada Riwayat VIP 3-Dot Green</h3>
-        <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Dot Green aktif.</p>
-      </div>
-    `;
+      `;
+    } else {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          </div>
+          <h3>Tidak Ditemukan Saham yang Cocok</h3>
+          <p>Coba gunakan kata kunci lain atau pilih filter sinyal yang berbeda di sidebar kiri.</p>
+        </div>
+      `;
+    }
     return;
   }
 
@@ -338,19 +393,47 @@ function sortStocks(stocks) {
       if ((b.count_green || 0) !== (a.count_green || 0)) {
         return (b.count_green || 0) - (a.count_green || 0);
       }
-      return (b.change || 0) - (a.change || 0);
+      return (Number(b.change) || 0) - (Number(a.change) || 0);
     }
     if (currentSort === "gain_desc") {
-      return (b.change || 0) - (a.change || 0);
+      return (Number(b.change) || 0) - (Number(a.change) || 0);
     }
     if (currentSort === "loss_asc") {
-      return (a.change || 0) - (b.change || 0);
+      return (Number(a.change) || 0) - (Number(b.change) || 0);
     }
     if (currentSort === "vol_desc") {
-      return (b.volume || 0) - (a.volume || 0);
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
     }
     if (currentSort === "sym_asc") {
-      return a.symbol.localeCompare(b.symbol);
+      return (a.symbol || "").localeCompare(b.symbol || "");
+    }
+    return 0;
+  });
+}
+
+// Helper Sorting Logic untuk VVIP 3-Dot (1 Bulan)
+function sortVipList(items) {
+  return [...items].sort((itemA, itemB) => {
+    const a = itemA.data || {};
+    const b = itemB.data || {};
+
+    if (currentSort === "dot_desc") {
+      const dateA = itemA.scan_date || "";
+      const dateB = itemB.scan_date || "";
+      if (dateB !== dateA) return dateB.localeCompare(dateA);
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
+    }
+    if (currentSort === "gain_desc") {
+      return (Number(b.change) || 0) - (Number(a.change) || 0);
+    }
+    if (currentSort === "loss_asc") {
+      return (Number(a.change) || 0) - (Number(b.change) || 0);
+    }
+    if (currentSort === "vol_desc") {
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
+    }
+    if (currentSort === "sym_asc") {
+      return (a.symbol || "").localeCompare(b.symbol || "");
     }
     return 0;
   });
