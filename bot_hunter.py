@@ -1196,6 +1196,9 @@ def simpan_database_json(hasil_deteksi, now_wib):
         saham_1_dot = [s for s in clean_stocks if s["count_green"] == 1]
         saham_0_dot = [s for s in clean_stocks if s["count_green"] == 0]
         
+        # Khusus Website: Simpan saham yang mengonfirmasi 3-Dot & 2-Dot Green
+        saham_web = [s for s in clean_stocks if s.get("count_green", 0) >= 2]
+        
         # Simpan scan hari ini
         history["last_updated"] = now_wib.strftime("%Y-%m-%d %H:%M:%S WIB")
         if "daily_scans" not in history or not isinstance(history["daily_scans"], dict):
@@ -1206,13 +1209,13 @@ def simpan_database_json(hasil_deteksi, now_wib):
             "date_display": tgl_id,
             "time_display": now_wib.strftime("%H:%M WIB"),
             "summary": {
-                "total_screener": len(clean_stocks),
+                "total_screener": len(saham_web),
                 "count_3_dot": len(saham_3_dot),
                 "count_2_dot": len(saham_2_dot),
                 "count_1_dot": len(saham_1_dot),
                 "count_0_dot": len(saham_0_dot)
             },
-            "stocks": clean_stocks
+            "stocks": saham_web
         }
         
         # PANGKAS DATABASE AGAR MAKSIMAL 30 HARI / 1 BULAN BERGULIR
@@ -1665,108 +1668,56 @@ async def run_daily_scan(send_wa=True):
             f"━━━━━━━━━━━━━━━━━━━━\n"
         )
         
-        has_multi_tf = bool(saham_3_dot or saham_2_dot)
-        
-        if not has_multi_tf:
+        if not saham_3_dot:
             pesan_wa += (
-                f"\nℹ️ *TIDAK ADA SAHAM MINIMAL 2 TIMEFRAME*\n"
-                f"Malam ini belum ada saham yang mengonfirmasi sinyal Dot Green di minimal 2 timeframe.\n"
+                f"\nℹ️ *TIDAK ADA SAHAM 3 TIMEFRAME (3-DOT)*\n"
+                f"Hasil scan malam ini belum ada saham yang mengonfirmasi 3 Timeframe sekaligus.\n"
+                f"*(Saham dengan 2 Timeframe dapat dipantau langsung di Website)*\n"
             )
         else:
-            # 1. KELOMPOK 3 TIMEFRAME (PRIORITAS UTAMA)
-            if saham_3_dot:
+            pesan_wa += (
+                f"\n━━━━━━━━━━━━━━━━━━━━\n"
+                f"🔥 *DOT GREEN 3 TIMEFRAME (VVIP)*\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n"
+                f"🟢 *ANALISA SAHAM INI !!!* 🟢\n\n"
+            )
+            for idx, item in enumerate(saham_3_dot, 1):
+                st = item["stock"]
+                tf = item["timeframes"]
+                gain_str = format_gain_header(tf)
+                gain_line = f"{gain_str.strip()}\n" if gain_str else ""
+                donalt_line = format_donalt_wa(tf)
+                scalp_line = format_scalping_wa(tf)
+                smc_1d = tf.get('D', {}).get('smc')
+                smc_1h = tf.get('60', {}).get('smc')
+                smc_line = format_smc_wa(smc_1d, smc_1h)
+                macd_line = format_macd_wa(tf)
                 pesan_wa += (
-                    f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔥 *DOT GREEN 3 TIMEFRAME*\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🟢 *ANALISA SAHAM INI !!!* 🟢\n\n"
+                    f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
+                    f"{gain_line}"
+                    f"📊 Volume: {st['volume']:,.0f} lembar\n"
+                    f"• Daily (1D)  : {tf['D']['date']}\n"
+                    f"• 1 Jam (1H)  : {tf['60']['date']}\n"
+                    f"• 15 Mnt (15M): {tf['15']['date']}\n"
+                    f"{donalt_line}"
+                    f"{scalp_line}"
+                    f"{smc_line}"
+                    f"{macd_line}"
                 )
-                for idx, item in enumerate(saham_3_dot, 1):
-                    st = item["stock"]
-                    tf = item["timeframes"]
-                    gain_str = format_gain_header(tf)
-                    gain_line = f"{gain_str.strip()}\n" if gain_str else ""
-                    donalt_line = format_donalt_wa(tf)
-                    scalp_line = format_scalping_wa(tf)
-                    smc_1d = tf.get('D', {}).get('smc')
-                    smc_1h = tf.get('60', {}).get('smc')
-                    smc_line = format_smc_wa(smc_1d, smc_1h)
-                    macd_line = format_macd_wa(tf)
-                    pesan_wa += (
-                        f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
-                        f"{gain_line}"
-                        f"📊 Volume: {st['volume']:,.0f} lembar\n"
-                        f"• Daily (1D)  : {tf['D']['date']}\n"
-                        f"• 1 Jam (1H)  : {tf['60']['date']}\n"
-                        f"• 15 Mnt (15M): {tf['15']['date']}\n"
-                        f"{donalt_line}"
-                        f"{scalp_line}"
-                        f"{smc_line}"
-                        f"{macd_line}"
-                    )
-                    if idx < len(saham_3_dot):
-                        pesan_wa += "───────────────────\n"
-            else:
-                pesan_wa += (
-                    f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🔥 *DOT GREEN 3 TIMEFRAME*\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"_Tidak ada saham dengan 3 Dot Green malam ini._\n"
-                )
-                
-            # 2. KELOMPOK 2 TIMEFRAME (RADAR POTENSIAL)
-            if saham_2_dot:
-                pesan_wa += (
-                    f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⚡ *DOT GREEN 2 TIMEFRAME*\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"🟡 *PANTAU SAHAM INI !!!* 🟡\n\n"
-                )
-                for idx, item in enumerate(saham_2_dot, 1):
-                    st = item["stock"]
-                    tf = item["timeframes"]
-                    gain_str = format_gain_header(tf)
-                    gain_line = f"{gain_str.strip()}\n" if gain_str else ""
-                    donalt_line = format_donalt_wa(tf)
-                    scalp_line = format_scalping_wa(tf)
-                    smc_1d = tf.get('D', {}).get('smc')
-                    smc_1h = tf.get('60', {}).get('smc')
-                    smc_line = format_smc_wa(smc_1d, smc_1h)
-                    macd_line = format_macd_wa(tf)
-                    pesan_wa += (
-                        f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
-                        f"{gain_line}"
-                        f"📊 Volume: {st['volume']:,.0f} lembar\n"
-                    )
-                    if tf.get('D', {}).get('status'):
-                        pesan_wa += f"• Daily (1D)  : {tf['D']['date']}\n"
-                    if tf.get('60', {}).get('status'):
-                        pesan_wa += f"• 1 Jam (1H)  : {tf['60']['date']}\n"
-                    if tf.get('15', {}).get('status'):
-                        pesan_wa += f"• 15 Mnt (15M): {tf['15']['date']}\n"
-                    pesan_wa += f"{donalt_line}"
-                    pesan_wa += f"{scalp_line}"
-                    pesan_wa += f"{smc_line}"
-                    pesan_wa += f"{macd_line}"
-                    if idx < len(saham_2_dot):
-                        pesan_wa += "───────────────────\n"
-            else:
-                pesan_wa += (
-                    f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                    f"⚡ *DOT GREEN 2 TIMEFRAME*\n"
-                    f"━━━━━━━━━━━━━━━━━━━━\n"
-                    f"_Tidak ada saham dengan 2 Dot Green malam ini._\n"
-                )
+                if idx < len(saham_3_dot):
+                    pesan_wa += "───────────────────\n"
 
         pesan_wa += (
             f"\n━━━━━━━━━━━━━━━━━━━━\n"
             f"📈 *REKAPITULASI PEMINDAIAN*:\n"
             f"• Total Saham Screener : {len(hasil_deteksi)} Saham\n"
-            f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (Prioritas)\n"
-            f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Potensial)\n"
-            f"• ⚪ 1 Timeframe Saja  : {len(saham_1_dot)} Saham (Diabaikan)\n"
-            f"• ⚪ 0 Timeframe       : {len(saham_0_dot)} Saham (Netral)\n\n"
-            f"🌐 _Bot Agent Okto 24 Jam Otomatis_"
+            f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (Dikirim ke WA)\n"
+            f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Tersedia di Web)\n"
+            f"• ⚪ 1 Timeframe Saja  : {len(saham_1_dot)} Saham\n"
+            f"• ⚪ 0 Timeframe       : {len(saham_0_dot)} Saham\n\n"
+            f"🌐 *Web Screener*: https://oktovaaaaa.github.io/Agent-AI-ForTrade/\n"
+            f"_(Daftar saham 3-Dot & 2-Dot lengkap tersimpan di website)_\n\n"
+            f"🤖 _Bot Agent Okto 24 Jam Otomatis_"
         )
         kirim_whatsapp(pesan_wa)
     else:

@@ -166,10 +166,10 @@ function renderDailyView() {
   document.getElementById("pageMainHeading").innerText = "Screener ARA Hunter";
   document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
 
-  if (!scanData || !scanData.stocks || scanData.stocks.length === 0) {
+  if (!scanData) {
     document.getElementById("activeDateDisplay").innerText = "Standby Scan Rutin";
     document.getElementById("activeTimeDisplay").innerText = "16:21 WIB";
-    document.getElementById("filterResultCount").innerText = "Menunggu data scan jam 16:21 WIB";
+    document.getElementById("filterResultCount").innerText = "Menunggu data scan";
     grid.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">
@@ -177,7 +177,26 @@ function renderDailyView() {
         </div>
         <h3>Menunggu Jadwal Scan Saham Jam 16:21 WIB</h3>
         <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
-          Database telah dikosongkan. Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:21 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
+          Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:21 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
+        </p>
+      </div>
+    `;
+    updateTopMetrics(0, 0, 0, 0);
+    return;
+  }
+
+  if (!scanData.stocks || scanData.stocks.length === 0) {
+    document.getElementById("activeDateDisplay").innerText = scanData.date_display || selectedDate;
+    document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:21 WIB";
+    document.getElementById("filterResultCount").innerText = "0 saham terkonfirmasi";
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <h3>Belum Ada Saham Minimal 2-Dot Green Hari Ini</h3>
+        <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
+          Scan tanggal ini telah selesai diproses. Belum ditemukan saham yang mengonfirmasi minimal 2 Timeframe Dot Green sekaligus.
         </p>
       </div>
     `;
