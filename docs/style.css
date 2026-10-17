@@ -151,7 +151,11 @@ body {
   top: 0;
   bottom: 0;
   left: 0;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   z-index: 100;
+  overflow: hidden;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -159,8 +163,9 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 24px 20px;
+  padding: 22px 20px;
   border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
 }
 
 .brand-logo-icon {
@@ -212,26 +217,51 @@ body.dark-theme .brand-logo-icon {
   font-weight: 600;
   letter-spacing: 0.5px;
   color: var(--text-muted);
-  text-transform: uppercase;
+}
+
+.brand-link {
+  text-transform: none;
+  text-decoration: none;
+  display: inline-block;
+  transition: color var(--transition);
+  cursor: pointer;
+}
+
+.brand-link:hover {
+  color: var(--brand-accent);
+  text-decoration: underline;
 }
 
 /* Scrollable Navigation */
 .sidebar-nav-container {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
-  padding: 16px 14px;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+  padding: 16px 14px 40px 14px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-light) transparent;
 }
 
 /* Custom Scrollbar for Sidebar */
 .sidebar-nav-container::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
+}
+.sidebar-nav-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 .sidebar-nav-container::-webkit-scrollbar-thumb {
   background: var(--border-light);
   border-radius: 4px;
+}
+.sidebar-nav-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 .nav-group-title {
@@ -542,8 +572,8 @@ body.dark-theme .nav-subitem.active {
 
 /* Sidebar WhatsApp Community Card */
 .sidebar-community-group {
-  margin-top: auto;
-  padding-top: 10px;
+  margin-top: 10px;
+  padding-top: 0;
 }
 
 .sidebar-wa-card {
@@ -1351,6 +1381,21 @@ body.dark-theme .btn-chart {
   transform: translateY(-1px);
 }
 
+/* Rekomendasi Aranter Badge & Score Pill */
+.rec-score-pill {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
 /* Empty State & Skeletons */
 .empty-state {
   grid-column: 1 / -1;
@@ -1533,18 +1578,39 @@ body.dark-theme .btn-chart {
     width: 290px !important;
     max-width: 85vw !important;
     height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     background-color: var(--bg-sidebar) !important;
     z-index: 1000 !important;
     transform: translateX(-100%) !important;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease !important;
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.45) !important;
     visibility: hidden;
-    overflow-y: auto;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .sidebar.open {
     transform: translateX(0) !important;
     visibility: visible !important;
+  }
+
+  .sidebar-nav-container {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    touch-action: pan-y !important;
+    padding: 14px 14px 60px 14px !important;
+  }
+
+  .sidebar-community-group {
+    margin-top: 10px !important;
+    padding-top: 0 !important;
+    padding-bottom: 24px !important;
   }
 
   .sidebar-close-btn {
@@ -1628,9 +1694,77 @@ body.dark-theme .btn-chart {
     padding: 16px;
   }
 
+  /* Mobile: Single Unified Summary Card for All 4 Metrics */
   .metrics-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0 !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-card) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-card) !important;
+    overflow: hidden !important;
+    margin-bottom: 16px !important;
+  }
+
+  .metric-card {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 10px 12px !important;
+    min-height: auto !important;
+  }
+
+  .metric-card:nth-child(1),
+  .metric-card:nth-child(3) {
+    border-right: 1px solid var(--border-light) !important;
+  }
+
+  .metric-card:nth-child(1),
+  .metric-card:nth-child(2) {
+    border-bottom: 1px solid var(--border-light) !important;
+  }
+
+  .metric-top {
+    margin-bottom: 4px !important;
+  }
+
+  .metric-tag {
+    font-size: 9px !important;
+    padding: 2px 6px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .metric-icon svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+
+  .metric-number {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    margin-bottom: 2px !important;
+    line-height: 1.15 !important;
+  }
+
+  .metric-meta {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .metric-title {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .metric-detail {
+    display: none !important;
   }
 
   .stocks-grid-container {

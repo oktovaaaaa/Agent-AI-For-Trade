@@ -13,7 +13,7 @@ let appData = {
   vip_3dot_history: []
 };
 
-let currentMode = "daily"; // 'daily' | 'vip'
+let currentMode = "daily"; // 'daily' | 'vip' | 'recommendation'
 let selectedDate = null;
 let searchQuery = "";
 let activeFilter = "all"; // 'all' | '3dot' | '2dot' | 'golden' | 'smc' | 'scalp'
@@ -40,6 +40,9 @@ async function loadDatabase() {
     // Update VIP badge count
     const vipCount = (appData.vip_3dot_history || []).length;
     document.getElementById("vipNavCount").innerText = vipCount;
+
+    // Update Rekomendasi Aranter badge count
+    updateRecommendationCount();
 
     // Pilih tanggal terbaru secara default yang memiliki data saham
     const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
@@ -221,6 +224,8 @@ function selectHistoryDate(dateKey) {
   // Update state tombol menu utama
   document.getElementById("menuDailyBtn").classList.add("active");
   document.getElementById("menuVipBtn").classList.remove("active");
+  const recBtn = document.getElementById("menuRecBtn");
+  if (recBtn) recBtn.classList.remove("active");
   
   closeHistoryDropdown();
   renderSidebarHistory();
@@ -228,11 +233,20 @@ function selectHistoryDate(dateKey) {
   toggleSidebar(false); // Close sidebar on mobile
 }
 
-// Handler Ganti Mode Utama (Daily vs VIP 3-Dot)
+// Handler Ganti Mode Utama (Daily vs Rekomendasi Aranter vs VIP 3-Dot)
 function switchMainMode(mode) {
   currentMode = mode;
   document.getElementById("menuDailyBtn").classList.toggle("active", mode === "daily");
   document.getElementById("menuVipBtn").classList.toggle("active", mode === "vip");
+  const recBtn = document.getElementById("menuRecBtn");
+  if (recBtn) recBtn.classList.toggle("active", mode === "recommendation");
+
+  // Jika masuk ke Rekomendasi Aranter, prioritaskan urutkan Skor Rekomendasi (Tertinggi)
+  if (mode === "recommendation" && currentSort !== "score_desc") {
+    currentSort = "score_desc";
+    const sortSel = document.getElementById("sortSelector");
+    if (sortSel) sortSel.value = "score_desc";
+  }
   
   renderSidebarHistory();
   renderMainView();
@@ -272,6 +286,8 @@ function handleSortChange(sortVal) {
 function renderMainView() {
   if (currentMode === "daily") {
     renderDailyView();
+  } else if (currentMode === "recommendation") {
+    renderRecommendationView();
   } else {
     renderVipView();
   }
@@ -316,13 +332,315 @@ function checkHasScalpBuy(s, isVipMode = false) {
   });
 }
 
+// Helper Ekstraksi Informasi Breakout (Tipe, Harga, dan Timeframe)
+function extractBreakoutInfo(smcObj, tfName = "") {
+  if (!smcObj) return null;
+  const st = typeof smcObj === 'string' ? smcObj : (smcObj.status_7d || '');
+  if (!st) return null;
+
+  // 1. Cek BOS (Break of Structure)
+  const matchBos = st.match(/BOS:\s*(Rp\s*[\d\.,]+)(?:\s+tgl\s+([^)]+))?/i);
+  if (matchBos) {
+    return {
+      type: "BOS",
+      tf: tfName,
+      price: matchBos[1].trim(),
+      date: matchBos[2] ? matchBos[2].trim() : "",
+      label: `Breakout BOS (${tfName}) @ ${matchBos[1].trim()}`
+    };
+  }
+
+  // 2. Cek CHoCH (Change of Character)
+  const matchChoch = st.match(/CHoCH:\s*(Rp\s*[\d\.,]+)(?:\s+tgl\s+([^)]+))?/i);
+  if (matchChoch) {
+    return {
+      type: "CHoCH",
+      tf: tfName,
+      price: matchChoch[1].trim(),
+      date: matchChoch[2] ? matchChoch[2].trim() : "",
+      label: `Breakout CHoCH (${tfName}) @ ${matchChoch[1].trim()}`
+    };
+  }
+
+  // 3. Cek BREAKOUT SUPPLY (Menembus Rp ...)
+  const matchBreakout = st.match(/BREAKOUT\s+SUPPLY\s*\(Menembus\s*(Rp\s*[\d\.,]+)\)/i);
+  if (matchBreakout) {
+    return {
+      type: "Breakout Supply",
+      tf: tfName,
+      price: matchBreakout[1].trim(),
+      date: "",
+      label: `Breakout Supply (${tfName}) @ ${matchBreakout[1].trim()}`
+    };
+  }
+
+  // 4. Cek jika status BREAKOUT umum dengan level supply
+  if (st.includes("BREAKOUT") && smcObj.supply) {
+    const pStr = `Rp ${Number(smcObj.supply).toLocaleString('id-ID')}`;
+    return {
+      type: "Breakout Supply",
+      tf: tfName,
+      price: pStr,
+      date: "",
+      label: `Breakout Supply (${tfName}) @ ${pStr}`
+    };
+  }
+
+  // 5. Cek Menguji Area Supply
+  if (st.includes("Menguji Area Supply") && smcObj.supply) {
+    const pStr = `Rp ${Math.round(smcObj.supply).toLocaleString('id-ID')}`;
+    return {
+      type: "Uji Resisten",
+      tf: tfName,
+      price: pStr,
+      date: "",
+      label: `Uji Supply (${tfName}) @ ${pStr}`
+    };
+  }
+
+  return null;
+}
+
+// ============================================================================
+// REKOMENDASI ARANTER ENGINE & HELPERS (5 KONFLUENSI INDIKATOR)
+// ============================================================================
+
+// Kamus Bulan Bahasa Indonesia
+const INDO_MONTHS = {
+  'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'Mei': 4, 'Jun': 5,
+  'Jul': 6, 'Agu': 7, 'Sep': 8, 'Okt': 9, 'Nov': 10, 'Des': 11
+};
+
+// Parser Tanggal Fleksibel (Mendukung format Indonesia '16 Okt 2026' & ISO '2026-10-16')
+function parseIndoDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return null;
+  const m = dateStr.match(/(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/);
+  if (m) {
+    const d = parseInt(m[1], 10);
+    const mon = INDO_MONTHS[m[2]] != null ? INDO_MONTHS[m[2]] : 9;
+    const y = parseInt(m[3], 10);
+    return new Date(y, mon, d);
+  }
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return new Date(dateStr);
+  return null;
+}
+
+// Helper: Cek Harga di Sekitar atau Condong ke Demand / Support
+function checkIsNearOrLeaningDemand(s) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => {
+    const smc = s.timeframes[tf]?.smc;
+    if (!smc) return false;
+    const st = smc.status_7d || "";
+    // 1. Status eksplisit area demand, pantulan, atau support
+    if (st.includes("Demand") || st.includes("Pantulan") || st.includes("Support")) return true;
+    
+    // 2. Condong ke demand daripada supply
+    const pDem = smc.pct_to_demand;
+    const pSup = smc.pct_to_supply;
+    if (pDem != null && pSup != null && Math.abs(pDem) <= Math.abs(pSup)) return true;
+    
+    // 3. Jarak ke demand relatif dekat (<= 15%)
+    if (pDem != null && Math.abs(pDem) <= 15) return true;
+    
+    return false;
+  });
+}
+
+// Helper: Cek Sinyal Swing atau Scalping Minimal 1 BUY
+function checkHasScalpSwingBuy(s) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => {
+    const sc = s.timeframes[tf]?.scalping;
+    if (!sc) return false;
+    const trend = sc.trend || "";
+    const isTrendBuy = trend.includes("BUY") || trend.includes("Green");
+    const hasAnyBuy = sc.buy != null && Boolean(sc.buy.date || sc.buy.price);
+    return isTrendBuy || hasAnyBuy;
+  });
+}
+
+// Helper: Cek MACD Divergences Minimal 1 BUY (Bullish Divergence)
+function checkHasMacdBuy(s) {
+  if (!s || !s.timeframes) return false;
+  return ['D', '60', '15'].some(tf => {
+    const mb = s.timeframes[tf]?.macd?.bull;
+    return mb != null && Boolean(mb.date || mb.price);
+  });
+}
+
+// Helper: Hitung Skor Rekomendasi Aranter & Prioritas Kebaruan Indikator (Recency Score)
+function calculateAranterScore(s, refDate) {
+  const tf = s.timeframes || {};
+  const indicatorDates = {};
+
+  // 1. Golden Cross
+  let latestGolden = null;
+  ['D', '60', '15'].forEach(tfKey => {
+    const dStr = tf[tfKey]?.donalt?.golden?.date;
+    const d = parseIndoDate(dStr);
+    if (d && (!latestGolden || d > latestGolden)) latestGolden = d;
+  });
+  if (latestGolden) indicatorDates.golden = latestGolden;
+
+  // 2. Dot Green
+  let latestDot = null;
+  ['D', '60', '15'].forEach(tfKey => {
+    const dStr = tf[tfKey]?.date;
+    const d = parseIndoDate(dStr);
+    if (d && (!latestDot || d > latestDot)) latestDot = d;
+  });
+  if (latestDot) indicatorDates.dot = latestDot;
+
+  // 3. Scalping / Swing BUY
+  let latestScalp = null;
+  ['D', '60', '15'].forEach(tfKey => {
+    const dStr = tf[tfKey]?.scalping?.buy?.date;
+    const d = parseIndoDate(dStr);
+    if (d && (!latestScalp || d > latestScalp)) latestScalp = d;
+  });
+  if (latestScalp) indicatorDates.scalp = latestScalp;
+
+  // 4. MACD Bull Divergence
+  let latestMacd = null;
+  ['D', '60', '15'].forEach(tfKey => {
+    const dStr = tf[tfKey]?.macd?.bull?.date;
+    const d = parseIndoDate(dStr);
+    if (d && (!latestMacd || d > latestMacd)) latestMacd = d;
+  });
+  if (latestMacd) indicatorDates.macd = latestMacd;
+
+  const validDates = Object.values(indicatorDates);
+  const maxDate = validDates.length ? new Date(Math.max(...validDates.map(d => d.getTime()))) : refDate;
+  const avgDateMs = validDates.length ? (validDates.reduce((a, b) => a + b.getTime(), 0) / validDates.length) : refDate.getTime();
+  const avgDate = new Date(avgDateMs);
+
+  const daysAgoLatest = Math.max(0, (refDate.getTime() - maxDate.getTime()) / (1000 * 3600 * 24));
+  const daysAgoAvg = Math.max(0, (refDate.getTime() - avgDate.getTime()) / (1000 * 3600 * 24));
+
+  // Penilaian Kebaruan Sinyal (Recency):
+  // Dasar nilai 100, terdepresiasi -2.5 per hari untuk sinyal paling baru & -1.5 per hari rata-rata sinyal
+  let score = 100 - (daysAgoLatest * 2.5 + daysAgoAvg * 1.5);
+
+  // Bonus konfluensi BOS / CHoCH Breakout
+  let hasBOS = false;
+  ['D', '60', '15'].forEach(tfKey => {
+    const st = tf[tfKey]?.smc?.status_7d || "";
+    if (st.includes("BOS") || st.includes("CHoCH") || st.includes("BREAKOUT")) hasBOS = true;
+  });
+  if (hasBOS) score += 3;
+
+  // Bonus harga sangat dekat demand (<= 5%)
+  let isVeryCloseDemand = false;
+  ['D', '60', '15'].forEach(tfKey => {
+    const pDem = tf[tfKey]?.smc?.pct_to_demand;
+    if (pDem != null && Math.abs(pDem) <= 5) isVeryCloseDemand = true;
+  });
+  if (isVeryCloseDemand) score += 2;
+
+  const finalScore = Math.min(99, Math.max(40, Math.round(score)));
+  const latestDateFormatted = maxDate.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+
+  return {
+    score: finalScore,
+    latestDate: maxDate,
+    latestDateStr: latestDateFormatted,
+    daysAgoLatest: Math.round(daysAgoLatest),
+    dates: {
+      golden: latestGolden ? latestGolden.toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "-",
+      dot: latestDot ? latestDot.toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "-",
+      scalp: latestScalp ? latestScalp.toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "-",
+      macd: latestMacd ? latestMacd.toLocaleDateString("id-ID", { day: "numeric", month: "short" }) : "-"
+    }
+  };
+}
+
+// Helper: Mengambil Seluruh Saham 30 Hari yang Memenuhi Kriteria Rekomendasi Aranter
+function getAranterRecommendations() {
+  let refDate = new Date();
+  if (appData.daily_scans) {
+    const dates = Object.keys(appData.daily_scans).sort();
+    if (dates.length > 0) {
+      const d = parseIndoDate(dates[dates.length - 1]);
+      if (d) refDate = d;
+    }
+  }
+
+  const poolMap = new Map();
+
+  // 1. Kumpulkan dari vip_3dot_history (arsip 30 hari)
+  (appData.vip_3dot_history || []).forEach(item => {
+    const stock = item.data || item;
+    if (stock && stock.symbol && !poolMap.has(stock.symbol)) {
+      poolMap.set(stock.symbol, {
+        stock: stock,
+        scan_date: item.scan_date,
+        scan_date_display: item.scan_date_display
+      });
+    }
+  });
+
+  // 2. Kumpulkan dari daily_scans (30 hari terakhir)
+  Object.entries(appData.daily_scans || {}).forEach(([dateKey, scanObj]) => {
+    (scanObj.stocks || []).forEach(stock => {
+      if (stock.count_green === 3 && !poolMap.has(stock.symbol)) {
+        poolMap.set(stock.symbol, {
+          stock: stock,
+          scan_date: dateKey,
+          scan_date_display: scanObj.date_display || dateKey
+        });
+      }
+    });
+  });
+
+  const list = [];
+  for (const [sym, entry] of poolMap.entries()) {
+    const s = entry.stock;
+    // 5 Filter Konfluensi Aranter:
+    // 1. 3 Dot Green
+    if (s.count_green !== 3) continue;
+    // 2. Minimal 1 Golden Cross
+    if (!checkHasGolden(s)) continue;
+    // 3. Harga sekitaran / condong ke demand atau support
+    if (!checkIsNearOrLeaningDemand(s)) continue;
+    // 4. Swing atau Scalping minimal 1 BUY
+    if (!checkHasScalpSwingBuy(s)) continue;
+    // 5. MACD Divergences minimal 1 BUY (Bullish Div)
+    if (!checkHasMacdBuy(s)) continue;
+
+    const scoring = calculateAranterScore(s, refDate);
+    s.aranterScore = scoring.score;
+    s.aranterMetadata = scoring;
+
+    list.push({
+      symbol: s.symbol,
+      data: s,
+      scan_date: entry.scan_date,
+      scan_date_display: entry.scan_date_display,
+      aranterScore: scoring.score,
+      aranterMetadata: scoring
+    });
+  }
+
+  // Sort descending berdasarkan skor (indikator paling baru muncul di urutan paling atas)
+  list.sort((a, b) => b.aranterScore - a.aranterScore);
+  return list;
+}
+
+// Helper: Update Badge Counter di Sidebar Menu Rekomendasi Aranter
+function updateRecommendationCount() {
+  const count = getAranterRecommendations().length;
+  const el = document.getElementById("recNavCount");
+  if (el) el.innerText = count;
+}
+
 // Render Daily Mode (Data Harian)
 function renderDailyView() {
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
 
   document.getElementById("pageMainHeading").innerText = "Screener ARA Hunter";
-  document.getElementById("pageSubHeading").innerText = "Daftar saham yang lolos screener volume dan indikator teknikal";
+  document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
 
   if (!scanData) {
     document.getElementById("activeDateDisplay").innerText = "Standby Scan Rutin";
@@ -446,7 +764,7 @@ function renderVipView() {
   const vipList = appData.vip_3dot_history || [];
 
   document.getElementById("pageMainHeading").innerText = "VVIP 3-Dot Green (Riwayat 1 Bulan)";
-  document.getElementById("pageSubHeading").innerText = "Arsip khusus saham yang berhasil mengonfirmasi 3 Timeframe (Daily + 1H + 15M) dalam 30 hari terakhir";
+  document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
 
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
   document.getElementById("activeTimeDisplay").innerText = "30 Hari";
@@ -532,9 +850,108 @@ function renderVipView() {
   }).join("");
 }
 
+// Render Rekomendasi Aranter View (5 Konfluensi Indikator)
+function renderRecommendationView() {
+  const grid = document.getElementById("stocksGrid");
+  const recList = getAranterRecommendations();
+
+  document.getElementById("pageMainHeading").innerText = "Rekomendasi Aranter (5 Konfluensi Indikator)";
+  document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
+
+  document.getElementById("activeDateDisplay").innerText = "Rekomendasi Aranter";
+  document.getElementById("activeTimeDisplay").innerText = "30 Hari Terakhir";
+
+  // Hitung metric top & sidebar
+  let countGolden = 0;
+  let countSmc = 0;
+  let countScalp = 0;
+  recList.forEach(item => {
+    const s = item.data || {};
+    if (checkHasGolden(s)) countGolden++;
+    if (checkHasSmcBreakout(s)) countSmc++;
+    if (checkHasScalpBuy(s, true)) countScalp++;
+  });
+
+  updateTopMetrics(recList.length, "5 Sinyal", countGolden, "ARANTER", true);
+
+  // Sinkronisasi value dropdown urutkan di UI
+  const sortSel = document.getElementById("sortSelector");
+  if (sortSel && sortSel.value !== currentSort) {
+    sortSel.value = currentSort;
+  }
+
+  // Update Sidebar Filter Counters
+  document.getElementById("countAllFilter").innerText = recList.length;
+  document.getElementById("count3DotFilter").innerText = recList.length;
+  document.getElementById("count2DotFilter").innerText = 0;
+  const countGoldEl = document.getElementById("countGoldenFilter");
+  if (countGoldEl) countGoldEl.innerText = countGolden;
+  const countSmcEl = document.getElementById("countSmcFilter");
+  if (countSmcEl) countSmcEl.innerText = countSmc;
+  const countScalpEl = document.getElementById("countScalpFilter");
+  if (countScalpEl) countScalpEl.innerText = countScalp;
+
+  // Filter rekomendasi berdasarkan search query & sinyal aktif
+  let filtered = recList.filter(item => {
+    const s = item.data || {};
+    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
+      return false;
+    }
+    if (activeFilter === "3dot" && s.count_green !== 3) return false;
+    if (activeFilter === "2dot" && s.count_green !== 2) return false;
+    if (activeFilter === "golden" && !checkHasGolden(s)) return false;
+    if (activeFilter === "smc" && !checkHasSmcBreakout(s)) return false;
+    if (activeFilter === "scalp" && !checkHasScalpBuy(s, true)) return false;
+    return true;
+  });
+
+  // Sort sesuai opsi dropdown
+  filtered = sortRecommendationList(filtered);
+
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${recList.length} saham Rekomendasi Aranter`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        </div>
+        <h3>Tidak Ditemukan Saham yang Cocok</h3>
+        <p>Coba gunakan kata kunci lain atau pilih filter sinyal yang berbeda di sidebar kiri.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Banner Informatif Konfluensi Aranter
+  const bannerHtml = `
+    <div class="breakout-banner-box" style="grid-column: 1 / -1; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 95, 70, 0.05)); border: 1px solid rgba(16, 185, 129, 0.35);">
+      <div class="breakout-banner-header" style="color:var(--brand-accent);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>STANDAR EMAS REKOMENDASI ARANTER</span>
+      </div>
+      <div class="breakout-banner-sub">
+        Memenuhi <b>Rally Good 3-Dot</b>, <b>Golden Cross</b>, <b>Area Demand</b>, <b>Swing/Scalping</b>, dan <b>Sinyal Bull</b>.
+      </div>
+    </div>
+  `;
+
+  const cardsHtml = filtered.map(item => {
+    return createStockCardHTML(item.data, item.scan_date_display);
+  }).join("");
+
+  grid.innerHTML = bannerHtml + cardsHtml;
+}
+
 // Helper Sorting Logic
 function sortStocks(stocks) {
   return [...stocks].sort((a, b) => {
+    if (currentSort === "score_desc") {
+      const scoreA = a.aranterScore || 0;
+      const scoreB = b.aranterScore || 0;
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return (Number(b.change) || 0) - (Number(a.change) || 0);
+    }
     if (currentSort === "dot_desc") {
       if ((b.count_green || 0) !== (a.count_green || 0)) {
         return (b.count_green || 0) - (a.count_green || 0);
@@ -563,6 +980,12 @@ function sortVipList(items) {
     const a = itemA.data || {};
     const b = itemB.data || {};
 
+    if (currentSort === "score_desc") {
+      const scoreA = itemA.aranterScore || a.aranterScore || 0;
+      const scoreB = itemB.aranterScore || b.aranterScore || 0;
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
+    }
     if (currentSort === "dot_desc") {
       const dateA = itemA.scan_date || "";
       const dateB = itemB.scan_date || "";
@@ -585,12 +1008,44 @@ function sortVipList(items) {
   });
 }
 
+// Helper Sorting Logic Khusus Rekomendasi Aranter
+function sortRecommendationList(items) {
+  return [...items].sort((itemA, itemB) => {
+    const a = itemA.data || itemA;
+    const b = itemB.data || itemB;
+
+    if (currentSort === "score_desc") {
+      const scoreA = itemA.aranterScore || a.aranterScore || 0;
+      const scoreB = itemB.aranterScore || b.aranterScore || 0;
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
+    }
+    if (currentSort === "gain_desc") {
+      return (Number(b.change) || 0) - (Number(a.change) || 0);
+    }
+    if (currentSort === "loss_asc") {
+      return (Number(a.change) || 0) - (Number(b.change) || 0);
+    }
+    if (currentSort === "vol_desc") {
+      return (Number(b.volume) || 0) - (Number(a.volume) || 0);
+    }
+    if (currentSort === "sym_asc") {
+      return (a.symbol || "").localeCompare(b.symbol || "");
+    }
+    return (itemB.aranterScore || b.aranterScore || 0) - (itemA.aranterScore || a.aranterScore || 0);
+  });
+}
+
 // Helper: Update Top Metric Cards
-function updateTopMetrics(vipCount, potCount, goldenCount, totalCount) {
+function updateTopMetrics(vipCount, potCount, goldenCount, totalCount, hideTotalMeta = false) {
   document.getElementById("statVipCount").innerText = vipCount;
   document.getElementById("statPotCount").innerText = potCount;
   document.getElementById("statGoldenCount").innerText = goldenCount;
   document.getElementById("statTotalCount").innerText = totalCount;
+  const metaEl = document.getElementById("statTotalMeta");
+  if (metaEl) {
+    metaEl.style.display = hideTotalMeta ? "none" : "";
+  }
 }
 
 // Helper: Generate HTML for Minimalist Stock Card
@@ -659,44 +1114,96 @@ function createStockCardHTML(stock, vipDateLabel = null) {
     donaltChip = `<span class="badge-chip chip-death">Death Cross</span>`;
   }
 
-  // Sinyal SMC (Smart Money Concepts) & Timeframe
+  // Sinyal SMC & Deteksi Breakout (Harga & Timeframe)
   let smcTfLabel = "1D";
   let smcStatus = tfD.smc?.status_7d || "";
-  if (!smcStatus && tf60.smc?.status_7d) {
-    smcStatus = tf60.smc.status_7d;
-    smcTfLabel = "1H";
-  } else if (!smcStatus && tf15.smc?.status_7d) {
-    smcStatus = tf15.smc.status_7d;
-    smcTfLabel = "15M";
-  }
+  let breakoutEvent = null;
 
-  let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
-  if (smcStatus) {
-    if (smcStatus.includes("BREAKOUT")) {
-      smcChip = `<span class="badge-chip chip-smc-breakout">${smcStatus}</span>`;
-    } else if (smcStatus.includes("DEMAND") || smcStatus.includes("Pantulan")) {
-      smcChip = `<span class="badge-chip chip-smc-demand">${smcStatus}</span>`;
-    } else {
-      smcChip = `<span class="badge-chip chip-neutral">${smcStatus}</span>`;
+  // Prioritaskan mencari Breakout (BOS, CHoCH, Breakout Supply) di 1D, 1H, atau 15M
+  for (const tfKey of ['D', '60', '15']) {
+    const tfCode = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+    const bo = extractBreakoutInfo(tf[tfKey]?.smc, tfCode);
+    if (bo && (bo.type === 'BOS' || bo.type === 'CHoCH' || bo.type === 'Breakout Supply')) {
+      breakoutEvent = bo;
+      break;
     }
   }
 
-  // Sinyal Scalping Trend & Timeframe
+  let smcChip = `<span class="badge-chip chip-neutral">-</span>`;
+  let smcRowTitle = "SMC Area (1D):";
+
+  if (breakoutEvent) {
+    smcRowTitle = `Breakout (${breakoutEvent.tf}):`;
+    smcChip = `<span class="badge-chip chip-smc-breakout">${breakoutEvent.type} @ ${breakoutEvent.price}</span>`;
+  } else {
+    if (!smcStatus && tf60.smc?.status_7d) {
+      smcStatus = tf60.smc.status_7d;
+      smcTfLabel = "1H";
+    } else if (!smcStatus && tf15.smc?.status_7d) {
+      smcStatus = tf15.smc.status_7d;
+      smcTfLabel = "15M";
+    }
+    smcRowTitle = `SMC Area (${smcTfLabel}):`;
+    if (smcStatus) {
+      if (smcStatus.includes("BREAKOUT") || smcStatus.includes("BOS") || smcStatus.includes("CHoCH")) {
+        smcChip = `<span class="badge-chip chip-smc-breakout">${smcStatus}</span>`;
+      } else if (smcStatus.includes("DEMAND") || smcStatus.includes("Pantulan")) {
+        smcChip = `<span class="badge-chip chip-smc-demand">${smcStatus}</span>`;
+      } else {
+        smcChip = `<span class="badge-chip chip-neutral">${smcStatus}</span>`;
+      }
+    }
+  }
+
+  // Sinyal Scalp & Swing Trend / Sinyal BUY
   let scalpTfLabel = "1H";
   let scalpTrend = tf60.scalping?.trend || "";
+  let scalpBuyObj = tf60.scalping?.buy || null;
+
   if (!scalpTrend && tf15.scalping?.trend) {
     scalpTrend = tf15.scalping.trend;
+    scalpBuyObj = tf15.scalping?.buy || null;
     scalpTfLabel = "15M";
   } else if (!scalpTrend && tfD.scalping?.trend) {
     scalpTrend = tfD.scalping.trend;
+    scalpBuyObj = tfD.scalping?.buy || null;
     scalpTfLabel = "1D";
+  }
+
+  if (!scalpBuyObj) {
+    for (const tfKey of ['15', '60', 'D']) {
+      if (tf[tfKey]?.scalping?.buy) {
+        scalpBuyObj = tf[tfKey].scalping.buy;
+        scalpTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+        break;
+      }
+    }
   }
 
   let scalpChip = `<span class="badge-chip chip-neutral">-</span>`;
   if (scalpTrend.includes("BUY") || scalpTrend.includes("Green")) {
-    scalpChip = `<span class="badge-chip chip-scalp-buy">Scalp BUY</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-buy">BUY (${scalpTfLabel})</span>`;
+  } else if (scalpBuyObj && scalpBuyObj.price) {
+    scalpChip = `<span class="badge-chip chip-scalp-buy">BUY (${scalpTfLabel}) @ Rp ${scalpBuyObj.price}</span>`;
   } else if (scalpTrend.includes("SELL") || scalpTrend.includes("Red")) {
-    scalpChip = `<span class="badge-chip chip-scalp-sell">Scalp SELL</span>`;
+    scalpChip = `<span class="badge-chip chip-scalp-sell">SELL (${scalpTfLabel})</span>`;
+  }
+
+  // Sinyal MACD Divergence (Bullish BUY)
+  let macdTfLabel = "";
+  let macdBullObj = null;
+  for (const tfKey of ['15', '60', 'D']) {
+    if (tf[tfKey]?.macd?.bull && (tf[tfKey]?.macd?.bull?.date || tf[tfKey]?.macd?.bull?.price)) {
+      macdBullObj = tf[tfKey].macd.bull;
+      macdTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+      break;
+    }
+  }
+
+  let macdChip = `<span class="badge-chip chip-neutral">-</span>`;
+  if (macdBullObj) {
+    const pStr = macdBullObj.price ? ` @ Rp ${macdBullObj.price}` : "";
+    macdChip = `<span class="badge-chip chip-macd-buy">Bullish Div (${macdTfLabel})${pStr}</span>`;
   }
 
   // VIP Date Notification
@@ -770,13 +1277,19 @@ function createStockCardHTML(stock, vipDateLabel = null) {
           <div class="indicator-val">${donaltChip}</div>
         </div>
         <div class="indicator-row">
-          <span class="indicator-title">SMC Area (${smcTfLabel}):</span>
+          <span class="indicator-title">${smcRowTitle}</span>
           <div class="indicator-val">${smcChip}</div>
         </div>
         <div class="indicator-row">
-          <span class="indicator-title">Scalp Signal (${scalpTfLabel}):</span>
+          <span class="indicator-title">Scalp/Swing (${scalpTfLabel}):</span>
           <div class="indicator-val">${scalpChip}</div>
         </div>
+        ${macdBullObj || currentMode === "recommendation" ? `
+        <div class="indicator-row">
+          <span class="indicator-title">MACD Div (${macdTfLabel || '15M'}):</span>
+          <div class="indicator-val">${macdChip}</div>
+        </div>
+        ` : ''}
       </div>
 
       <!-- Card Footer: Volume, Hint, & Direct TradingView Button -->
@@ -829,6 +1342,11 @@ function openStockDetail(symbol) {
     alert("Data saham " + symbol + " tidak ditemukan.");
     return;
   }
+
+  // Cek apakah saham ini masuk dalam Rekomendasi Aranter (5 Konfluensi)
+  const recItem = getAranterRecommendations().find(r => r.symbol === stock.symbol);
+  const recScore = recItem ? recItem.aranterScore : (stock.aranterScore || null);
+  const recMetadata = recItem ? recItem.aranterMetadata : (stock.aranterMetadata || null);
 
   const tf = stock.timeframes || {};
   const tfD = tf.D || {};
@@ -966,8 +1484,8 @@ function openStockDetail(symbol) {
     return parts.length > 0 ? parts.join('<br>') : '<span style="color:var(--text-dim); font-size:11.5px;">- (Netral)</span>';
   }
 
-  // Helper Parser SMC per Timeframe (Menampilkan Level Resisten & Support beserta % dari Harga Sekarang)
-  function formatSmcPerTf(smcObj, curPrice) {
+  // Helper Parser SMC per Timeframe (Menampilkan Level Resisten & Support beserta % dari Harga Sekarang & Breakout)
+  function formatSmcPerTf(smcObj, curPrice, tfCode = "") {
     if (!smcObj) return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
     const statusText = typeof smcObj === 'string' ? smcObj : (smcObj.status_7d || '-');
     if (!statusText || statusText === '-') return '<span style="color:var(--text-dim); font-size:11.5px;">- (Data Area Belum Termuat)</span>';
@@ -977,12 +1495,24 @@ function openStockDetail(symbol) {
     const pctSup = typeof smcObj === 'object' && smcObj.pct_to_supply != null ? smcObj.pct_to_supply : (sup && curPrice ? ((sup - curPrice) / curPrice * 100) : null);
     const pctDem = typeof smcObj === 'object' && smcObj.pct_to_demand != null ? smcObj.pct_to_demand : (dem && curPrice ? ((dem - curPrice) / curPrice * 100) : null);
 
+    const bo = extractBreakoutInfo(smcObj, tfCode);
+
     let statusColor = "var(--text-secondary)";
-    if (statusText.includes("BREAKOUT")) statusColor = "var(--status-cyan)";
+    if (bo || statusText.includes("BREAKOUT")) statusColor = "var(--status-cyan)";
     else if (statusText.includes("DEMAND") || statusText.includes("Pantulan")) statusColor = "var(--status-green)";
     else if (statusText.includes("BREAKDOWN")) statusColor = "var(--status-red)";
 
     const parts = [];
+
+    // Jika ada Breakout spesifik di timeframe ini, tampilkan badge breakout harga dan TF
+    if (bo && (bo.type === 'BOS' || bo.type === 'CHoCH' || bo.type === 'Breakout Supply')) {
+      parts.push(`
+        <div class="breakout-smc-badge">
+          🔥 BREAKOUT ${bo.type.toUpperCase()}${tfCode ? ` (${tfCode})` : ''} @ ${bo.price}${bo.date ? ` (tgl ${bo.date})` : ''}
+        </div>
+      `);
+    }
+
     parts.push(`<div style="color:${statusColor}; font-weight:700;">${statusText}</div>`);
 
     const levels = [];
@@ -1032,6 +1562,40 @@ function openStockDetail(symbol) {
   const macd60 = tf60.macd || {};
   const macd15 = tf15.macd || {};
 
+  // Evaluasi Breakout di seluruh TF (1D, 1H, 15M)
+  const allBreakouts = [];
+  [
+    { tf: '1D', smc: smcD },
+    { tf: '1H', smc: smc60 },
+    { tf: '15M', smc: smc15 }
+  ].forEach(item => {
+    const b = extractBreakoutInfo(item.smc, item.tf);
+    if (b && (b.type === 'BOS' || b.type === 'CHoCH' || b.type === 'Breakout Supply')) {
+      allBreakouts.push(b);
+    }
+  });
+
+  const breakoutBannerHtml = allBreakouts.length > 0 ? `
+    <div class="breakout-banner-box">
+      <div class="breakout-banner-header">
+        <span>🔥 BREAKOUT TERDETEKSI:</span>
+        <span class="breakout-banner-sub">(Struktur Smart Money / Supply Tembus)</span>
+      </div>
+      <div class="breakout-banner-grid">
+        ${allBreakouts.map(b => `
+          <div class="breakout-pill-item">
+            <span>${b.type} (${b.tf})</span>
+            <span style="opacity:0.65;">@</span>
+            <span class="breakout-pill-price">${b.price}</span>
+            ${b.date ? `<span class="breakout-pill-date">(${b.date})</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const starIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+
   const modalHtml = `
     <div class="modal-dialog" onclick="event.stopPropagation()">
       
@@ -1041,6 +1605,7 @@ function openStockDetail(symbol) {
           <div class="modal-symbol-row">
             <span class="modal-symbol-text">${stock.symbol}</span>
             ${isVip ? `<span class="vip-badge-pill" style="font-size:12px; padding:3px 10px;">FULL 3-DOT GREEN (VVIP)</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text); font-size:12px; padding:3px 10px;">2-DOT GREEN (POTENSIAL)</span>` : '')}
+
           </div>
           <span class="modal-name-text">${stock.name || stock.symbol} • Bursa Efek Indonesia (IDX)</span>
         </div>
@@ -1057,6 +1622,38 @@ function openStockDetail(symbol) {
       <!-- Modal Body -->
       <div class="modal-body">
         
+        <!-- Banner Rekomendasi Aranter (Jika Memenuhi 5 Konfluensi) -->
+        ${recScore ? `
+          <div class="breakout-banner-box" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 95, 70, 0.04)); border: 1px solid rgba(16, 185, 129, 0.35); margin-bottom: 16px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+
+                <span class="rec-score-pill" style="font-size:12px; padding:3px 10px;" title="Skor Rekomendasi: ${recScore}">${starIconSvg} : ${recScore}</span>
+
+
+              ${recMetadata ? `
+                <div style="font-size:11.5px; font-weight:600; color:var(--text-secondary);">
+                  Sinyal Terakhir: <b style="color:var(--text-primary);">${recMetadata.latestDateStr}</b> (${recMetadata.daysAgoLatest === 0 ? 'Hari ini' : recMetadata.daysAgoLatest + ' hari lalu'})
+                </div>
+              ` : ''}
+            </div>
+            
+            <div style="font-size:11.5px; color:var(--text-secondary); margin-top:6px; line-height:1.5;">
+              Memenuhi <b>Rally Good 3-Dot</b>, <b>Golden Cross</b>, <b>Area Demand</b>, <b>Swing/Scalping</b>, dan <b>Sinyal Bull</b>.
+            </div>
+
+            ${recMetadata ? `
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; padding-top:8px; border-top:1px dashed rgba(16, 185, 129, 0.25); font-size:11px;">
+                <span style="background:var(--bg-card); padding:3px 8px; border-radius:4px; border:1px solid var(--border-light);">Dot Green: <b>${recMetadata.dates.dot}</b></span>
+                <span style="background:var(--bg-card); padding:3px 8px; border-radius:4px; border:1px solid var(--border-light);">Golden Cross: <b>${recMetadata.dates.golden}</b></span>
+                <span style="background:var(--bg-card); padding:3px 8px; border-radius:4px; border:1px solid var(--border-light);">Scalp/Swing: <b>${recMetadata.dates.scalp}</b></span>
+                <span style="background:var(--bg-card); padding:3px 8px; border-radius:4px; border:1px solid var(--border-light);">MACD Bull: <b>${recMetadata.dates.macd}</b></span>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+
+        ${breakoutBannerHtml}
+
         <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 15M) -->
         <div class="modal-section">
           <div class="modal-sec-title">
@@ -1094,10 +1691,10 @@ function openStockDetail(symbol) {
             </div>
           </div>
 
-          <!-- Scalping & Trend Signal (1D, 1H, 15M) -->
+          <!-- Scalp & Swing Trading Signal (1D, 1H, 15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
-              <span>Scalping Signal & Trend</span>
+              <span>Scalp & Swing Trading</span>
               <span class="modal-tf-status ${isScalpBuy ? 'active' : 'inactive'}">
                 ${isScalpBuy ? 'BUY' : 'SELL'}
               </span>
@@ -1110,7 +1707,7 @@ function openStockDetail(symbol) {
               </span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Scalping (1D):</span>
+              <span class="detail-info-label">Swing Trading (1D):</span>
               <span class="detail-info-value">${formatScalpPerTf(scalpD)}</span>
             </div>
             <div class="detail-info-row">
@@ -1141,15 +1738,15 @@ function openStockDetail(symbol) {
 
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (1D):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smcD, stock.close)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smcD, stock.close, '1D')}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (1H):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smc60, stock.close)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc60, stock.close, '1H')}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">SMC (15M):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close)}</span>
+              <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close, '15M')}</span>
             </div>
           </div>
 
