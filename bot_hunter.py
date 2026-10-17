@@ -1812,9 +1812,10 @@ def main():
             now_wib = datetime.datetime.now(WIB_TZ)
             hari_ini = now_wib.date()
             
-            # Cek apakah jam sudah mencapai 19.00 WIB dan belum scan hari ini
+            # Cek jadwal: Sabtu pukul 16:10 WIB, Senin-Jumat pukul 16:21 WIB
+            target_menit = 10 if now_wib.weekday() == 5 else MENIT_SCAN_WIB
             if (now_wib.hour == JAM_SCAN_WIB and 
-                now_wib.minute >= MENIT_SCAN_WIB and 
+                now_wib.minute >= target_menit and 
                 scan_terakhir_tanggal != hari_ini):
                 
                 print(f"⏰ Waktu menunjukkan {now_wib.strftime('%H:%M WIB')}. Memulai scan...")
