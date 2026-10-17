@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-10-17 21:20:06 WIB",
+  "last_updated": "2026-10-18 00:30:03 WIB",
   "daily_scans": {
     "2026-10-17": {
       "date": "2026-10-17",
@@ -19673,13 +19673,1317 @@
           }
         }
       ]
+    },
+    "2026-10-18": {
+      "date": "2026-10-18",
+      "date_display": "18 Oktober 2026",
+      "time_display": "00:30 WIB",
+      "summary": {
+        "total_screener": 10,
+        "count_3_dot": 3,
+        "count_2_dot": 7,
+        "count_1_dot": 1,
+        "count_0_dot": 0
+      },
+      "stocks": [
+        {
+          "symbol": "GOTO",
+          "name": "GOTO",
+          "close": 25.0,
+          "change": -7.4074074074074066,
+          "volume": 42657972000.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "12 Okt 2026",
+              "dot_close": 27,
+              "gain_pct": -7.4074074074074066,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": null,
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 49.88087562788749,
+                "demand": 26,
+                "pct_to_supply": 99.52350251154996,
+                "pct_to_demand": 4.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 26)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "12 Okt 2026, 14:00 WIB",
+              "dot_close": 26,
+              "gain_pct": -3.8461538461538463,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "6 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-06 09:00:00+07:00",
+                  "price": 30,
+                  "exit_price": 30,
+                  "reversed": true,
+                  "gain_pct": 0.0
+                },
+                "sell": {
+                  "date": "8 Okt 2026, 11:00 WIB",
+                  "dt": "2026-10-08 11:00:00+07:00",
+                  "price": 30
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 27,
+                "demand": 23,
+                "pct_to_supply": 8.0,
+                "pct_to_demand": -8.0,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 13:30 WIB",
+              "dot_close": 26,
+              "gain_pct": -3.8461538461538463,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "14 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-14 09:00:00+07:00",
+                  "price": 27,
+                  "exit_price": 23,
+                  "reversed": true,
+                  "gain_pct": -14.814814814814813
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-16 09:15:00+07:00",
+                  "price": 23
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 27,
+                "demand": 23,
+                "pct_to_supply": 8.0,
+                "pct_to_demand": -8.0,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "1 Okt 2026, 11:30 WIB",
+                  "dt": "2026-10-01 11:30:00+07:00",
+                  "price": 28
+                },
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "LPKR",
+          "name": "LPKR",
+          "close": 39.0,
+          "change": -11.363636363636363,
+          "volume": 371645300.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "28 Sep 2026",
+              "dot_close": 43,
+              "gain_pct": -9.30232558139535,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": null,
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 49,
+                "demand": 39,
+                "pct_to_supply": 25.64102564102564,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 39)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 10:00 WIB",
+              "dot_close": 43,
+              "gain_pct": -9.30232558139535,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "2 Okt 2026, 14:00 WIB",
+                  "dt": "2026-10-02 14:00:00+07:00",
+                  "price": 43,
+                  "exit_price": 43,
+                  "reversed": true,
+                  "gain_pct": 0.0
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-16 09:00:00+07:00",
+                  "price": 43
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 47,
+                "demand": 38,
+                "pct_to_supply": 20.51282051282051,
+                "pct_to_demand": -2.564102564102564,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "16 Okt 2026, 15:30 WIB",
+              "dot_close": 38,
+              "gain_pct": 2.631578947368421,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "14 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-14 09:15:00+07:00",
+                  "price": 45,
+                  "exit_price": 43,
+                  "reversed": true,
+                  "gain_pct": -4.444444444444445
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-16 09:15:00+07:00",
+                  "price": 43
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 40,
+                "demand": 38,
+                "pct_to_supply": 2.564102564102564,
+                "pct_to_demand": -2.564102564102564,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": {
+                  "type": "Bear",
+                  "date": "6 Okt 2026, 14:30 WIB",
+                  "dt": "2026-10-06 14:30:00+07:00",
+                  "price": 47
+                }
+              }
+            }
+          }
+        },
+        {
+          "symbol": "PADI",
+          "name": "PADI",
+          "close": 32.0,
+          "change": -11.11111111111111,
+          "volume": 290536400.0,
+          "count_green": 3,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": true,
+              "date": "15 Okt 2026",
+              "dot_close": 36,
+              "gain_pct": -11.11111111111111,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": null,
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 76,
+                "demand": 37,
+                "pct_to_supply": 137.5,
+                "pct_to_demand": 15.625,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 37)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "15 Okt 2026, 10:00 WIB",
+              "dot_close": 34,
+              "gain_pct": -5.88235294117647,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "6 Okt 2026, 13:00 WIB",
+                  "dt": "2026-10-06 13:00:00+07:00",
+                  "price": 42,
+                  "exit_price": 40,
+                  "reversed": true,
+                  "gain_pct": -4.761904761904762
+                },
+                "sell": {
+                  "date": "12 Okt 2026, 11:00 WIB",
+                  "dt": "2026-10-12 11:00:00+07:00",
+                  "price": 40
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 39,
+                "demand": 31,
+                "pct_to_supply": 21.875,
+                "pct_to_demand": -3.125,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "15 Okt 2026, 11:00 WIB",
+              "dot_close": 34,
+              "gain_pct": -5.88235294117647,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "5 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-05 09:15:00+07:00",
+                  "price": 40,
+                  "exit_price": 43,
+                  "reversed": true,
+                  "gain_pct": 7.5
+                },
+                "sell": {
+                  "date": "7 Okt 2026, 14:45 WIB",
+                  "dt": "2026-10-07 14:45:00+07:00",
+                  "price": 43
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 40.854912252821634,
+                "demand": 31,
+                "pct_to_supply": 27.671600790067608,
+                "pct_to_demand": -3.125,
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 34 tgl 16 Okt)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "9 Okt 2026, 11:15 WIB",
+                  "dt": "2026-10-09 11:15:00+07:00",
+                  "price": 40
+                },
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "DMAS",
+          "name": "DMAS",
+          "close": 159.0,
+          "change": -14.516129032258066,
+          "volume": 364202200.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "16 Okt 2026",
+                  "dt": "2026-10-16 09:00:00+07:00",
+                  "price": 179
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 193,
+                "demand": 145,
+                "pct_to_supply": 21.38364779874214,
+                "pct_to_demand": -8.80503144654088,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 09:00 WIB",
+              "dot_close": 184,
+              "gain_pct": -13.586956521739129,
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "16 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-16 09:00:00+07:00",
+                  "price": 164
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "30 Sep 2026, 14:00 WIB",
+                  "dt": "2026-09-30 14:00:00+07:00",
+                  "price": 184,
+                  "exit_price": 189,
+                  "reversed": true,
+                  "gain_pct": 2.717391304347826
+                },
+                "sell": {
+                  "date": "9 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-09 09:00:00+07:00",
+                  "price": 189
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 186,
+                "demand": 159,
+                "pct_to_supply": 16.9811320754717,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 159)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "29 Sep 2026, 15:00 WIB",
+                  "dt": "2026-09-29 15:00:00+07:00",
+                  "price": 183
+                },
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "2 Okt 2026, 14:00 WIB",
+              "dot_close": 178,
+              "gain_pct": -10.674157303370785,
+              "donalt": {
+                "golden": {
+                  "date": "6 Okt 2026, 10:15 WIB",
+                  "dt": "2026-10-06 10:15:00+07:00",
+                  "price": 192,
+                  "exit_price": 184,
+                  "reversed": true,
+                  "gain_pct": -4.166666666666666
+                },
+                "death": {
+                  "date": "12 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-12 09:00:00+07:00",
+                  "price": 184
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "14 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-14 09:15:00+07:00",
+                  "price": 182,
+                  "exit_price": 184,
+                  "reversed": true,
+                  "gain_pct": 1.098901098901099
+                },
+                "sell": {
+                  "date": "15 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-15 09:00:00+07:00",
+                  "price": 184
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 188.79425834952067,
+                "demand": 158.25939230276617,
+                "pct_to_supply": 18.73852726384948,
+                "pct_to_demand": -0.4657910045495766,
+                "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "13 Okt 2026, 10:30 WIB",
+                  "dt": "2026-10-13 10:30:00+07:00",
+                  "price": 181
+                },
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "KIJA",
+          "name": "KIJA",
+          "close": 123.0,
+          "change": -12.142857142857142,
+          "volume": 343735400.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "22 Sep 2026",
+                  "dt": "2026-09-22 09:00:00+07:00",
+                  "price": 178
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 194,
+                "demand": 119,
+                "pct_to_supply": 57.72357723577236,
+                "pct_to_demand": -3.2520325203252036,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "16 Okt 2026, 09:00 WIB",
+              "dot_close": 119,
+              "gain_pct": 3.361344537815126,
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "28 Sep 2026, 09:00 WIB",
+                  "dt": "2026-09-28 09:00:00+07:00",
+                  "price": 169
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "6 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-06 09:00:00+07:00",
+                  "price": 160,
+                  "exit_price": 156,
+                  "reversed": true,
+                  "gain_pct": -2.5
+                },
+                "sell": {
+                  "date": "8 Okt 2026, 13:00 WIB",
+                  "dt": "2026-10-08 13:00:00+07:00",
+                  "price": 156
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 152,
+                "demand": 119,
+                "pct_to_supply": 23.577235772357724,
+                "pct_to_demand": -3.2520325203252036,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "13 Okt 2026, 16:00 WIB",
+                  "dt": "2026-10-13 16:00:00+07:00",
+                  "price": 150
+                },
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "16 Okt 2026, 09:45 WIB",
+              "dot_close": 119,
+              "gain_pct": 3.361344537815126,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "13 Okt 2026, 15:00 WIB",
+                  "dt": "2026-10-13 15:00:00+07:00",
+                  "price": 144,
+                  "exit_price": 149,
+                  "reversed": true,
+                  "gain_pct": 3.4722222222222223
+                },
+                "sell": {
+                  "date": "15 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-15 09:00:00+07:00",
+                  "price": 149
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 143.68678233395445,
+                "demand": 119,
+                "pct_to_supply": 16.818522222727196,
+                "pct_to_demand": -3.2520325203252036,
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 140 tgl 16 Okt)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "12 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-12 09:00:00+07:00",
+                  "price": 149
+                },
+                "bear": {
+                  "type": "Bear",
+                  "date": "6 Okt 2026, 10:30 WIB",
+                  "dt": "2026-10-06 10:30:00+07:00",
+                  "price": 161
+                }
+              }
+            }
+          }
+        },
+        {
+          "symbol": "ENRG",
+          "name": "ENRG",
+          "close": 880.0,
+          "change": -4.864864864864865,
+          "volume": 331755500.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "15 Okt 2026",
+                  "dt": "2026-10-15 09:00:00+07:00",
+                  "price": 935
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 1059.639875,
+                "demand": 860.265125,
+                "pct_to_supply": 20.41362215909092,
+                "pct_to_demand": -2.2425994318181806,
+                "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "22 Sep 2026, 15:00 WIB",
+              "dot_close": 897.186375,
+              "gain_pct": -1.9155858223994984,
+              "donalt": {
+                "golden": {
+                  "date": "1 Okt 2026, 14:00 WIB",
+                  "dt": "2026-10-01 14:00:00+07:00",
+                  "price": 1037.487125,
+                  "exit_price": 945,
+                  "reversed": true,
+                  "gain_pct": -8.914532312870879
+                },
+                "death": {
+                  "date": "13 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-13 09:00:00+07:00",
+                  "price": 945
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "24 Sep 2026, 15:00 WIB",
+                  "dt": "2026-09-24 15:00:00+07:00",
+                  "price": 934.107625,
+                  "exit_price": 990,
+                  "reversed": true,
+                  "gain_pct": 5.983504845065365
+                },
+                "sell": {
+                  "date": "9 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-09 09:00:00+07:00",
+                  "price": 990
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 935,
+                "demand": 790,
+                "pct_to_supply": 6.25,
+                "pct_to_demand": -10.227272727272728,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "23 Sep 2026, 13:00 WIB",
+                  "dt": "2026-09-23 13:00:00+07:00",
+                  "price": 911.954875
+                },
+                "bear": {
+                  "type": "Bear",
+                  "date": "7 Okt 2026, 14:00 WIB",
+                  "dt": "2026-10-07 14:00:00+07:00",
+                  "price": 1035
+                }
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "16 Okt 2026, 10:30 WIB",
+              "dot_close": 790,
+              "gain_pct": 11.39240506329114,
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "9 Okt 2026, 09:30 WIB",
+                  "dt": "2026-10-09 09:30:00+07:00",
+                  "price": 965
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "15 Okt 2026, 15:45 WIB",
+                  "dt": "2026-10-15 15:45:00+07:00",
+                  "price": 925,
+                  "exit_price": 790,
+                  "reversed": true,
+                  "gain_pct": -14.594594594594595
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-16 09:15:00+07:00",
+                  "price": 790
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 933.3110160471892,
+                "demand": 790,
+                "pct_to_supply": 6.058070005362414,
+                "pct_to_demand": -10.227272727272728,
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 880 tgl 16 Okt)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "13 Okt 2026, 16:00 WIB",
+                  "dt": "2026-10-13 16:00:00+07:00",
+                  "price": 945
+                },
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "BUKA",
+          "name": "BUKA",
+          "close": 98.0,
+          "change": -6.666666666666667,
+          "volume": 281284900.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": null,
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 124.27380577491266,
+                "demand": 94.79939904063971,
+                "pct_to_supply": 26.810005892768018,
+                "pct_to_demand": -3.265919346286007,
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 101 tgl 12 Okt)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "18 Sep 2026, 09:00 WIB",
+              "dot_close": 102,
+              "gain_pct": -3.9215686274509802,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "13 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-13 09:00:00+07:00",
+                  "price": 97,
+                  "exit_price": 101,
+                  "reversed": true,
+                  "gain_pct": 4.123711340206185
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-16 09:00:00+07:00",
+                  "price": 101
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 101,
+                "demand": 96,
+                "pct_to_supply": 3.061224489795918,
+                "pct_to_demand": -2.0408163265306123,
+                "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "13 Okt 2026, 10:00 WIB",
+                  "dt": "2026-10-13 10:00:00+07:00",
+                  "price": 101
+                },
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "12 Okt 2026, 10:45 WIB",
+              "dot_close": 97,
+              "gain_pct": 1.0309278350515463,
+              "donalt": {
+                "golden": {
+                  "date": "15 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-15 09:00:00+07:00",
+                  "price": 103,
+                  "exit_price": 94,
+                  "reversed": true,
+                  "gain_pct": -8.737864077669903
+                },
+                "death": {
+                  "date": "16 Okt 2026, 10:15 WIB",
+                  "dt": "2026-10-16 10:15:00+07:00",
+                  "price": 94
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "13 Okt 2026, 09:45 WIB",
+                  "dt": "2026-10-13 09:45:00+07:00",
+                  "price": 100,
+                  "exit_price": 96,
+                  "reversed": true,
+                  "gain_pct": -4.0
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-16 09:15:00+07:00",
+                  "price": 96
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 107.83699808302427,
+                "demand": 90.24955944700562,
+                "pct_to_supply": 10.037753145943132,
+                "pct_to_demand": -7.908612809177935,
+                "status_7d": "⚪ Di Antara Demand & Supply (CHoCH: Rp 101 tgl 16 Okt)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "9 Okt 2026, 14:30 WIB",
+                  "dt": "2026-10-09 14:30:00+07:00",
+                  "price": 100
+                },
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "KPIG",
+          "name": "KPIG",
+          "close": 32.0,
+          "change": -13.513513513513514,
+          "volume": 258034100.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "23 Sep 2026",
+                  "dt": "2026-09-23 09:00:00+07:00",
+                  "price": 65
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 89,
+                "demand": 37,
+                "pct_to_supply": 178.125,
+                "pct_to_demand": 15.625,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 37)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "29 Sep 2026, 11:00 WIB",
+              "dot_close": 37,
+              "gain_pct": -13.513513513513514,
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "18 Sep 2026, 16:00 WIB",
+                  "dt": "2026-09-18 16:00:00+07:00",
+                  "price": 68
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "29 Sep 2026, 14:00 WIB",
+                  "dt": "2026-09-29 14:00:00+07:00",
+                  "price": 45,
+                  "exit_price": 44,
+                  "reversed": true,
+                  "gain_pct": -2.2222222222222223
+                },
+                "sell": {
+                  "date": "5 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-05 09:00:00+07:00",
+                  "price": 44
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 42.76804689178324,
+                "demand": 32,
+                "pct_to_supply": 33.65014653682263,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 32)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "16 Okt 2026, 10:30 WIB",
+              "dot_close": 32,
+              "gain_pct": 0.0,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "6 Okt 2026, 09:30 WIB",
+                  "dt": "2026-10-06 09:30:00+07:00",
+                  "price": 43,
+                  "exit_price": 43,
+                  "reversed": true,
+                  "gain_pct": 0.0
+                },
+                "sell": {
+                  "date": "9 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-09 09:00:00+07:00",
+                  "price": 43
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 39.839987849152,
+                "demand": 32,
+                "pct_to_supply": 24.49996202860001,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 32)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "ESSA",
+          "name": "ESSA",
+          "close": 476.0,
+          "change": -15.0,
+          "volume": 218867700.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "22 Sep 2026",
+                  "dt": "2026-09-22 09:00:00+07:00",
+                  "price": 610
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 730.4184017915355,
+                "demand": 433.53959278797873,
+                "pct_to_supply": 53.449244073852,
+                "pct_to_demand": -8.920253615970854,
+                "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 555 tgl 13 Okt)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "25 Sep 2026, 10:00 WIB",
+              "dot_close": 575,
+              "gain_pct": -17.217391304347824,
+              "donalt": {
+                "golden": null,
+                "death": null
+              },
+              "scalping": {
+                "buy": {
+                  "date": "2 Okt 2026, 15:00 WIB",
+                  "dt": "2026-10-02 15:00:00+07:00",
+                  "price": 575,
+                  "exit_price": 580,
+                  "reversed": true,
+                  "gain_pct": 0.8695652173913043
+                },
+                "sell": {
+                  "date": "9 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-09 09:00:00+07:00",
+                  "price": 580
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 585,
+                "demand": 476,
+                "pct_to_supply": 22.899159663865547,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 476)"
+              },
+              "macd": {
+                "bull": {
+                  "type": "Bull",
+                  "date": "2 Okt 2026, 11:00 WIB",
+                  "dt": "2026-10-02 11:00:00+07:00",
+                  "price": 565
+                },
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "16 Okt 2026, 09:30 WIB",
+              "dot_close": 476,
+              "gain_pct": 0.0,
+              "donalt": {
+                "golden": {
+                  "date": "6 Okt 2026, 16:00 WIB",
+                  "dt": "2026-10-06 16:00:00+07:00",
+                  "price": 590,
+                  "exit_price": 580,
+                  "reversed": true,
+                  "gain_pct": -1.694915254237288
+                },
+                "death": {
+                  "date": "8 Okt 2026, 15:00 WIB",
+                  "dt": "2026-10-08 15:00:00+07:00",
+                  "price": 580
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "9 Okt 2026, 15:30 WIB",
+                  "dt": "2026-10-09 15:30:00+07:00",
+                  "price": 580,
+                  "exit_price": 580,
+                  "reversed": true,
+                  "gain_pct": 0.0
+                },
+                "sell": {
+                  "date": "15 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-15 09:00:00+07:00",
+                  "price": 580
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 558.8859894498023,
+                "demand": 476,
+                "pct_to_supply": 17.413022993655947,
+                "pct_to_demand": -0.0,
+                "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 476)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            }
+          }
+        },
+        {
+          "symbol": "DYAN",
+          "name": "DYAN",
+          "close": 81.0,
+          "change": 3.85,
+          "volume": 210940000.0,
+          "count_green": 2,
+          "has_green_dot": true,
+          "timeframes": {
+            "D": {
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
+              "donalt": {
+                "golden": null,
+                "death": {
+                  "date": "8 Okt 2026",
+                  "dt": "2026-10-08 09:00:00+07:00",
+                  "price": 80
+                }
+              },
+              "scalping": {
+                "buy": null,
+                "sell": {
+                  "date": "25 Sep 2026",
+                  "dt": "2026-09-25 09:00:00+07:00",
+                  "price": 89
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 111.37960734312063,
+                "demand": 66.49334870021177,
+                "pct_to_supply": 56.87268639876144,
+                "pct_to_demand": -6.347396196884833,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "60": {
+              "status": true,
+              "date": "28 Sep 2026, 16:00 WIB",
+              "dot_close": 75,
+              "gain_pct": -5.333333333333334,
+              "donalt": {
+                "golden": {
+                  "date": "22 Sep 2026, 09:00 WIB",
+                  "dt": "2026-09-22 09:00:00+07:00",
+                  "price": 100,
+                  "exit_price": 77,
+                  "reversed": true,
+                  "gain_pct": -23.0
+                },
+                "death": {
+                  "date": "28 Sep 2026, 11:00 WIB",
+                  "dt": "2026-09-28 11:00:00+07:00",
+                  "price": 77
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "13 Okt 2026, 14:00 WIB",
+                  "dt": "2026-10-13 14:00:00+07:00",
+                  "price": 79,
+                  "exit_price": 79,
+                  "reversed": true,
+                  "gain_pct": 0.0
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:00 WIB",
+                  "dt": "2026-10-16 09:00:00+07:00",
+                  "price": 79
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 82,
+                "demand": 68,
+                "pct_to_supply": 15.492957746478872,
+                "pct_to_demand": -4.225352112676056,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            },
+            "15": {
+              "status": true,
+              "date": "13 Okt 2026, 09:30 WIB",
+              "dot_close": 77,
+              "gain_pct": -7.792207792207792,
+              "donalt": {
+                "golden": {
+                  "date": "5 Okt 2026, 13:45 WIB",
+                  "dt": "2026-10-05 13:45:00+07:00",
+                  "price": 85,
+                  "exit_price": 82,
+                  "reversed": true,
+                  "gain_pct": -3.5294117647058822
+                },
+                "death": {
+                  "date": "8 Okt 2026, 10:45 WIB",
+                  "dt": "2026-10-08 10:45:00+07:00",
+                  "price": 82
+                }
+              },
+              "scalping": {
+                "buy": {
+                  "date": "13 Okt 2026, 14:00 WIB",
+                  "dt": "2026-10-13 14:00:00+07:00",
+                  "price": 79,
+                  "exit_price": 76,
+                  "reversed": true,
+                  "gain_pct": -3.79746835443038
+                },
+                "sell": {
+                  "date": "16 Okt 2026, 09:15 WIB",
+                  "dt": "2026-10-16 09:15:00+07:00",
+                  "price": 76
+                },
+                "trend": "SELL (Red)"
+              },
+              "smc": {
+                "supply": 81,
+                "demand": 70,
+                "pct_to_supply": 14.084507042253522,
+                "pct_to_demand": -1.4084507042253522,
+                "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              },
+              "macd": {
+                "bull": null,
+                "bear": null
+              }
+            }
+          }
+        }
+      ]
     }
   },
   "vip_3dot_history": [
     {
       "symbol": "GOTO",
-      "scan_date": "2026-10-17",
-      "scan_date_display": "17 Oktober 2026",
+      "scan_date": "2026-10-18",
+      "scan_date_display": "18 Oktober 2026",
       "data": {
         "symbol": "GOTO",
         "name": "GOTO",
@@ -19705,10 +21009,10 @@
             },
             "smc": {
               "supply": 49.88087562788749,
-              "demand": null,
+              "demand": 26,
               "pct_to_supply": 99.52350251154996,
-              "pct_to_demand": 0,
-              "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              "pct_to_demand": 4.0,
+              "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 26)"
             },
             "macd": {
               "bull": null,
@@ -19799,8 +21103,8 @@
     },
     {
       "symbol": "LPKR",
-      "scan_date": "2026-10-17",
-      "scan_date_display": "17 Oktober 2026",
+      "scan_date": "2026-10-18",
+      "scan_date_display": "18 Oktober 2026",
       "data": {
         "symbol": "LPKR",
         "name": "LPKR",
@@ -19899,11 +21203,11 @@
               "trend": "SELL (Red)"
             },
             "smc": {
-              "supply": 46.85507878512626,
-              "demand": null,
-              "pct_to_supply": 20.141227654169896,
-              "pct_to_demand": 0,
-              "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              "supply": 40,
+              "demand": 38,
+              "pct_to_supply": 2.564102564102564,
+              "pct_to_demand": -2.564102564102564,
+              "status_7d": "⚪ Di Antara Demand & Supply"
             },
             "macd": {
               "bull": null,
@@ -19920,8 +21224,8 @@
     },
     {
       "symbol": "PADI",
-      "scan_date": "2026-10-17",
-      "scan_date_display": "17 Oktober 2026",
+      "scan_date": "2026-10-18",
+      "scan_date_display": "18 Oktober 2026",
       "data": {
         "symbol": "PADI",
         "name": "PADI",
@@ -20021,10 +21325,10 @@
             },
             "smc": {
               "supply": 40.854912252821634,
-              "demand": null,
+              "demand": 31,
               "pct_to_supply": 27.671600790067608,
-              "pct_to_demand": 0,
-              "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
+              "pct_to_demand": -3.125,
+              "status_7d": "⚪ Di Antara Demand & Supply (BOS: Rp 34 tgl 16 Okt)"
             },
             "macd": {
               "bull": {
