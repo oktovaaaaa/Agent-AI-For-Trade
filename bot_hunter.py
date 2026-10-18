@@ -1324,8 +1324,8 @@ async def run_daily_scan(send_wa=True):
             f"Laporan lengkap akan dikirimkan otomatis setelah pemindaian selesai."
         )
         kirim_whatsapp(pesan_mulai)
-    
-    # 2. Jalankan Browser dengan Playwright (Support Docker & Local Chrome/Edge)
+        
+    hasil_deteksi = []
     async with async_playwright() as p:
         browser_args = [
             "--no-sandbox",
