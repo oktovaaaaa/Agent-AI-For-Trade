@@ -18,6 +18,7 @@ let selectedDate = null;
 let searchQuery = "";
 let activeFilter = "all"; // 'all' | '3dot' | '2dot' | 'golden' | 'smc' | 'scalp'
 let currentSort = "dot_desc"; // 'dot_desc' | 'gain_desc' | 'loss_asc' | 'vol_desc' | 'sym_asc'
+let screenerTrendRange = 7; // Default 7 hari (in-memory, kembali ke 7 setiap kali buka web)
 
 // Inisialisasi saat DOM selesai dimuat
 document.addEventListener("DOMContentLoaded", async () => {
@@ -220,6 +221,9 @@ function renderSidebarHistory() {
 function selectHistoryDate(dateKey) {
   selectedDate = dateKey;
   currentMode = "daily";
+  if (currentSort === "score_desc") {
+    currentSort = "dot_desc";
+  }
   
   // Update state tombol menu utama
   document.getElementById("menuDailyBtn").classList.add("active");
@@ -236,16 +240,17 @@ function selectHistoryDate(dateKey) {
 // Handler Ganti Mode Utama (Daily vs Rekomendasi Aranter vs VIP 3-Dot)
 function switchMainMode(mode) {
   currentMode = mode;
+  applyGridCardMode(mode);
   document.getElementById("menuDailyBtn").classList.toggle("active", mode === "daily");
   document.getElementById("menuVipBtn").classList.toggle("active", mode === "vip");
   const recBtn = document.getElementById("menuRecBtn");
   if (recBtn) recBtn.classList.toggle("active", mode === "recommendation");
 
   // Jika masuk ke Rekomendasi Aranter, prioritaskan urutkan Skor Rekomendasi (Tertinggi)
-  if (mode === "recommendation" && currentSort !== "score_desc") {
+  if (mode === "recommendation") {
     currentSort = "score_desc";
-    const sortSel = document.getElementById("sortSelector");
-    if (sortSel) sortSel.value = "score_desc";
+  } else if (currentSort === "score_desc") {
+    currentSort = "dot_desc";
   }
   
   renderSidebarHistory();
@@ -282,8 +287,62 @@ function handleSortChange(sortVal) {
   renderMainView();
 }
 
+// Helper: Sinkronisasi opsi dropdown pengurutan sesuai mode yang aktif
+function syncSortDropdownOptions() {
+  const sortSel = document.getElementById("sortSelector");
+  if (!sortSel) return;
+
+  if (currentMode === "recommendation") {
+    // Khusus Rekomendasi Aranter: hanya di menu ini opsi Skor Rekomendasi ditampilkan
+    if (sortSel.dataset.mode !== "recommendation") {
+      sortSel.innerHTML = `
+        <option value="score_desc">Skor Rekomendasi (Tertinggi)</option>
+        <option value="gain_desc">% Kenaikan Tertinggi</option>
+        <option value="loss_asc">% Penurunan Terbesar</option>
+        <option value="vol_desc">Volume Terbesar</option>
+        <option value="sym_asc">Kode Saham (A-Z)</option>
+      `;
+      sortSel.dataset.mode = "recommendation";
+    }
+    if (currentSort !== "score_desc" && currentSort !== "gain_desc" && currentSort !== "loss_asc" && currentSort !== "vol_desc" && currentSort !== "sym_asc") {
+      currentSort = "score_desc";
+    }
+  } else if (currentMode === "vip") {
+    if (sortSel.dataset.mode !== "vip") {
+      sortSel.innerHTML = `
+        <option value="dot_desc">Sinyal Terbaru</option>
+        <option value="gain_desc">% Kenaikan Tertinggi</option>
+        <option value="loss_asc">% Penurunan Terbesar</option>
+        <option value="vol_desc">Volume Terbesar</option>
+        <option value="sym_asc">Kode Saham (A-Z)</option>
+      `;
+      sortSel.dataset.mode = "vip";
+    }
+    if (currentSort === "score_desc") {
+      currentSort = "dot_desc";
+    }
+  } else {
+    // Mode Screener Harian
+    if (sortSel.dataset.mode !== "daily") {
+      sortSel.innerHTML = `
+        <option value="dot_desc">Dot Green Terbanyak</option>
+        <option value="gain_desc">% Kenaikan Tertinggi</option>
+        <option value="loss_asc">% Penurunan Terbesar</option>
+        <option value="vol_desc">Volume Terbesar</option>
+        <option value="sym_asc">Kode Saham (A-Z)</option>
+      `;
+      sortSel.dataset.mode = "daily";
+    }
+    if (currentSort === "score_desc") {
+      currentSort = "dot_desc";
+    }
+  }
+  sortSel.value = currentSort;
+}
+
 // Main View Render Engine
 function renderMainView() {
+  syncSortDropdownOptions();
   if (currentMode === "daily") {
     renderDailyView();
   } else if (currentMode === "recommendation") {
@@ -636,6 +695,7 @@ function updateRecommendationCount() {
 
 // Render Daily Mode (Data Harian)
 function renderDailyView() {
+  applyGridCardMode("daily");
   const scanData = appData.daily_scans[selectedDate];
   const grid = document.getElementById("stocksGrid");
 
@@ -670,9 +730,9 @@ function renderDailyView() {
         <div class="empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
-        <h3>Belum Ada Saham Minimal 2-Dot Green Hari Ini</h3>
+        <h3>Belum Ada Saham Minimal 2 Rally Good Hari Ini</h3>
         <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
-          Scan tanggal ini telah selesai diproses. Belum ditemukan saham yang mengonfirmasi minimal 2 Timeframe Dot Green sekaligus.
+          Scan tanggal ini telah selesai diproses. Belum ditemukan saham yang mengonfirmasi minimal 2 Rally Good sekaligus.
         </p>
       </div>
     `;
@@ -760,10 +820,11 @@ function renderDailyView() {
 
 // Render VIP View (1 Bulan 3-Dot Green)
 function renderVipView() {
+  applyGridCardMode("vip");
   const grid = document.getElementById("stocksGrid");
   const vipList = appData.vip_3dot_history || [];
 
-  document.getElementById("pageMainHeading").innerText = "VVIP 3-Dot Green (Riwayat 1 Bulan)";
+  document.getElementById("pageMainHeading").innerText = "3 Rally Good 1 bulan terakhir";
   document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
 
   document.getElementById("activeDateDisplay").innerText = "Riwayat 1 Bulan Terakhir";
@@ -780,7 +841,10 @@ function renderVipView() {
     if (checkHasScalpBuy(s, true)) countScalp++;
   });
 
-  updateTopMetrics(vipList.length, "-", countGolden, "VIP");
+  updateMetricCard(0, "VVIP 30 HARI", "tag-gold", vipList.length, "Full Rally Good", "Konfirmasi Multi-Timeframe");
+  updateMetricCard(1, "BREAKOUT SMC", "tag-cyan", countSmc, "Breakout Supply / BOS", "Struktur Smart Money");
+  updateMetricCard(2, "DONALT CROSS", "tag-green", countGolden, "Golden Cross Aktif", "EMA Bullish Reversal Signal");
+  updateMetricCard(3, "SCALP & SWING", "tag-slate", countScalp, "Sinyal BUY Aktif", "Konfirmasi Scalping / Swing");
 
   // Sinkronisasi value dropdown urutkan di UI
   const sortSel = document.getElementById("sortSelector");
@@ -818,7 +882,7 @@ function renderVipView() {
   // Sort VIP list sesuai opsi dropdown "Urutkan"
   filtered = sortVipList(filtered);
 
-  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${vipList.length} saham Full 3-Dot Green`;
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${vipList.length} saham Full Rally Good`;
 
   if (filtered.length === 0) {
     if (vipList.length === 0) {
@@ -827,8 +891,8 @@ function renderVipView() {
           <div class="empty-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
           </div>
-          <h3>Belum Ada Riwayat VIP 3-Dot Green</h3>
-          <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Dot Green aktif.</p>
+          <h3>Belum Ada Riwayat 3 Rally Good 1 Bulan Terakhir</h3>
+          <p>Data akan terisi secara otomatis setiap kali bot scan mendeteksi saham dengan 3 Rally Good aktif.</p>
         </div>
       `;
     } else {
@@ -855,7 +919,7 @@ function renderRecommendationView() {
   const grid = document.getElementById("stocksGrid");
   const recList = getAranterRecommendations();
 
-  document.getElementById("pageMainHeading").innerText = "Rekomendasi Aranter (5 Konfluensi Indikator)";
+  document.getElementById("pageMainHeading").innerText = "Rekomendasi Aranter";
   document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
 
   document.getElementById("activeDateDisplay").innerText = "Rekomendasi Aranter";
@@ -872,7 +936,15 @@ function renderRecommendationView() {
     if (checkHasScalpBuy(s, true)) countScalp++;
   });
 
-  updateTopMetrics(recList.length, "5 Sinyal", countGolden, "ARANTER", true);
+  applyGridCardMode("recommendation");
+  const topStock = recList.length > 0 ? recList[0] : null;
+  const topScore = topStock ? (topStock.aranterScore || 0) : 0;
+  const topSymbol = topStock ? (topStock.data?.symbol || "") : "";
+
+  updateMetricCard(0, "REKOMENDASI", "tag-green", recList.length, "Saham Pilihan Aranter", "Lolos 5 Konfluensi Ketat");
+  updateMetricCard(1, "KONFLUENSI", "tag-cyan", "5 / 5", "Standar Emas Aranter", "3-Dot, GC, Demand, Scalp, MACD");
+  updateMetricCard(2, "DONALT CROSS", "tag-gold", countGolden, "Golden Cross Aktif", "EMA Bullish Reversal");
+  updateMetricCard(3, "SKOR TERATAS", "tag-slate", topScore ? `${topScore}` : "-", topSymbol ? `Skor Tertinggi (${topSymbol})` : "Skor Rekomendasi", "Kemunculan Sinyal Terbaru");
 
   // Sinkronisasi value dropdown urutkan di UI
   const sortSel = document.getElementById("sortSelector");
@@ -1036,16 +1108,339 @@ function sortRecommendationList(items) {
   });
 }
 
-// Helper: Update Top Metric Cards
-function updateTopMetrics(vipCount, potCount, goldenCount, totalCount, hideTotalMeta = false) {
-  document.getElementById("statVipCount").innerText = vipCount;
-  document.getElementById("statPotCount").innerText = potCount;
-  document.getElementById("statGoldenCount").innerText = goldenCount;
-  document.getElementById("statTotalCount").innerText = totalCount;
-  const metaEl = document.getElementById("statTotalMeta");
-  if (metaEl) {
-    metaEl.style.display = hideTotalMeta ? "none" : "";
+// Helper: Update Top Metric Cards (Supports 4 Cards: VVIP, Radar Potensial, DonAlt Golden Cross, Saham Pilihan)
+function updateMetricCard(cardIndex, tagText, tagClass, numberText, titleText, detailText, hideMeta = false) {
+  const tagIds = ["statVipTag", "statPotTag", "statGoldenTag", "statTotalTag"];
+  const numIds = ["statVipCount", "statPotCount", "statGoldenCount", "statTotalCount"];
+  const titleIds = ["statVipTitle", "statPotTitle", "statGoldenTitle", "statTotalTitle"];
+  const detailIds = ["statVipDetail", "statPotDetail", "statGoldenDetail", "statTotalDetail"];
+  const metaIds = ["statVipMeta", "statPotMeta", "statGoldenMeta", "statTotalMeta"];
+
+  const tagEl = document.getElementById(tagIds[cardIndex]);
+  const numEl = document.getElementById(numIds[cardIndex]);
+  const titleEl = document.getElementById(titleIds[cardIndex]);
+  const detailEl = document.getElementById(detailIds[cardIndex]);
+  const metaEl = document.getElementById(metaIds[cardIndex]);
+
+  if (tagEl) {
+    tagEl.innerText = tagText;
+    if (tagClass) {
+      tagEl.className = `metric-tag ${tagClass}`;
+    }
   }
+  if (numEl) numEl.innerText = numberText;
+  if (titleEl) titleEl.innerText = titleText;
+  if (detailEl) detailEl.innerText = detailText;
+  if (metaEl) {
+    metaEl.style.display = hideMeta ? "none" : "";
+  }
+}
+
+// Helper: Switch Grid Card Mode (3 cards for Screener, 4 cards for Rekomendasi Aranter & VIP)
+function applyGridCardMode(mode) {
+  const gridSection = document.getElementById("metricsGridSection");
+  const cardGolden = document.getElementById("metricCardGolden");
+  const cardTotal = document.getElementById("metricCardTotal");
+  const periodFilter = document.getElementById("screenerPeriodFilter");
+  const totalIcon = document.getElementById("statTotalIcon");
+  const sparkBox = document.getElementById("statTotalSparkline");
+
+  if (mode === "daily") {
+    // 3 Cards Mode (Screener)
+    if (gridSection) gridSection.classList.remove("mode-4-cards");
+    if (cardGolden) cardGolden.style.display = "none";
+    if (cardTotal) cardTotal.classList.add("metric-card-wide");
+    if (periodFilter) periodFilter.style.display = "inline-flex";
+    if (totalIcon) totalIcon.style.display = "none";
+    if (sparkBox) sparkBox.style.display = "flex";
+  } else {
+    // 4 Cards Mode (VIP & Rekomendasi Aranter)
+    if (gridSection) gridSection.classList.add("mode-4-cards");
+    if (cardGolden) cardGolden.style.display = "flex";
+    if (cardTotal) cardTotal.classList.remove("metric-card-wide");
+    if (periodFilter) periodFilter.style.display = "none";
+    if (totalIcon) totalIcon.style.display = "inline-flex";
+    if (sparkBox) {
+      sparkBox.innerHTML = "";
+      sparkBox.style.display = "none";
+    }
+  }
+}
+
+// Global state untuk hover sparkline
+window._activeScreenerCount = null;
+
+// Handler tombol filter periode sparkline (7 Hari vs 30 Hari, default 7 hari)
+function setScreenerPeriod(days) {
+  screenerTrendRange = (days === 30) ? 30 : 7;
+  const btn7 = document.getElementById("btnPeriod7");
+  const btn30 = document.getElementById("btnPeriod30");
+  if (btn7 && btn30) {
+    if (screenerTrendRange === 7) {
+      btn7.classList.add("active");
+      btn30.classList.remove("active");
+    } else {
+      btn7.classList.remove("active");
+      btn30.classList.add("active");
+    }
+  }
+  renderScreenerTrendSparkline();
+}
+
+// Helper: Render Sparkline SVG Tren Saham Pilihan Lolos Sinyal (7 Hari atau 30 Hari Terakhir)
+function renderScreenerTrendSparkline() {
+  const sparkBox = document.getElementById("statTotalSparkline");
+  if (!sparkBox) return;
+
+  // Hanya tampil di mode Screener Harian biasa
+  if (currentMode !== "daily") {
+    sparkBox.innerHTML = "";
+    sparkBox.style.display = "none";
+    return;
+  }
+  sparkBox.style.display = "flex";
+
+  // Pastikan tombol filter periode sesuai status aktif saat ini
+  const btn7 = document.getElementById("btnPeriod7");
+  const btn30 = document.getElementById("btnPeriod30");
+  if (btn7 && btn30) {
+    if (screenerTrendRange === 7) {
+      btn7.classList.add("active");
+      btn30.classList.remove("active");
+    } else {
+      btn7.classList.remove("active");
+      btn30.classList.add("active");
+    }
+  }
+
+  const dailyScans = appData.daily_scans || {};
+  const datesAsc = Object.keys(dailyScans).sort();
+  if (datesAsc.length === 0) {
+    sparkBox.innerHTML = "";
+    return;
+  }
+
+  // Ambil sesuai filter periode: default 7 hari terakhir, atau 30 hari terakhir
+  const rangeCount = (screenerTrendRange === 30) ? 30 : 7;
+  const rollingDates = datesAsc.slice(-rangeCount);
+  const trendPoints = rollingDates.map(dateKey => {
+    const scan = dailyScans[dateKey];
+    const total = scan?.summary?.total_screener ?? (scan?.stocks ? scan.stocks.length : 0);
+    return {
+      date: dateKey,
+      dateDisplay: scan?.date_display || dateKey,
+      count: Number(total) || 0
+    };
+  });
+
+  const oldestPoint = trendPoints[0];
+  const latestPoint = trendPoints[trendPoints.length - 1];
+
+  // Aturan Warna:
+  // - Hijau jika nilai akhir >= nilai awal (tren naik / bertahan, misal 149 -> 157)
+  // - Merah jika nilai akhir < nilai awal (tren turun, misal 149 -> 97)
+  const isBullish = latestPoint.count >= oldestPoint.count;
+
+  // Catat angka aktif saat ini untuk restore saat mouse leave
+  const statNumEl = document.getElementById("statTotalCount");
+  if (statNumEl) {
+    window._activeScreenerCount = statNumEl.innerText;
+  }
+
+  sparkBox.innerHTML = generateInteractiveSparklineSVG(trendPoints, isBullish);
+  attachSparklineHoverEvents(sparkBox, trendPoints, isBullish);
+}
+
+// Generator SVG Sparkline Halus dengan Area Gradient, Tik Bulat, dan Indikator Interaktif
+function generateInteractiveSparklineSVG(trendPoints, isBullish) {
+  if (!trendPoints || trendPoints.length === 0) return "";
+
+  const width = 260;
+  const height = 55;
+  const padX = 8;
+  const padY = 8;
+  const strokeColor = isBullish ? "#16A34A" : "#DC2626";
+  const gradId = isBullish ? "sparklineGradBullWide" : "sparklineGradBearWide";
+  const gradRgb = isBullish ? "22, 163, 74" : "220, 38, 38";
+
+  let coords = [];
+  if (trendPoints.length === 1) {
+    const val = trendPoints[0].count;
+    coords = [
+      { x: padX, y: height / 2, val: val, date: trendPoints[0].dateDisplay, pctX: 0 },
+      { x: width - padX, y: height / 2, val: val, date: trendPoints[0].dateDisplay, pctX: 100 }
+    ];
+  } else {
+    const counts = trendPoints.map(p => p.count);
+    const min = Math.min(...counts);
+    const max = Math.max(...counts);
+    const range = (max - min) || 1;
+
+    coords = trendPoints.map((p, idx) => {
+      const x = padX + (idx / (trendPoints.length - 1)) * (width - 2 * padX);
+      const y = (height - padY) - ((p.count - min) / range) * (height - 2 * padY);
+      const pctX = (x / width) * 100;
+      return {
+        x: Number(x.toFixed(1)),
+        y: Number(y.toFixed(1)),
+        val: p.count,
+        date: p.dateDisplay,
+        pctX: Number(pctX.toFixed(1))
+      };
+    });
+  }
+
+  // Smooth Bezier Curve Path
+  let pathLine = `M ${coords[0].x} ${coords[0].y}`;
+  for (let i = 0; i < coords.length - 1; i++) {
+    const p0 = coords[i];
+    const p1 = coords[i + 1];
+    const midX = (p0.x + p1.x) / 2;
+    pathLine += ` C ${midX} ${p0.y}, ${midX} ${p1.y}, ${p1.x} ${p1.y}`;
+  }
+
+  const first = coords[0];
+  const last = coords[coords.length - 1];
+  const pathArea = `${pathLine} L ${last.x} ${height} L ${first.x} ${height} Z`;
+
+  // Render "Tik" (circles at each date point)
+  let ticksSvg = coords.map((c, idx) => {
+    const isLast = (idx === coords.length - 1);
+    const r = isLast ? 4 : 2.8;
+    return `
+      <circle class="spark-tick" data-idx="${idx}" cx="${c.x}" cy="${c.y}" r="${r}" fill="#FFFFFF" stroke="${strokeColor}" stroke-width="${isLast ? 2.2 : 1.8}"/>
+      ${isLast ? `<circle cx="${c.x}" cy="${c.y}" r="7" fill="${strokeColor}" opacity="0.2"/>` : ''}
+    `;
+  }).join("");
+
+  return `
+    <div class="spark-floating-tooltip" id="sparkFloatingTooltip">
+      <span class="spark-tooltip-date" id="sparkTooltipDate"></span>
+      <span class="spark-tooltip-sep">•</span>
+      <span class="spark-tooltip-count ${isBullish ? '' : 'bearish'}" id="sparkTooltipCount"></span>
+    </div>
+    <svg class="metric-sparkline-svg" id="sparklineSvgEl" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(${gradRgb}, 0.28)"/>
+          <stop offset="100%" stop-color="rgba(${gradRgb}, 0.0)"/>
+        </linearGradient>
+      </defs>
+      <!-- Area Gradient Fill -->
+      <path d="${pathArea}" fill="url(#${gradId})"/>
+      <!-- Curve Line -->
+      <path d="${pathLine}" fill="none" stroke="${strokeColor}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Interactive Crosshair Guideline -->
+      <line id="sparkCrosshair" x1="0" y1="2" x2="0" y2="${height - 2}" stroke="${strokeColor}" stroke-dasharray="2 2" stroke-width="1.2" opacity="0" style="transition: opacity 0.1s ease;"/>
+      <!-- Ticks at each date -->
+      <g class="spark-ticks-group">
+        ${ticksSvg}
+      </g>
+      <!-- Focus Dot on Hover -->
+      <circle id="sparkFocusDot" cx="0" cy="0" r="5.5" fill="${strokeColor}" stroke="#FFFFFF" stroke-width="2.5" opacity="0" style="transition: opacity 0.1s ease;"/>
+      <!-- Invisible Mouse Target Overlay -->
+      <rect id="sparkOverlayRect" x="0" y="0" width="${width}" height="${height}" fill="transparent" style="cursor:crosshair;"/>
+    </svg>
+  `;
+}
+
+// Handler Hover & Touch untuk Interaksi Ticks dan Tooltip
+function attachSparklineHoverEvents(sparkBox, trendPoints, isBullish) {
+  const overlay = sparkBox.querySelector("#sparkOverlayRect");
+  const svg = sparkBox.querySelector("#sparklineSvgEl");
+  const tooltip = sparkBox.querySelector("#sparkFloatingTooltip");
+  const crosshair = sparkBox.querySelector("#sparkCrosshair");
+  const focusDot = sparkBox.querySelector("#sparkFocusDot");
+  const statNumEl = document.getElementById("statTotalCount");
+  const tDateEl = sparkBox.querySelector("#sparkTooltipDate");
+  const tCountEl = sparkBox.querySelector("#sparkTooltipCount");
+
+  if (!overlay || !svg) return;
+
+  const width = 260;
+  const height = 55;
+  const padX = 8;
+  const padY = 8;
+  const counts = trendPoints.map(p => p.count);
+  const min = Math.min(...counts);
+  const max = Math.max(...counts);
+  const range = (max - min) || 1;
+
+  const coords = trendPoints.map((p, idx) => {
+    const x = padX + (idx / Math.max(1, trendPoints.length - 1)) * (width - 2 * padX);
+    const y = (height - padY) - ((p.count - min) / range) * (height - 2 * padY);
+    const pctX = (x / width) * 100;
+    return { x, y, pctX, val: p.count, date: p.dateDisplay };
+  });
+
+  function handlePointerMove(e) {
+    const rect = svg.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const relX = clientX - rect.left;
+    const normX = Math.max(0, Math.min(width, (relX / rect.width) * width));
+
+    // Cari titik terdekat
+    let closest = coords[0];
+    let minDist = Math.abs(coords[0].x - normX);
+    for (let i = 1; i < coords.length; i++) {
+      const dist = Math.abs(coords[i].x - normX);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = coords[i];
+      }
+    }
+
+    // Tampilkan Crosshair & Focus Dot
+    if (crosshair) {
+      crosshair.setAttribute("x1", closest.x);
+      crosshair.setAttribute("x2", closest.x);
+      crosshair.style.opacity = "0.7";
+    }
+    if (focusDot) {
+      focusDot.setAttribute("cx", closest.x);
+      focusDot.setAttribute("cy", closest.y);
+      focusDot.style.opacity = "1";
+    }
+
+    // Tampilkan Floating Tooltip
+    if (tooltip && tDateEl && tCountEl) {
+      tDateEl.innerText = closest.date;
+      tCountEl.innerText = `${closest.val} Saham Lolos`;
+      tooltip.style.left = `${closest.pctX}%`;
+      tooltip.classList.add("visible");
+    }
+
+    // Update Angka di Card
+    if (statNumEl) {
+      statNumEl.innerText = closest.val;
+    }
+  }
+
+  function handlePointerLeave() {
+    if (crosshair) crosshair.style.opacity = "0";
+    if (focusDot) focusDot.style.opacity = "0";
+    if (tooltip) tooltip.classList.remove("visible");
+    if (statNumEl && window._activeScreenerCount !== null) {
+      statNumEl.innerText = window._activeScreenerCount;
+    }
+  }
+
+  overlay.addEventListener("mousemove", handlePointerMove);
+  overlay.addEventListener("mouseleave", handlePointerLeave);
+  overlay.addEventListener("touchmove", handlePointerMove, { passive: true });
+  overlay.addEventListener("touchend", handlePointerLeave);
+}
+
+// Backward-compatible updateTopMetrics helper (3 Cards in Screener)
+function updateTopMetrics(vipCount, potCount, p3, p4, hideTotalMeta = false) {
+  const totalCount = p4 !== undefined ? p4 : p3;
+  const hideMeta = typeof p4 === "boolean" ? p4 : hideTotalMeta;
+
+  applyGridCardMode("daily");
+  updateMetricCard(0, "VVIP", "tag-gold", vipCount, "Full Rally Good", "Konfirmasi Daily + 1H + 15M");
+  updateMetricCard(1, "RADAR POTENSIAL", "tag-cyan", potCount, "2 Rally good", "Siap pantau untuk konfirmasi ke-3");
+  updateMetricCard(3, "SAHAM PILIHAN", "tag-slate", totalCount, "Lolos Seleksi Sinyal", "Kualifikasi 2 Rally Good", hideMeta);
+  renderScreenerTrendSparkline();
 }
 
 // Helper: Generate HTML for Minimalist Stock Card
@@ -1658,7 +2053,6 @@ function openStockDetail(symbol) {
         <div class="modal-section">
           <div class="modal-sec-title">
             <span>Sinyal RallyGood Dot Green & Kenaikan Harga</span>
-            <span class="modal-sec-badge">${stock.count_green || 0} dari 3 Timeframe (1D, 1H, 15M)</span>
           </div>
           <div class="modal-tf-grid">
             ${renderTfDetailCard("1D", tfD)}

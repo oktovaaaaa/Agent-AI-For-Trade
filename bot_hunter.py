@@ -1235,19 +1235,19 @@ def simpan_database_json(hasil_deteksi, now_wib):
             "stocks": saham_web
         }
         
-        # PANGKAS DATABASE AGAR MAKSIMAL 30 HARI / 1 BULAN BERGULIR
-        # Misal sekarang 16 Oktober, maka data tanggal 15 September ke belakang (< 30 hari) otomatis terhapus
-        cutoff_dt = now_wib - datetime.timedelta(days=30)
-        cutoff_date_str = cutoff_dt.strftime("%Y-%m-%d")
-        
-        # 1. Pangkas daily_scans yang lebih tua dari 30 hari (1 bulan)
-        daily_keys = list(history["daily_scans"].keys())
-        for d_key in daily_keys:
-            if d_key < cutoff_date_str:
+        # PANGKAS DATABASE: MAKSIMAL 30 CANDLE / HARI BUKA BURSA TERAKHIR (1 BULAN BERGULIR)
+        # Jika masuk tanggal baru ke-31, tanggal terlama (ke-1) otomatis terhapus bergulir.
+        sorted_daily_keys = sorted(history["daily_scans"].keys())
+        if len(sorted_daily_keys) > 30:
+            keys_to_remove = sorted_daily_keys[:-30]
+            for d_key in keys_to_remove:
                 del history["daily_scans"][d_key]
-                print(f"🗑️ [RETENSI 1 BULAN] Menghapus data harian lama tanggal {d_key} (> 30 hari).")
+                print(f"🗑️ [RETENSI 30 CANDLE] Menghapus data harian bursa lama tanggal {d_key} (> 30 candle).")
+        
+        # Batas tanggal bursa terlama yang masih aktif tersimpan
+        oldest_retained_date = min(history["daily_scans"].keys()) if history["daily_scans"] else date_key
                 
-        # 2. SIMPAN RIWAYAT KHUSUS SAHAM 3 DOT GREEN (1 BULAN TERAKHIR / 30 HARI)
+        # 2. SIMPAN RIWAYAT KHUSUS SAHAM 3 DOT GREEN (1 BULAN TERAKHIR / 30 CANDLE)
         if "vip_3dot_history" not in history or not isinstance(history["vip_3dot_history"], list):
             history["vip_3dot_history"] = []
 
@@ -1272,10 +1272,10 @@ def simpan_database_json(hasil_deteksi, now_wib):
             else:
                 history["vip_3dot_history"].append(record_item)
                 
-        # Pangkas vip_3dot_history agar maksimal 30 hari terakhir
+        # Pangkas vip_3dot_history agar selaras dengan 30 candle bursa terakhir
         history["vip_3dot_history"] = [
             h for h in history["vip_3dot_history"]
-            if h.get("scan_date", "") >= cutoff_date_str
+            if h.get("scan_date", "") >= oldest_retained_date
         ]
         
         # Urutkan vip_3dot_history berdasarkan tanggal terbaru

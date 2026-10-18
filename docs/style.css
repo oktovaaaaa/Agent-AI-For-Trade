@@ -781,8 +781,23 @@ body.dark-theme .sidebar-wa-card:hover {
 }
 
 .topbar-subtitle {
-  font-size: 12.5px;
-  color: var(--text-muted);
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  color: #D97706;
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.28);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.4px;
+  margin-top: 5px;
+  width: fit-content;
+}
+
+body.dark-theme .topbar-subtitle {
+  color: #FBBF24;
+  background: rgba(251, 191, 36, 0.14);
+  border-color: rgba(251, 191, 36, 0.35);
 }
 
 .topbar-right {
@@ -915,9 +930,26 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.8fr);
   gap: 18px;
   margin-bottom: 28px;
+  transition: all 0.2s ease;
+}
+
+.metrics-grid.mode-4-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.metrics-grid.mode-4-cards #metricCardTotal.metric-card-wide {
+  grid-column: auto !important;
+}
+
+.metrics-grid.mode-4-cards #metricCardTotal .metric-main-row {
+  display: block !important;
+}
+
+.metrics-grid.mode-4-cards #metricCardTotal .metric-sparkline-box {
+  display: none !important;
 }
 
 .metric-card {
@@ -975,6 +1007,160 @@ body.light-theme .theme-toggle-btn:hover .moon-svg {
   line-height: 1.1;
   margin-bottom: 6px;
 }
+
+.metric-card-wide .metric-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.metric-number-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.metric-number-col .metric-number {
+  margin-bottom: 4px;
+}
+
+.metric-sparkline-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 140px;
+  height: 55px;
+  position: relative;
+}
+
+.metric-sparkline-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.spark-floating-tooltip {
+  position: absolute;
+  top: -12px;
+  transform: translate(-50%, -100%);
+  background: #111827;
+  color: #FFFFFF;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 30;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.spark-floating-tooltip.visible {
+  opacity: 1;
+}
+
+.spark-floating-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #111827;
+}
+
+.spark-tooltip-date {
+  color: #9CA3AF;
+  font-size: 10.5px;
+}
+
+.spark-tooltip-sep {
+  opacity: 0.3;
+}
+
+.spark-tooltip-count {
+  color: #4ADE80;
+  font-weight: 700;
+}
+
+.spark-tooltip-count.bearish {
+  color: #F87171;
+}
+
+.spark-tick {
+  cursor: pointer;
+  transition: r 0.12s ease;
+}
+
+/* Period Filter Toggle inside Saham Pilihan Metric Card */
+.metric-period-filter {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.period-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.period-btn:hover {
+  color: var(--text-primary);
+}
+
+.period-btn.active {
+  background: var(--bg-card);
+  color: var(--brand-accent);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dark-theme .metric-period-filter {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-theme .period-btn {
+  color: var(--text-muted);
+}
+
+.dark-theme .period-btn:hover {
+  color: var(--text-primary);
+}
+
+.dark-theme .period-btn.active {
+  background: #1A2820;
+  color: #4ADE80;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
 
 .metric-meta {
   display: flex;
@@ -1327,7 +1513,120 @@ body.dark-theme .stock-card.is-vip {
 .chip-smc-demand { background: var(--status-green-bg); color: var(--status-green-text); }
 .chip-scalp-buy { background: var(--status-green-bg); color: var(--status-green-text); font-weight: 700; }
 .chip-scalp-sell { background: var(--status-red-bg); color: var(--status-red-text); }
+.chip-macd-buy { background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3); }
+body.dark-theme .chip-macd-buy { background: rgba(16, 185, 129, 0.25); color: #34D399; border-color: rgba(52, 211, 153, 0.4); }
 .chip-neutral { background: var(--bg-app); color: var(--text-dim); }
+
+/* Breakout High-Contrast Badges & Banner (Adaptive Light & Dark Theme) */
+.breakout-banner-box {
+  background: var(--status-cyan-bg);
+  border: 1px solid rgba(2, 132, 199, 0.28);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.dark-theme .breakout-banner-box {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(14, 165, 233, 0.05));
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.breakout-banner-header {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--status-cyan-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breakout-banner-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.breakout-banner-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.breakout-pill-item {
+  background: var(--bg-card);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+  color: var(--status-cyan-text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+}
+
+body.dark-theme .breakout-pill-item {
+  background: rgba(2, 132, 199, 0.25);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #E0F2FE;
+  box-shadow: none;
+}
+
+.breakout-pill-price {
+  color: #0284C7;
+  font-weight: 800;
+}
+
+body.dark-theme .breakout-pill-price {
+  color: #38BDF8;
+}
+
+.breakout-pill-date {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+body.dark-theme .breakout-pill-date {
+  color: rgba(224, 242, 254, 0.75);
+}
+
+.breakout-smc-badge {
+  background: var(--status-cyan-bg);
+  color: var(--status-cyan-text);
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  font-weight: 700;
+  margin-bottom: 5px;
+  font-size: 11.5px;
+  border: 1px solid rgba(2, 132, 199, 0.3);
+}
+
+body.dark-theme .breakout-smc-badge {
+  background: rgba(56, 189, 248, 0.16);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+/* Rekomendasi Aranter Badge & Score Pill */
+.rec-score-pill {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
 
 /* Card Footer: Volume & TradingView Action Button */
 .card-footer-row {
@@ -1379,21 +1678,6 @@ body.dark-theme .btn-chart {
   background: var(--brand-accent);
   color: #FFFFFF;
   transform: translateY(-1px);
-}
-
-/* Rekomendasi Aranter Badge & Score Pill */
-.rec-score-pill {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  color: #FFFFFF;
-  font-weight: 800;
-  font-size: 11px;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  white-space: nowrap;
 }
 
 /* Empty State & Skeletons */
@@ -1484,7 +1768,7 @@ body.dark-theme .btn-chart {
 
 @media (max-width: 1024px) {
   .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1694,10 +1978,10 @@ body.dark-theme .btn-chart {
     padding: 16px;
   }
 
-  /* Mobile: Single Unified Summary Card for All 4 Metrics */
+  /* Mobile: Single Unified Summary Card for All 4 Metrics (Persis 50% : 50% Sejajar) */
   .metrics-grid {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 0 !important;
     background: var(--bg-card) !important;
     border: 1px solid var(--border-card) !important;
@@ -1705,6 +1989,8 @@ body.dark-theme .btn-chart {
     box-shadow: var(--shadow-card) !important;
     overflow: hidden !important;
     margin-bottom: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .metric-card {
@@ -1714,27 +2000,75 @@ body.dark-theme .btn-chart {
     box-shadow: none !important;
     padding: 10px 12px !important;
     min-height: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
-  .metric-card:nth-child(1),
-  .metric-card:nth-child(3) {
+  #metricCardVip {
+    grid-column: 1 !important;
     border-right: 1px solid var(--border-light) !important;
+    border-bottom: 1px solid var(--border-light) !important;
+    box-sizing: border-box !important;
   }
 
-  .metric-card:nth-child(1),
-  .metric-card:nth-child(2) {
+  #metricCardPot {
+    grid-column: 2 !important;
     border-bottom: 1px solid var(--border-light) !important;
+    border-right: none !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mode 3 Cards (Screener): Saham Pilihan membentang penuh 100% di baris kedua */
+  .metrics-grid:not(.mode-4-cards) #metricCardTotal {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Mode 4 Cards: Golden Cross dan Saham Pilihan membentuk grid 2x2 rapi & persis 50%:50% sejajar */
+  .metrics-grid.mode-4-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .metrics-grid.mode-4-cards #metricCardGolden {
+    grid-column: 1 !important;
+    border-right: 1px solid var(--border-light) !important;
+    border-bottom: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .metrics-grid.mode-4-cards #metricCardTotal {
+    grid-column: 2 !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    box-sizing: border-box !important;
   }
 
   .metric-top {
-    margin-bottom: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 6px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .metric-tag {
-    font-size: 9px !important;
-    padding: 2px 6px !important;
+    font-size: 9.5px !important;
+    padding: 2px 7px !important;
     font-weight: 700 !important;
     letter-spacing: 0.3px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: calc(100% - 24px) !important;
   }
 
   .metric-icon svg {
@@ -1747,11 +2081,72 @@ body.dark-theme .btn-chart {
     font-weight: 800 !important;
     margin-bottom: 2px !important;
     line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  .metric-card-wide .metric-main-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 0 !important;
+    gap: 14px !important;
+    width: 100% !important;
+  }
+
+  .metric-card-wide .metric-number-col {
+    min-width: 90px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .metric-card-wide .metric-number-col .metric-number {
+    margin-bottom: 0 !important;
+  }
+
+  .metric-sparkline-box {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    height: 42px !important;
+    position: relative !important;
+  }
+
+  .metric-sparkline-box svg {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex: 1 !important;
+  }
+
+  /* Khusus Mode 4 Cards: Saham Pilihan berperilaku sebagai card biasa tanpa sparkline */
+  .metrics-grid.mode-4-cards #metricCardTotal.metric-card-wide .metric-main-row {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .metrics-grid.mode-4-cards #metricCardTotal .metric-number-col {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .metrics-grid.mode-4-cards #metricCardTotal .metric-number-col .metric-number {
+    margin-bottom: 2px !important;
+  }
+
+  .metrics-grid.mode-4-cards #metricCardTotal .metric-sparkline-box {
+    display: none !important;
   }
 
   .metric-meta {
     display: flex !important;
     flex-direction: column !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    overflow: hidden !important;
   }
 
   .metric-title {
@@ -1761,6 +2156,9 @@ body.dark-theme .btn-chart {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 
   .metric-detail {
