@@ -1308,10 +1308,22 @@ async def run_daily_scan(send_wa=True):
     # 1. Ambil saham lolos kriteria Screener HUNTER
     hunter_stocks = get_hunter_stocks()
     if not hunter_stocks:
-        kirim_whatsapp(f"ℹ️ *SCAN HUNTER {date_display}*\nTidak ada saham IDX Rp 10-1000 yang lolos kriteria volume hari ini.")
+        if send_wa:
+            kirim_whatsapp(f"ℹ️ *SCAN HUNTER {tgl_analisa_id}*\nTidak ada saham IDX Rp 10-1000 yang lolos kriteria volume hari ini.")
         return
         
-    hasil_deteksi = []
+    # Kirim notifikasi awal ke WhatsApp saat pemindaian dimulai
+    if send_wa:
+        pesan_mulai = (
+            f"🚀 *Memulai Analisa Screener Aranter*\n"
+            f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"📊 *Jumlah Saham Terdeteksi di Screener*: *{len(hunter_stocks)} Saham*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"⏳ Bot sedang menganalisis chart multi-timeframe (Daily, 1H, 15M) di TradingView...\n\n"
+            f"Laporan lengkap akan dikirimkan otomatis setelah pemindaian selesai."
+        )
+        kirim_whatsapp(pesan_mulai)
     
     # 2. Jalankan Browser dengan Playwright (Support Docker & Local Chrome/Edge)
     async with async_playwright() as p:
@@ -1701,7 +1713,7 @@ async def run_daily_scan(send_wa=True):
                 f"Hasil scan malam ini belum ada saham yang mengonfirmasi 3 Timeframe (Daily + 1H + 15M) sekaligus.\n\n"
                 f"👀 *Pantau Saham Potensial (2 Timeframe):*\n"
                 f"Tersedia *{len(saham_2_dot)} saham* yang lolos 2-Dot Green dan siap dipantau langsung di website:\n"
-                f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n"
+                f"👉 https://aranter.web.id/\n"
             )
         else:
             pesan_wa += (
@@ -1746,7 +1758,7 @@ async def run_daily_scan(send_wa=True):
             f"━━━━━━━━━━━━━━━━━━━━\n\n"
             f"🌐 *DASHBOARD & DATA LENGKAP:*\n"
             f"Untuk melihat analisa mendalam, chart TradingView, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
-            f"👉 https://oktovaaaaa.github.io/Agent-AI-For-Trade/\n\n"
+            f"👉 https://aranter.web.id/\n\n"
             f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
             f"🤖 _Dashboard Aranter for Trade by Oktovaaaaa_"
         )
