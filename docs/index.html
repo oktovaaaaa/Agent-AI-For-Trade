@@ -143,6 +143,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: clip;
 }
 
 /* Layout Wrapper */
@@ -868,12 +869,24 @@ body.dark-theme .topbar-subtitle {
 }
 
 .search-clear-btn {
-  background: transparent;
+  background: var(--border-light);
   border: none;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-secondary);
   cursor: pointer;
-  padding: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.search-clear-btn:hover {
+  background: var(--text-muted);
+  color: #FFFFFF;
 }
 
 /* Theme Toggle Button */
@@ -1797,7 +1810,7 @@ body.dark-theme .btn-chart {
     width: 100% !important;
     min-height: 100vh !important;
     position: relative;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Sticky Top Header on Mobile */
@@ -1809,6 +1822,7 @@ body.dark-theme .btn-chart {
     padding: 12px 18px;
     background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border-light);
+    position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 500;
@@ -1965,6 +1979,7 @@ body.dark-theme .btn-chart {
     align-items: flex-start;
     padding: 16px;
     gap: 12px;
+    position: static !important;
   }
 
   .topbar-title {
@@ -1985,7 +2000,18 @@ body.dark-theme .btn-chart {
   }
 
   .search-pill {
-    width: 100%;
+    width: 100% !important;
+    padding: 10px 16px !important;
+  }
+
+  .search-pill input {
+    font-size: 16px !important; /* Mencegah auto-zoom di browser mobile iOS Safari & Chrome */
+  }
+
+  .search-clear-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 13px !important;
   }
 
   .content-body {
@@ -2213,10 +2239,11 @@ body.dark-theme .btn-chart {
   inset: 0;
   background: rgba(10, 15, 20, 0.75);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 250;
+  z-index: 2000;
   padding: 20px;
   opacity: 0;
   visibility: hidden;
@@ -2568,14 +2595,59 @@ body.dark-theme .modal-tv-btn:hover {
 }
 
 @media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 12px !important;
+  }
+  .modal-dialog {
+    max-height: 84vh !important;
+    border-radius: var(--radius-lg) !important;
+  }
+  .modal-header {
+    padding: 12px 16px !important;
+  }
+  .modal-symbol-text {
+    font-size: 19px !important;
+  }
+  .modal-name-text {
+    font-size: 11px !important;
+  }
+  .modal-price-val {
+    font-size: 19px !important;
+  }
+  .modal-close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+  .modal-body {
+    padding: 12px 14px !important;
+    gap: 12px !important;
+  }
+  .modal-section {
+    padding: 12px !important;
+    gap: 10px !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .modal-sec-title {
+    font-size: 11px !important;
+  }
   .modal-tf-grid {
     grid-template-columns: 1fr;
   }
   .detail-box-grid {
     grid-template-columns: 1fr;
   }
-  .modal-dialog {
-    max-height: 95vh;
+  .modal-tf-card {
+    padding: 10px 12px !important;
+  }
+  .modal-footer {
+    padding: 10px 14px !important;
+    gap: 8px !important;
+  }
+  .modal-tv-btn,
+  .modal-close-action-btn {
+    padding: 9px 12px !important;
+    font-size: 13px !important;
   }
 }
 
@@ -2738,8 +2810,8 @@ body.dark-theme .modal-tv-btn:hover {
             <span class="search-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="search-svg"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
             </span>
-            <input type="text" id="globalSearchInput" placeholder="Cari Saham..." oninput="handleSearch(this.value)">
-            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" style="display:none;">✕</button>
+            <input type="text" id="globalSearchInput" placeholder="Cari Kode atau Nama Saham..." oninput="handleSearch(this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); }" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search">
+            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" style="display:none;" aria-label="Hapus Pencarian" title="Hapus Pencarian">✕</button>
           </div>
 
           <!-- Theme Toggle (Light / Dark) -->
@@ -3148,15 +3220,25 @@ function setSidebarFilter(filterKey, element) {
 
 // Handler Search Input
 function handleSearch(val) {
-  searchQuery = val.trim().toUpperCase();
-  document.getElementById("searchClearBtn").style.display = searchQuery ? "block" : "none";
+  searchQuery = val ? val.trim() : "";
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (clearBtn) {
+    clearBtn.style.display = searchQuery ? "flex" : "none";
+  }
   renderMainView();
 }
 
 function clearSearch() {
-  document.getElementById("globalSearchInput").value = "";
+  const input = document.getElementById("globalSearchInput");
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
   searchQuery = "";
-  document.getElementById("searchClearBtn").style.display = "none";
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (clearBtn) {
+    clearBtn.style.display = "none";
+  }
   renderMainView();
 }
 
@@ -3655,9 +3737,12 @@ function renderDailyView() {
 
   // Filter Saham
   let filtered = scanData.stocks.filter(s => {
-    // 1. Search filter
-    if (searchQuery && !s.symbol.includes(searchQuery) && !s.name.includes(searchQuery)) {
-      return false;
+    // 1. Search filter (simbol kode saham atau nama emiten)
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
@@ -3745,9 +3830,12 @@ function renderVipView() {
   // Filter VIP list berdasarkan search query & sinyal aktif
   let filtered = vipList.filter(item => {
     const s = item.data || {};
-    // 1. Search filter
-    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
-      return false;
+    // 1. Search filter (simbol kode saham atau nama emiten)
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
@@ -3845,8 +3933,11 @@ function renderRecommendationView() {
   // Filter rekomendasi berdasarkan search query & sinyal aktif
   let filtered = recList.filter(item => {
     const s = item.data || {};
-    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
-      return false;
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
     if (activeFilter === "2dot" && s.count_green !== 2) return false;

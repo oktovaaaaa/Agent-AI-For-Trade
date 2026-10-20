@@ -269,15 +269,25 @@ function setSidebarFilter(filterKey, element) {
 
 // Handler Search Input
 function handleSearch(val) {
-  searchQuery = val.trim().toUpperCase();
-  document.getElementById("searchClearBtn").style.display = searchQuery ? "block" : "none";
+  searchQuery = val ? val.trim() : "";
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (clearBtn) {
+    clearBtn.style.display = searchQuery ? "flex" : "none";
+  }
   renderMainView();
 }
 
 function clearSearch() {
-  document.getElementById("globalSearchInput").value = "";
+  const input = document.getElementById("globalSearchInput");
+  if (input) {
+    input.value = "";
+    input.focus();
+  }
   searchQuery = "";
-  document.getElementById("searchClearBtn").style.display = "none";
+  const clearBtn = document.getElementById("searchClearBtn");
+  if (clearBtn) {
+    clearBtn.style.display = "none";
+  }
   renderMainView();
 }
 
@@ -776,9 +786,12 @@ function renderDailyView() {
 
   // Filter Saham
   let filtered = scanData.stocks.filter(s => {
-    // 1. Search filter
-    if (searchQuery && !s.symbol.includes(searchQuery) && !s.name.includes(searchQuery)) {
-      return false;
+    // 1. Search filter (simbol kode saham atau nama emiten)
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
@@ -866,9 +879,12 @@ function renderVipView() {
   // Filter VIP list berdasarkan search query & sinyal aktif
   let filtered = vipList.filter(item => {
     const s = item.data || {};
-    // 1. Search filter
-    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
-      return false;
+    // 1. Search filter (simbol kode saham atau nama emiten)
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     // 2. Sinyal filter
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
@@ -966,8 +982,11 @@ function renderRecommendationView() {
   // Filter rekomendasi berdasarkan search query & sinyal aktif
   let filtered = recList.filter(item => {
     const s = item.data || {};
-    if (searchQuery && !s.symbol?.includes(searchQuery) && !s.name?.includes(searchQuery)) {
-      return false;
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
     }
     if (activeFilter === "3dot" && s.count_green !== 3) return false;
     if (activeFilter === "2dot" && s.count_green !== 2) return false;
