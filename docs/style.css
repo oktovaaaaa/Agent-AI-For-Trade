@@ -2593,6 +2593,256 @@ body.dark-theme .modal-tv-btn:hover {
   color: var(--text-primary);
 }
 
+/* ==========================================================================
+   MODAL PERFORMANCE HISTORY (30 HARI TRACKING & COLLAPSIBLE CHART/TABLE)
+   ========================================================================== */
+
+.modal-perf-section {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  padding: 14px 18px !important;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+
+.modal-perf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  gap: 12px;
+}
+
+.modal-perf-title-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.modal-perf-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-perf-subtitle {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.perf-toggle-btn {
+  background: var(--brand-mint-light);
+  color: var(--brand-primary);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+body.dark-theme .perf-toggle-btn {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ADE80;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.perf-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.2);
+}
+
+.modal-perf-content {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Stat Summary KPI Cards di Atas Grafik */
+.perf-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.perf-kpi-card {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: all 0.2s ease;
+}
+
+.perf-kpi-card.highlight {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.perf-kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.perf-kpi-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  line-height: 1.2;
+}
+
+.perf-kpi-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* Professional Chart Box */
+.perf-chart-box {
+  background: var(--bg-app);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px 12px 16px;
+  position: relative;
+  overflow: visible;
+}
+
+.perf-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+}
+
+.perf-chart-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.perf-chart-dates {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.perf-chart-svg-wrap {
+  width: 100%;
+  height: 140px;
+  position: relative;
+  overflow: visible;
+}
+
+.perf-chart-svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+.perf-chart-dot {
+  cursor: pointer;
+  transition: transform 0.15s ease, r 0.15s ease;
+}
+
+.perf-chart-dot:hover {
+  r: 5px !important;
+  opacity: 1 !important;
+}
+
+/* Tabel Riwayat Harian */
+.perf-table-wrap {
+  width: 100%;
+  max-height: 380px;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+}
+
+.perf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.perf-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+}
+
+.perf-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+}
+
+.perf-table tr:last-child td {
+  border-bottom: none;
+}
+
+.perf-table tr:hover {
+  background: var(--bg-hover);
+}
+
+.perf-badge-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.perf-badge-dot.dot-3 {
+  background: var(--status-green-bg);
+  color: var(--status-green-text);
+}
+
+.perf-badge-dot.dot-2 {
+  background: var(--status-cyan-bg);
+  color: var(--status-cyan-text);
+}
+
+.perf-badge-dot.dot-off {
+  background: var(--border-light);
+  color: var(--text-muted);
+}
+
 @media (max-width: 768px) {
   .modal-backdrop {
     padding: 12px !important;
@@ -2638,6 +2888,32 @@ body.dark-theme .modal-tv-btn:hover {
   }
   .modal-tf-card {
     padding: 10px 12px !important;
+  }
+  .modal-perf-section {
+    padding: 10px 12px !important;
+  }
+  .modal-perf-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .perf-toggle-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .perf-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .perf-kpi-val {
+    font-size: 14px !important;
+  }
+  .perf-chart-svg-wrap {
+    height: 115px !important;
+  }
+  .perf-table th, .perf-table td {
+    padding: 7px 9px;
+    font-size: 11px;
   }
   .modal-footer {
     padding: 10px 14px !important;

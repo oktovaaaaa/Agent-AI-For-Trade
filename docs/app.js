@@ -2032,6 +2032,294 @@ function openStockDetail(symbol) {
 
   const starIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
 
+  // --------------------------------------------------------------------------
+  // RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - OPSI A: KENAIKAN HARIAN & KUMULATIF
+  // --------------------------------------------------------------------------
+  const vipEntry = (appData.vip_3dot_history || []).find(h => h.symbol === stock.symbol || h.data?.symbol === stock.symbol);
+  let perfHistory = (vipEntry && Array.isArray(vipEntry.performance_history)) ? [...vipEntry.performance_history] : [];
+  let basePrice = vipEntry?.base_price || null;
+  let firstDetectedDate = vipEntry?.scan_date_display || null;
+
+  if (perfHistory.length === 0) {
+    const dates = Object.keys(appData.daily_scans || {}).sort();
+    const dynamicHist = [];
+    let detectedBase = null;
+    dates.forEach(dKey => {
+      const scan = appData.daily_scans[dKey];
+      const sFound = (scan.stocks || []).find(s => s.symbol === stock.symbol);
+      if (sFound) {
+        if (detectedBase === null) {
+          detectedBase = Number(sFound.close) || 0;
+          firstDetectedDate = scan.date_display || dKey;
+        }
+        const cVal = Number(sFound.close) || 0;
+        const chgVal = Number(sFound.change) || 0;
+        const cumGain = detectedBase > 0 ? ((cVal - detectedBase) / detectedBase) * 100 : 0;
+        dynamicHist.push({
+          date: dKey,
+          date_display: scan.date_display ? scan.date_display.split(' ').slice(0, 2).join(' ') : dKey,
+          close: cVal,
+          daily_change_pct: Number(chgVal.toFixed(2)),
+          cumulative_gain_pct: Number(cumGain.toFixed(2)),
+          count_green: sFound.count_green || 0
+        });
+      }
+    });
+    if (dynamicHist.length > 0) {
+      perfHistory = dynamicHist;
+      basePrice = detectedBase;
+    }
+  }
+
+  // Fallback 1 data point awal jika saham baru pertama kali terdeteksi
+  if (perfHistory.length === 0) {
+    basePrice = Number(stock.close) || 0;
+    firstDetectedDate = selectedDate || "Hari Ini";
+    perfHistory = [{
+      date: selectedDate || "today",
+      date_display: "Hari Ini",
+      close: basePrice,
+      daily_change_pct: Number(changeVal.toFixed(2)),
+      cumulative_gain_pct: 0.0,
+      count_green: stock.count_green || 0
+    }];
+  }
+
+  // Ringkasan Performa
+  const latestPerf = perfHistory[perfHistory.length - 1];
+  const totalCumGain = latestPerf ? Number(latestPerf.cumulative_gain_pct || 0) : 0;
+  const cumSign = totalCumGain > 0 ? "+" : "";
+  const cumClass = totalCumGain > 0 ? "positive" : (totalCumGain < 0 ? "negative" : "flat");
+  const cumFormatted = `${cumSign}${totalCumGain.toFixed(2)}%`;
+  const basePriceFormatted = basePrice ? "Rp " + Number(basePrice).toLocaleString("id-ID") : priceFormatted;
+  const allPrices = perfHistory.map(item => Number(item.close) || 0);
+  const minPriceVal = allPrices.length > 0 ? Math.min(...allPrices) : 0;
+  const maxPriceVal = allPrices.length > 0 ? Math.max(...allPrices) : 0;
+  const entryPriceVal = Number(basePrice) || (allPrices[0] || 0);
+  const latestPriceVal = latestPerf ? Number(latestPerf.close) : entryPriceVal;
+  const minGainPct = entryPriceVal > 0 ? (((minPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
+  const maxGainPct = entryPriceVal > 0 ? (((maxPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
+
+  // Generator Chart Area Trendline Halus (Smooth Spline Curve)
+  function generatePerfChartSvg(hist) {
+    if (!hist || hist.length === 0) return '';
+    const w = 600;
+    const h = 135;
+    const padL = 16;
+    const padR = 64; // space for price text on right
+    const padT = 16;
+    const padB = 22; // space for date text on bottom
+
+    const chartW = w - padL - padR;
+    const chartH = h - padT - padB;
+
+    const prices = hist.map(item => Number(item.close) || 0);
+    const minP = Math.min(...prices);
+    const maxP = Math.max(...prices);
+    const rangeP = (maxP - minP) || 1;
+    const midP = Math.round((maxP + minP) / 2);
+
+    const points = hist.map((item, idx) => {
+      const x = padL + (idx / (hist.length - 1)) * chartW;
+      const y = padT + chartH - ((item.close - minP) / rangeP) * chartH;
+      return { x, y, item, idx };
+    });
+
+    const isUp = (hist[hist.length - 1].close >= hist[0].close);
+    const strokeColor = isUp ? '#10B981' : '#EF4444';
+    const gradStart = isUp ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)';
+    const gradId = 'perfGradArea_' + (stock.symbol || 'sym').replace(/[^a-zA-Z0-9]/g, '');
+
+    // Algoritma Smooth Spline Bezier Curve (Cubic Catmull-Rom)
+    let splineD = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i === 0 ? i : i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      splineD += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+    const areaD = `${splineD} L ${(padL + chartW).toFixed(1)} ${(padT + chartH).toFixed(1)} L ${padL.toFixed(1)} ${(padT + chartH).toFixed(1)} Z`;
+
+    const midY = (padT + padT + chartH) / 2;
+    const startPt = points[0];
+    const endPt = points[points.length - 1];
+
+    return `
+      <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${gradStart}" />
+            <stop offset="100%" stop-color="${gradStart}" stop-opacity="0" />
+          </linearGradient>
+          <filter id="glow_${gradId}" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="${strokeColor}" flood-opacity="0.35" />
+          </filter>
+        </defs>
+
+        <!-- Horizontal Reference Gridlines & Price Tags -->
+        <line x1="${padL}" y1="${padT}" x2="${padL + chartW}" y2="${padT}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
+        <text x="${padL + chartW + 6}" y="${padT + 3.5}" font-size="9" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${maxP.toLocaleString('id-ID')}</text>
+
+        <line x1="${padL}" y1="${midY.toFixed(1)}" x2="${padL + chartW}" y2="${midY.toFixed(1)}" stroke="var(--border-light)" stroke-dasharray="2 4" opacity="0.4" />
+        <text x="${padL + chartW + 6}" y="${(midY + 3.5).toFixed(1)}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">Rp ${midP.toLocaleString('id-ID')}</text>
+
+        <line x1="${padL}" y1="${padT + chartH}" x2="${padL + chartW}" y2="${padT + chartH}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
+        <text x="${padL + chartW + 6}" y="${padT + chartH + 3.5}" font-size="9" font-weight="700" fill="var(--status-red)" text-anchor="start">Rp ${minP.toLocaleString('id-ID')}</text>
+
+        <!-- Shaded Area & Glowing Curve Line -->
+        <path d="${areaD}" fill="url(#${gradId})" />
+        <path d="${splineD}" fill="none" stroke="${strokeColor}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow_${gradId})" />
+
+        <!-- Interactive Micro-Dots on All Points with Native Tooltips -->
+        ${points.map(p => `
+          <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="${strokeColor}" opacity="0.85" class="perf-chart-dot">
+            <title>${p.item.date_display}: Rp ${Number(p.item.close).toLocaleString('id-ID')} (${p.item.daily_change_pct > 0 ? '+' : ''}${p.item.daily_change_pct}% hari ini • ${p.item.cumulative_gain_pct > 0 ? '+' : ''}${p.item.cumulative_gain_pct}% kumulatif)</title>
+          </circle>
+        `).join('')}
+
+        <!-- Entry Dot Indicator (Day 1) -->
+        <circle cx="${startPt.x.toFixed(1)}" cy="${startPt.y.toFixed(1)}" r="4" fill="#ffffff" stroke="${strokeColor}" stroke-width="2.2" />
+
+        <!-- Current/Now Dot Indicator (Day 31) with Pulse Ring -->
+        <circle cx="${endPt.x.toFixed(1)}" cy="${endPt.y.toFixed(1)}" r="4.5" fill="#ffffff" stroke="${strokeColor}" stroke-width="2.5" />
+        <circle cx="${endPt.x.toFixed(1)}" cy="${endPt.y.toFixed(1)}" r="8" fill="none" stroke="${strokeColor}" stroke-width="1.5" opacity="0.5" />
+
+        <!-- X-Axis Dates -->
+        <text x="${padL}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">${hist[0].date_display.split(' ').slice(0, 2).join(' ')} (Entry)</text>
+        <text x="${(padL + chartW / 2).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${hist[Math.floor(hist.length / 2)].date_display.split(' ').slice(0, 2).join(' ')}</text>
+        <text x="${(padL + chartW).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="end">${hist[hist.length - 1].date_display.split(' ').slice(0, 2).join(' ')} (Hari ${hist.length})</text>
+      </svg>
+    `;
+  }
+
+  // Generator Baris Tabel Riwayat Harian
+  const perfRowsHtml = perfHistory.map((item, idx) => {
+    const dayChg = Number(item.daily_change_pct || 0);
+    const daySign = dayChg > 0 ? "+" : "";
+    const dayColor = dayChg > 0 ? "var(--status-green)" : (dayChg < 0 ? "var(--status-red)" : "var(--text-muted)");
+    
+    const cumG = Number(item.cumulative_gain_pct || 0);
+    const cumGSign = cumG > 0 ? "+" : "";
+    const cumGColor = cumG > 0 ? "var(--status-green)" : (cumG < 0 ? "var(--status-red)" : "var(--text-muted)");
+
+    let dotBadge = `<span class="perf-badge-dot dot-off" style="color:var(--text-secondary); background:rgba(148, 163, 184, 0.15); border:1px solid rgba(148, 163, 184, 0.25);">⚪ Masa Pantau</span>`;
+    if (idx === 0) {
+      dotBadge = `<span class="perf-badge-dot dot-3">🟢 3-Dot Terdeteksi</span>`;
+    } else if (item.count_green === 3) {
+      dotBadge = `<span class="perf-badge-dot dot-3">🟢 3-Dot Aktif</span>`;
+    }
+
+    return `
+      <tr>
+        <td style="font-weight:600;">${item.date_display || item.date}</td>
+        <td style="font-weight:700;">Rp ${Number(item.close || 0).toLocaleString('id-ID')}</td>
+        <td style="color:${dayColor}; font-weight:700;">${daySign}${dayChg.toFixed(2)}%</td>
+        <td style="color:${cumGColor}; font-weight:800;">${cumGSign}${cumG.toFixed(2)}%</td>
+        <td>${dotBadge}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const minGainSign = minGainPct > 0 ? "+" : "";
+  const maxGainSign = maxGainPct > 0 ? "+" : "";
+
+  const perfSectionHtml = `
+    <!-- SECTION 6: RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - COLLAPSIBLE ACCORDION -->
+    <div class="modal-perf-section">
+      <div class="modal-perf-header" onclick="togglePerfHistoryCollapse()">
+        <div class="modal-perf-title-col">
+          <div class="modal-perf-title-row">
+            <span style="font-size:12.5px; font-weight:700; color:var(--text-primary); display:inline-flex; align-items:center; gap:6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+              Riwayat Performa & Kenaikan Sinyal (30 Hari)
+            </span>
+            <span class="change-pill ${cumClass}" style="font-size:11px; padding:2px 8px;">Kumulatif: ${cumFormatted}</span>
+          </div>
+          <div class="modal-perf-subtitle">
+            Deteksi Awal: <b>${firstDetectedDate || 'Aktif'}</b> • Modal Entry: <b>${basePriceFormatted}</b> • Hari Terpantau: <b>${perfHistory.length} hari</b>
+          </div>
+        </div>
+        <button type="button" class="perf-toggle-btn" id="perfToggleBtn" onclick="event.stopPropagation(); togglePerfHistoryCollapse();">
+          <span>▼</span>
+          <span>Buka Grafik & Riwayat</span>
+        </button>
+      </div>
+
+      <!-- Kontainer Grafik & Tabel (Default Tertutup) -->
+      <div class="modal-perf-content" id="modalPerfContent" style="display: none;">
+        
+        <!-- 4 KPI Stat Cards (Rapi & Tidak Bertumpuk) -->
+        <div class="perf-kpi-grid">
+          <div class="perf-kpi-card">
+            <span class="perf-kpi-label">MODAL ENTRY (HARI 1)</span>
+            <span class="perf-kpi-val">Rp ${entryPriceVal.toLocaleString('id-ID')}</span>
+            <span class="perf-kpi-sub">${perfHistory[0]?.date_display || 'Awal'}</span>
+          </div>
+          <div class="perf-kpi-card">
+            <span class="perf-kpi-label">TERENDAH (LOW)</span>
+            <span class="perf-kpi-val" style="color:var(--status-red);">Rp ${minPriceVal.toLocaleString('id-ID')}</span>
+            <span class="perf-kpi-sub" style="color:var(--status-red);">${minGainSign}${minGainPct.toFixed(2)}%</span>
+          </div>
+          <div class="perf-kpi-card">
+            <span class="perf-kpi-label">TERTINGGI (PEAK)</span>
+            <span class="perf-kpi-val" style="color:var(--status-green);">Rp ${maxPriceVal.toLocaleString('id-ID')}</span>
+            <span class="perf-kpi-sub" style="color:var(--status-green);">${maxGainSign}${maxGainPct.toFixed(2)}%</span>
+          </div>
+          <div class="perf-kpi-card highlight">
+            <span class="perf-kpi-label">HARGA TERAKHIR</span>
+            <span class="perf-kpi-val" style="color:var(--brand-primary);">Rp ${latestPriceVal.toLocaleString('id-ID')}</span>
+            <span class="perf-kpi-sub" style="color:${cumClass === 'positive' ? 'var(--status-green)' : (cumClass === 'negative' ? 'var(--status-red)' : 'var(--text-muted)')}; font-weight:700;">${cumFormatted} Kumulatif</span>
+          </div>
+        </div>
+
+        <!-- Professional Chart Box -->
+        <div class="perf-chart-box">
+          <div class="perf-chart-header">
+            <span class="perf-chart-title">📈 Kurva Pergerakan Harga Penutupan (Close)</span>
+            <span class="perf-chart-dates">${perfHistory[0]?.date_display || ''} s/d ${perfHistory[perfHistory.length - 1]?.date_display || ''} (${perfHistory.length} Hari Bursa)</span>
+          </div>
+          <div class="perf-chart-svg-wrap">
+            ${generatePerfChartSvg(perfHistory)}
+          </div>
+        </div>
+
+        <!-- Tabel Riwayat Harian -->
+        <div class="perf-table-wrap">
+          <table class="perf-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Harga Close</th>
+                <th>Hari Ini (%)</th>
+                <th>Total Kenaikan (%)</th>
+                <th>Status Sinyal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${perfRowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-size:10.5px; color:var(--text-muted); line-height:1.6; padding: 6px 2px; display:flex; gap:6px; align-items:flex-start;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <div>
+            <b>Keterangan Status Sinyal:</b><br/>
+            • <b>🟢 3-Dot Terdeteksi / Aktif:</b> Ketiga timeframe (Daily, 1H, 15M) aktif memunculkan sinyal Rally Good Dot Green.<br/>
+            • <b>⚪ Masa Pantau:</b> Dot green padam di timeframe intraday, namun saham tetap aktif dipantau & diperbarui harganya selama 30 hari bursa.<br/>
+            • <i>Jika saham memicu 3-Dot Green baru, siklus deteksi awal dan masa kedaluwarsa 30 hari akan di-reset otomatis.</i>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  `;
+
   const modalHtml = `
     <div class="modal-dialog" onclick="event.stopPropagation()">
       
@@ -2214,6 +2502,8 @@ function openStockDetail(symbol) {
 
         </div>
 
+        ${perfSectionHtml}
+
       </div>
 
       <!-- Modal Footer -->
@@ -2252,6 +2542,21 @@ function closeModal() {
   }
   document.body.style.overflow = "";
 }
+
+function togglePerfHistoryCollapse() {
+  const content = document.getElementById("modalPerfContent");
+  const btn = document.getElementById("perfToggleBtn");
+  if (!content) return;
+  const isHidden = content.style.display === "none" || !content.style.display;
+  if (isHidden) {
+    content.style.display = "flex";
+    if (btn) btn.innerHTML = `<span>▲</span><span>Tutup Riwayat</span>`;
+  } else {
+    content.style.display = "none";
+    if (btn) btn.innerHTML = `<span>▼</span><span>Buka Grafik & Riwayat</span>`;
+  }
+}
+window.togglePerfHistoryCollapse = togglePerfHistoryCollapse;
 
 // Tutup modal dengan tombol Escape keyboard
 window.addEventListener("keydown", (e) => {

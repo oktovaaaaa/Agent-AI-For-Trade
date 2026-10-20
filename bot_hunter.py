@@ -1247,37 +1247,128 @@ def simpan_database_json(hasil_deteksi, now_wib):
         # Batas tanggal bursa terlama yang masih aktif tersimpan
         oldest_retained_date = min(history["daily_scans"].keys()) if history["daily_scans"] else date_key
                 
-        # 2. SIMPAN RIWAYAT KHUSUS SAHAM 3 DOT GREEN (1 BULAN TERAKHIR / 30 CANDLE)
+        # 2. SIMPAN & PERBARUI RIWAYAT KHUSUS SAHAM 3 DOT GREEN & REKOMENDASI (1 BULAN / 30 CANDLE)
         if "vip_3dot_history" not in history or not isinstance(history["vip_3dot_history"], list):
             history["vip_3dot_history"] = []
 
-        # Refresh data harga & indikator saham VVIP yang sudah ada jika ikut ter-scan hari ini
         stock_lookup = {s["symbol"]: s for s in clean_stocks}
+        saham_3_dot_lookup = {s["symbol"]: s for s in saham_3_dot}
+        tgl_id_short = now_wib.strftime("%d %b %Y")
+
+        # Cek apakah ada saham yang sedang dipantau di vip_3dot_history tapi sepi/tidak masuk screener hunter hari ini
+        missing_tracked = [
+            h.get("symbol") for h in history["vip_3dot_history"]
+            if h.get("symbol") and h.get("symbol") not in stock_lookup
+        ]
+        if missing_tracked:
+            try:
+                q_missing = (Query().set_markets('indonesia')
+                             .select('name', 'close', 'change', 'volume')
+                             .where(Column('name').isin(missing_tracked)))
+                df_miss = q_missing.get_scanner_data()[1]
+                if not df_miss.empty:
+                    for _, row in df_miss.iterrows():
+                        tk = str(row['ticker']).split(':')[-1]
+                        stock_lookup[tk] = {
+                            "symbol": tk,
+                            "name": tk,
+                            "close": float(row['close']),
+                            "change": float(row['change']),
+                            "volume": float(row['volume']),
+                            "count_green": 0,
+                            "has_green_dot": False,
+                            "timeframes": {}
+                        }
+            except Exception as e_miss:
+                print(f"⚠️ [INFO] Info harga saham sepi tidak dapat di-fetch: {e_miss}")
+
+        # a. Perbarui saham-saham yang SUDAH ADA di tracking vip_3dot_history
         for h in history["vip_3dot_history"]:
             sym = h.get("symbol")
-            if sym in stock_lookup:
-                h["data"] = stock_lookup[sym]
+            if "performance_history" not in h or not isinstance(h["performance_history"], list):
+                h["performance_history"] = []
 
-        # Simpan / Perbarui saham 3-Dot Green (1 emiten = 1 card, anti-duplikasi antar hari)
-        for s3 in saham_3_dot:
-            idx_exist = next((i for i, h in enumerate(history["vip_3dot_history"]) if h.get("symbol") == s3["symbol"]), None)
-            record_item = {
-                "symbol": s3["symbol"],
-                "scan_date": date_key,
-                "scan_date_display": tgl_id,
-                "data": s3
-            }
-            if idx_exist is not None:
-                history["vip_3dot_history"][idx_exist] = record_item
-            else:
-                history["vip_3dot_history"].append(record_item)
+            # Re-Trigger Sinyal Baru:
+            # Jika saham ter-trigger 3-Dot Green lagi di tanggal baru yang berbeda, reset siklus 30 hari baru
+            if sym in saham_3_dot_lookup and h.get("scan_date") != date_key:
+                s3 = saham_3_dot_lookup[sym]
+                c_val = float(s3.get("close", 0))
+                chg_val = round(float(s3.get("change", 0.0)), 2)
+                h["scan_date"] = date_key
+                h["scan_date_display"] = tgl_id
+                h["base_price"] = c_val
+                h["data"] = s3
+                h["performance_history"] = [{
+                    "date": date_key,
+                    "date_display": tgl_id_short,
+                    "close": c_val,
+                    "daily_change_pct": chg_val,
+                    "cumulative_gain_pct": 0.0,
+                    "count_green": 3
+                }]
+                continue
+
+            # Update data harian berjalan (Tracking harian 30 hari bursa)
+            if sym in stock_lookup:
+                cur_s = stock_lookup[sym]
+                h["data"] = cur_s
+                c_val = float(cur_s.get("close", 0))
+                chg_val = round(float(cur_s.get("change", 0.0)), 2)
+                base_p = float(h.get("base_price") or c_val)
+                if not h.get("base_price"):
+                    h["base_price"] = base_p
                 
-        # Pangkas vip_3dot_history agar selaras dengan 30 candle bursa terakhir
+                cum_gain = round(((c_val - base_p) / base_p) * 100, 2) if base_p > 0 else 0.0
+                cg_status = cur_s.get("count_green", 0)
+
+                # Update jika tanggal hari ini sudah ada, atau tambahkan jika hari baru
+                existing_entry = next((item for item in h["performance_history"] if item.get("date") == date_key), None)
+                if existing_entry:
+                    existing_entry["close"] = c_val
+                    existing_entry["daily_change_pct"] = chg_val
+                    existing_entry["cumulative_gain_pct"] = cum_gain
+                    existing_entry["count_green"] = cg_status
+                else:
+                    h["performance_history"].append({
+                        "date": date_key,
+                        "date_display": tgl_id_short,
+                        "close": c_val,
+                        "daily_change_pct": chg_val,
+                        "cumulative_gain_pct": cum_gain,
+                        "count_green": cg_status
+                    })
+
+        # b. Tambahkan saham 3-Dot Green BARU yang belum pernah masuk vip_3dot_history
+        existing_symbols = {h.get("symbol") for h in history["vip_3dot_history"]}
+        for s3 in saham_3_dot:
+            sym = s3["symbol"]
+            if sym not in existing_symbols:
+                c_val = float(s3.get("close", 0))
+                chg_val = round(float(s3.get("change", 0.0)), 2)
+                record_item = {
+                    "symbol": sym,
+                    "scan_date": date_key,
+                    "scan_date_display": tgl_id,
+                    "base_price": c_val,
+                    "data": s3,
+                    "performance_history": [{
+                        "date": date_key,
+                        "date_display": tgl_id_short,
+                        "close": c_val,
+                        "daily_change_pct": chg_val,
+                        "cumulative_gain_pct": 0.0,
+                        "count_green": 3
+                    }]
+                }
+                history["vip_3dot_history"].append(record_item)
+                existing_symbols.add(sym)
+
+        # c. Pangkas saham yang masa pantau 30 hari bursa-nya sudah kedaluwarsa (tanpa re-trigger baru)
         history["vip_3dot_history"] = [
             h for h in history["vip_3dot_history"]
             if h.get("scan_date", "") >= oldest_retained_date
         ]
-        
+
         # Urutkan vip_3dot_history berdasarkan tanggal terbaru
         history["vip_3dot_history"].sort(key=lambda x: (x.get("scan_date", ""), x.get("data", {}).get("volume", 0)), reverse=True)
         
