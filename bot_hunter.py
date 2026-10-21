@@ -1283,6 +1283,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
                 print(f"⚠️ [INFO] Info harga saham sepi tidak dapat di-fetch: {e_miss}")
 
         # a. Perbarui saham-saham yang SUDAH ADA di tracking vip_3dot_history
+        scanned_symbols = {s["symbol"] for s in clean_stocks}
         for h in history["vip_3dot_history"]:
             sym = h.get("symbol")
             if "performance_history" not in h or not isinstance(h["performance_history"], list):
@@ -1311,7 +1312,6 @@ def simpan_database_json(hasil_deteksi, now_wib):
             # Update data harian berjalan (Tracking harian 30 hari bursa)
             if sym in stock_lookup:
                 cur_s = stock_lookup[sym]
-                h["data"] = cur_s
                 c_val = float(cur_s.get("close", 0))
                 chg_val = round(float(cur_s.get("change", 0.0)), 2)
                 base_p = float(h.get("base_price") or c_val)
@@ -1319,7 +1319,20 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     h["base_price"] = base_p
                 
                 cum_gain = round(((c_val - base_p) / base_p) * 100, 2) if base_p > 0 else 0.0
-                cg_status = cur_s.get("count_green", 0)
+
+                if sym in scanned_symbols:
+                    h["data"] = cur_s
+                    cg_status = cur_s.get("count_green", 0)
+                else:
+                    # Saham sepi/tidak masuk screener hari ini: update harga close, change, volume
+                    # Data indikator sinyal 3-Dot (RallyGood, SMC, EMA) tetap utuh terjaga!
+                    if "data" in h and isinstance(h["data"], dict):
+                        h["data"]["close"] = c_val
+                        h["data"]["change"] = chg_val
+                        h["data"]["volume"] = float(cur_s.get("volume", 0))
+                    else:
+                        h["data"] = cur_s
+                    cg_status = h.get("data", {}).get("count_green", 3)
 
                 # Update jika tanggal hari ini sudah ada, atau tambahkan jika hari baru
                 existing_entry = next((item for item in h["performance_history"] if item.get("date") == date_key), None)

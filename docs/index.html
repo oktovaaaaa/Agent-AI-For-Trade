@@ -10,6 +10,7 @@
   <meta name="description" content="Dashboard Minimalist Rekomendasi Saham Hunter IDX dengan Indikator RallyGood, DonAlt EMA Suite, Smart Money Concepts (SMC), dan MACD Divergence.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
 /* ==========================================================================
@@ -2857,6 +2858,29 @@ body.dark-theme .perf-toggle-btn {
   color: var(--text-muted);
 }
 
+/* ==========================================================================
+   TRACK RECORD STYLING (BUKTI AKURASI CUAN >= 8% & LUXURY CARD >= 25%)
+   ========================================================================== */
+
+/* Luxury Stock Card (Kenaikan >= 25% di Track Record) */
+.stock-card.track-luxury-card {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+  box-shadow: 0 4px 16px -2px rgba(245, 158, 11, 0.15) !important;
+}
+
+.stock-card.track-luxury-card:hover {
+  transform: translateY(-3px);
+  border-color: #F59E0B !important;
+  box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.28) !important;
+}
+
+body.dark-theme .stock-card.track-luxury-card {
+  border-color: rgba(251, 191, 36, 0.5) !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.08) 100%) !important;
+}
+
+
 @media (max-width: 768px) {
   .modal-backdrop {
     padding: 12px !important;
@@ -2940,7 +2964,7 @@ body.dark-theme .perf-toggle-btn {
   }
 }
 
-  </style>
+</style>
 </head>
 <body class="light-theme">
   <!-- Layout Wrapper with Left Sidebar & Main Content -->
@@ -3013,6 +3037,13 @@ body.dark-theme .perf-toggle-btn {
             </span>
             <span class="nav-label">3 Rally Good 1 bulan terakhir</span>
             <span class="nav-count vip-counter" id="vipNavCount">0</span>
+          </button>
+          <button class="nav-item" id="menuTrackRecordBtn" onclick="switchMainMode('trackrecord')">
+            <span class="nav-icon" style="color:var(--status-gold);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+            </span>
+            <span class="nav-label">Track Record</span>
+            <span class="nav-count" id="trackRecordNavCount" style="background:rgba(245, 158, 11, 0.15); color:var(--status-gold); font-weight:800;">0</span>
           </button>
         </div>
 
@@ -3285,6 +3316,9 @@ async function loadDatabase() {
     // Update Rekomendasi Aranter badge count
     updateRecommendationCount();
 
+    // Update Track Record badge count
+    updateTrackRecordCount();
+
     // Pilih tanggal terbaru secara default yang memiliki data saham
     const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
     const latestWithStocks = availableDates.find(d => (appData.daily_scans[d]?.stocks || []).length > 0) || availableDates[0];
@@ -3485,10 +3519,14 @@ function switchMainMode(mode) {
   document.getElementById("menuVipBtn").classList.toggle("active", mode === "vip");
   const recBtn = document.getElementById("menuRecBtn");
   if (recBtn) recBtn.classList.toggle("active", mode === "recommendation");
+  const trackBtn = document.getElementById("menuTrackRecordBtn");
+  if (trackBtn) trackBtn.classList.toggle("active", mode === "trackrecord");
 
-  // Jika masuk ke Rekomendasi Aranter, prioritaskan urutkan Skor Rekomendasi (Tertinggi)
+  // Atur default sort sesuai mode
   if (mode === "recommendation") {
     currentSort = "score_desc";
+  } else if (mode === "trackrecord") {
+    currentSort = "gain_desc";
   } else if (currentSort === "score_desc") {
     currentSort = "dot_desc";
   }
@@ -3571,6 +3609,19 @@ function syncSortDropdownOptions() {
     if (currentSort === "score_desc") {
       currentSort = "dot_desc";
     }
+  } else if (currentMode === "trackrecord") {
+    if (sortSel.dataset.mode !== "trackrecord") {
+      sortSel.innerHTML = `
+        <option value="gain_desc">% Kenaikan Tertinggi (Peak)</option>
+        <option value="close_desc">Harga Close Tertinggi</option>
+        <option value="vol_desc">Volume Terbesar</option>
+        <option value="sym_asc">Kode Saham (A-Z)</option>
+      `;
+      sortSel.dataset.mode = "trackrecord";
+    }
+    if (currentSort !== "gain_desc" && currentSort !== "close_desc" && currentSort !== "vol_desc" && currentSort !== "sym_asc") {
+      currentSort = "gain_desc";
+    }
   } else {
     // Mode Screener Harian
     if (sortSel.dataset.mode !== "daily") {
@@ -3597,6 +3648,8 @@ function renderMainView() {
     renderDailyView();
   } else if (currentMode === "recommendation") {
     renderRecommendationView();
+  } else if (currentMode === "trackrecord") {
+    renderTrackRecordView();
   } else {
     renderVipView();
   }
@@ -3943,6 +3996,80 @@ function updateRecommendationCount() {
   if (el) el.innerText = count;
 }
 
+// ============================================================================
+// TRACK RECORD ENGINE (Bukti Akurasi Sinyal Cuan >= +20%)
+// ============================================================================
+
+// Helper: Ambil Saham 3 Rally Good untuk Track Record (Opsi 2: Kenaikan dari Harga Close saat keluar sinyal di screener)
+function getTrackRecordStocks() {
+  const vipList = appData.vip_3dot_history || [];
+  const dailyScans = appData.daily_scans || {};
+  const sortedDates = Object.keys(dailyScans).sort();
+  const results = [];
+
+  vipList.forEach(item => {
+    const s = item.data || item;
+    if (!s || !s.symbol) return;
+    const sym = s.symbol;
+
+    // Rekam jejak kemunculan saham ini di scan harian (dari yang paling awal)
+    const scanHistory = [];
+    sortedDates.forEach(dKey => {
+      const scan = dailyScans[dKey];
+      const sFound = (scan.stocks || []).find(st => st.symbol === sym);
+      if (sFound) {
+        scanHistory.push({
+          date: dKey,
+          date_display: scan.date_display || dKey,
+          close: Number(sFound.close) || 0,
+          count_green: sFound.count_green || 0,
+          stock: sFound
+        });
+      }
+    });
+
+    // Opsi 2 (Track Record): Entry adalah harga CLOSE pada hari pertama saham resmi masuk screener
+    if (scanHistory.length < 2) {
+      // Belum ada hari bursa berikutnya setelah terdeteksi di screener (Day 1)
+      return;
+    }
+
+    const entryClose = scanHistory[0].close;
+    const entryDateDisplay = scanHistory[0].date_display;
+    const subsequentCloses = scanHistory.slice(1).map(p => p.close).filter(c => c > 0);
+
+    if (entryClose <= 0 || subsequentCloses.length === 0) return;
+
+    const peakClose = Math.max(...subsequentCloses);
+    const peakGain = ((peakClose - entryClose) / entryClose) * 100;
+
+    // Syarat Kriteria Track Record: Minimal kenaikan >= +8% dari harga close rekomendasi
+    if (peakGain >= 8.0) {
+      results.push({
+        stock: s,
+        vipItem: item,
+        symbol: sym,
+        name: s.name || sym,
+        close: Number(s.close) || peakClose,
+        basePrice: entryClose,
+        peakPrice: peakClose,
+        peakGain: Number(peakGain.toFixed(2)),
+        isLuxury: peakGain >= 25.0,
+        detectedDate: entryDateDisplay || "Hari Pertama Sinyal"
+      });
+    }
+  });
+
+  return results.sort((a, b) => b.peakGain - a.peakGain);
+}
+
+// Helper: Update Badge Counter di Sidebar Menu Track Record
+function updateTrackRecordCount() {
+  const count = getTrackRecordStocks().length;
+  const el = document.getElementById("trackRecordNavCount");
+  if (el) el.innerText = count;
+}
+
 // Render Daily Mode (Data Harian)
 function renderDailyView() {
   applyGridCardMode("daily");
@@ -4274,6 +4401,156 @@ function renderRecommendationView() {
   grid.innerHTML = bannerHtml + cardsHtml;
 }
 
+// Render Track Record Mode (Bukti Saham 3 Rally Good Kenaikan >= +20%)
+function renderTrackRecordView() {
+  applyGridCardMode("trackrecord");
+  const grid = document.getElementById("stocksGrid");
+  const trackList = getTrackRecordStocks();
+
+  document.getElementById("pageMainHeading").innerText = "Track Record";
+  document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
+
+  document.getElementById("activeDateDisplay").innerText = "Target Kenaikan \u2265 +8%";
+  document.getElementById("activeTimeDisplay").innerText = "30 Hari Terakhir";
+
+  // Hitung metrics
+  const totalLolos = trackList.length;
+  let maxGain = 0;
+  let topStock = null;
+  let sumGain = 0;
+
+  trackList.forEach(item => {
+    sumGain += item.peakGain;
+    if (item.peakGain > maxGain) {
+      maxGain = item.peakGain;
+      topStock = item;
+    }
+  });
+
+  const avgGain = totalLolos > 0 ? (sumGain / totalLolos) : 0;
+
+  // HANYA 3 KARTU METRIK:
+  // Card 0: Total Saham Lolos >= 8%
+  updateMetricCard(
+    0,
+    "TARGET CUAN \u2265 8%",
+    "tag-gold",
+    `${totalLolos} Saham`,
+    "Total Saham Lolos \u2265 8%",
+    "Kenaikan dari harga close saat sinyal terdeteksi"
+  );
+
+  // Card 1: Rekor Cuan Tertinggi (Peak) + Close Price
+  if (topStock) {
+    updateMetricCard(
+      1,
+      "REKOR PEAK CUAN",
+      "tag-green",
+      `+${maxGain.toFixed(1)}% (${topStock.symbol})`,
+      "Rekor Cuan Tertinggi (Peak)",
+      `Close: Rp ${Number(topStock.close).toLocaleString('id-ID')} \u2022 Entry: Rp ${Number(topStock.basePrice).toLocaleString('id-ID')} \u2794 Peak: Rp ${Number(topStock.peakPrice).toLocaleString('id-ID')}`
+    );
+  } else {
+    updateMetricCard(1, "REKOR PEAK CUAN", "tag-green", "-", "Rekor Cuan Tertinggi (Peak)", "Belum ada rekor");
+  }
+
+  // Card 2 (metricCardGolden): Hidden by applyGridCardMode("trackrecord")
+
+  // Card 3 (metricCardTotal, wide): Rata-rata Kenaikan
+  updateMetricCard(
+    3,
+    "RATA-RATA CUAN",
+    "tag-cyan",
+    `+${avgGain.toFixed(1)}%`,
+    "Rata-rata Kenaikan",
+    `Rata-rata kenaikan puncak seluruh ${totalLolos} saham lolos target`
+  );
+
+  // Sinkronisasi value dropdown urutkan di UI
+  const sortSel = document.getElementById("sortSelector");
+  if (sortSel && sortSel.value !== currentSort) {
+    sortSel.value = currentSort;
+  }
+
+  // Update Sidebar Filter Counters
+  document.getElementById("countAllFilter").innerText = totalLolos;
+  document.getElementById("count3DotFilter").innerText = totalLolos;
+  document.getElementById("count2DotFilter").innerText = 0;
+
+  let countGolden = 0;
+  let countSmc = 0;
+  let countScalp = 0;
+  trackList.forEach(item => {
+    if (checkHasGolden(item.stock)) countGolden++;
+    if (checkHasSmcBreakout(item.stock)) countSmc++;
+    if (checkHasScalpBuy(item.stock, true)) countScalp++;
+  });
+  const countGoldEl = document.getElementById("countGoldenFilter");
+  if (countGoldEl) countGoldEl.innerText = countGolden;
+  const countSmcEl = document.getElementById("countSmcFilter");
+  if (countSmcEl) countSmcEl.innerText = countSmc;
+  const countScalpEl = document.getElementById("countScalpFilter");
+  if (countScalpEl) countScalpEl.innerText = countScalp;
+
+  // Filter list berdasarkan search query & sinyal aktif
+  let filtered = trackList.filter(item => {
+    const s = item.stock || {};
+    if (searchQuery) {
+      const q = searchQuery.toUpperCase();
+      const matchSymbol = s.symbol && s.symbol.toUpperCase().includes(q);
+      const matchName = s.name && s.name.toUpperCase().includes(q);
+      if (!matchSymbol && !matchName) return false;
+    }
+    if (activeFilter === "3dot" && s.count_green !== 3) return false;
+    if (activeFilter === "2dot" && s.count_green !== 2) return false;
+    if (activeFilter === "golden" && !checkHasGolden(s)) return false;
+    if (activeFilter === "smc" && !checkHasSmcBreakout(s)) return false;
+    if (activeFilter === "scalp" && !checkHasScalpBuy(s, true)) return false;
+    return true;
+  });
+
+  // Sort list
+  filtered.sort((a, b) => {
+    if (currentSort === "gain_desc") {
+      return b.peakGain - a.peakGain;
+    } else if (currentSort === "close_desc") {
+      return b.close - a.close;
+    } else if (currentSort === "vol_desc") {
+      return (Number(b.stock.volume) || 0) - (Number(a.stock.volume) || 0);
+    } else if (currentSort === "sym_asc") {
+      return a.symbol.localeCompare(b.symbol);
+    }
+    return b.peakGain - a.peakGain;
+  });
+
+  document.getElementById("filterResultCount").innerText = `Menampilkan ${filtered.length} dari ${totalLolos} saham lolos target \u2265 8%`;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg>
+        </div>
+        <h3>Belum Ada Saham dengan Kenaikan \u2265 +8%</h3>
+        <p>Saham 3 Rally Good akan otomatis masuk ke menu ini begitu mencapai target keuntungan minimal +8% sejak terdeteksi di screener.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const cardsHtml = filtered.map(item => {
+    return createStockCardHTML(item.stock, item.detectedDate, {
+      peakGain: item.peakGain,
+      isLuxury: item.isLuxury,
+      basePrice: item.basePrice,
+      peakPrice: item.peakPrice,
+      detectedDate: item.detectedDate
+    });
+  }).join("");
+
+  grid.innerHTML = cardsHtml;
+}
+
 // Helper Sorting Logic
 function sortStocks(stocks) {
   return [...stocks].sort((a, b) => {
@@ -4395,7 +4672,7 @@ function updateMetricCard(cardIndex, tagText, tagClass, numberText, titleText, d
   }
 }
 
-// Helper: Switch Grid Card Mode (3 cards for Screener, 4 cards for Rekomendasi Aranter & VIP)
+// Helper: Switch Grid Card Mode (3 cards for Screener & Track Record, 4 cards for Rekomendasi Aranter & VIP)
 function applyGridCardMode(mode) {
   const gridSection = document.getElementById("metricsGridSection");
   const cardGolden = document.getElementById("metricCardGolden");
@@ -4404,14 +4681,21 @@ function applyGridCardMode(mode) {
   const totalIcon = document.getElementById("statTotalIcon");
   const sparkBox = document.getElementById("statTotalSparkline");
 
-  if (mode === "daily") {
-    // 3 Cards Mode (Screener)
+  if (mode === "daily" || mode === "trackrecord") {
+    // 3 Cards Mode (Screener Harian & Track Record)
     if (gridSection) gridSection.classList.remove("mode-4-cards");
     if (cardGolden) cardGolden.style.display = "none";
     if (cardTotal) cardTotal.classList.add("metric-card-wide");
-    if (periodFilter) periodFilter.style.display = "inline-flex";
-    if (totalIcon) totalIcon.style.display = "none";
-    if (sparkBox) sparkBox.style.display = "flex";
+    if (periodFilter) periodFilter.style.display = (mode === "daily") ? "inline-flex" : "none";
+    if (totalIcon) totalIcon.style.display = (mode === "daily") ? "none" : "inline-flex";
+    if (sparkBox) {
+      if (mode === "daily") {
+        sparkBox.style.display = "flex";
+      } else {
+        sparkBox.innerHTML = "";
+        sparkBox.style.display = "none";
+      }
+    }
   } else {
     // 4 Cards Mode (VIP & Rekomendasi Aranter)
     if (gridSection) gridSection.classList.add("mode-4-cards");
@@ -4725,9 +5009,12 @@ function updateTopMetrics(vipCount, potCount, p3, p4, hideTotalMeta = false) {
 }
 
 // Helper: Generate HTML for Minimalist Stock Card
-function createStockCardHTML(stock, vipDateLabel = null) {
-  const isVip = stock.count_green === 3;
+function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null) {
+  const isVip = (currentMode === "trackrecord") ? false : (stock.count_green === 3);
   const tf = stock.timeframes || {};
+  const isLuxury = Boolean(trackRecordInfo && trackRecordInfo.isLuxury);
+  const cardClass = isLuxury ? "stock-card is-vip track-luxury-card" : (isVip ? "stock-card is-vip" : "stock-card");
+
 
   // Formatter Harga & Kenaikan
   const priceFormatted = "Rp " + Number(stock.close || 0).toLocaleString("id-ID");
@@ -4882,22 +5169,39 @@ function createStockCardHTML(stock, vipDateLabel = null) {
     macdChip = `<span class="badge-chip chip-macd-buy">Bullish Div (${macdTfLabel})${pStr}</span>`;
   }
 
-  // VIP Date Notification
-  const vipDateRow = vipDateLabel ? `
-    <div style="font-size:11px; font-weight:600; color:var(--status-gold); margin-top:2px;">
-      Terdeteksi VIP: ${vipDateLabel}
-    </div>
-  ` : "";
+  // VIP or Track Record Date Notification
+  let vipDateRow = "";
+  if (trackRecordInfo) {
+    const entryStr = trackRecordInfo.basePrice ? `Rp ${Number(trackRecordInfo.basePrice).toLocaleString('id-ID')}` : '-';
+    const peakStr = trackRecordInfo.peakPrice ? `Rp ${Number(trackRecordInfo.peakPrice).toLocaleString('id-ID')}` : '-';
+    vipDateRow = `
+      <div style="font-size:11px; font-weight:600; color:var(--text-secondary); margin-top:3px; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+        <span>Entry Close: <b>${entryStr}</b> \u2794 Peak: <b>${peakStr}</b></span>
+        <span style="opacity:0.8;">(${trackRecordInfo.detectedDate})</span>
+      </div>
+    `;
+  } else if (vipDateLabel) {
+    vipDateRow = `
+      <div style="font-size:11px; font-weight:600; color:var(--status-gold); margin-top:2px;">
+        Terdeteksi VIP: ${vipDateLabel}
+      </div>
+    `;
+  }
 
   return `
-    <article class="stock-card ${isVip ? 'is-vip' : ''}" onclick="openStockDetail('${stock.symbol}')" title="Klik untuk melihat analisa detail lengkap">
+    <article class="${cardClass}" onclick="openStockDetail('${stock.symbol}')" title="Klik untuk melihat analisa detail lengkap">
       
       <!-- Card Header: Symbol & Price -->
       <div class="card-header-row">
         <div class="symbol-col">
           <div class="symbol-badge-box">
             <span class="symbol-text">${stock.symbol}</span>
-            ${isVip ? `<span class="vip-badge-pill">3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">2-DOT</span>` : '')}
+            ${(stock.count_green === 3) ? `<span class="vip-badge-pill">3-DOT</span>` : (stock.count_green === 2 ? `<span class="vip-badge-pill" style="background:var(--status-cyan-bg); color:var(--status-cyan-text);">2-DOT</span>` : '')}
+            ${trackRecordInfo ? `
+              <span class="vip-badge-pill" style="${isLuxury ? 'background:linear-gradient(135deg, #F59E0B, #D97706); color:#fff; font-weight:800;' : 'background:var(--status-green-bg); color:var(--status-green-text); border:1px solid rgba(22,163,74,0.3); font-weight:700;'}">
+                ${isLuxury ? '★ ' : ''}+${trackRecordInfo.peakGain.toFixed(1)}% PEAK
+              </span>
+            ` : ''}
           </div>
           <span class="symbol-name">${stock.name || stock.symbol}</span>
           ${vipDateRow}
@@ -4964,6 +5268,14 @@ function createStockCardHTML(stock, vipDateLabel = null) {
         <div class="indicator-row">
           <span class="indicator-title">MACD Div (${macdTfLabel || '15M'}):</span>
           <div class="indicator-val">${macdChip}</div>
+        </div>
+        ` : ''}
+        ${trackRecordInfo ? `
+        <div class="indicator-row">
+          <span class="indicator-title">Realisasi Cuan:</span>
+          <div class="indicator-val">
+            <span class="badge-chip ${isLuxury ? 'chip-golden' : 'chip-scalp-buy'}">+${trackRecordInfo.peakGain.toFixed(1)}% Peak (@ Rp ${trackRecordInfo.peakPrice})</span>
+          </div>
         </div>
         ` : ''}
       </div>
@@ -5273,72 +5585,165 @@ function openStockDetail(symbol) {
   const starIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
 
   // --------------------------------------------------------------------------
-  // RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - OPSI A: KENAIKAN HARIAN & KUMULATIF
+  // RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - KHUSUS SAHAM 3 RALLY GOOD / VIP
   // --------------------------------------------------------------------------
   const vipEntry = (appData.vip_3dot_history || []).find(h => h.symbol === stock.symbol || h.data?.symbol === stock.symbol);
-  let perfHistory = (vipEntry && Array.isArray(vipEntry.performance_history)) ? [...vipEntry.performance_history] : [];
-  let basePrice = vipEntry?.base_price || null;
-  let firstDetectedDate = vipEntry?.scan_date_display || null;
+  const isVipTracked = Boolean(vipEntry) || stock.count_green === 3;
+  let perfSectionHtml = '';
 
-  if (perfHistory.length === 0) {
-    const dates = Object.keys(appData.daily_scans || {}).sort();
-    const dynamicHist = [];
-    let detectedBase = null;
-    dates.forEach(dKey => {
-      const scan = appData.daily_scans[dKey];
-      const sFound = (scan.stocks || []).find(s => s.symbol === stock.symbol);
+  if (isVipTracked) {
+    const currentClose = Number(stock.close) || 0;
+
+    // 1. METRIK OPSI 1: Kenaikan Setelah Dot Green (TradingView)
+    let dotClosePrice = null;
+    let dotDateDisplay = null;
+    if (tf15.dot_close) {
+      dotClosePrice = Number(tf15.dot_close);
+      dotDateDisplay = cleanDate(tf15.date);
+    } else if (tf60.dot_close) {
+      dotClosePrice = Number(tf60.dot_close);
+      dotDateDisplay = cleanDate(tf60.date);
+    } else if (tfD.dot_close) {
+      dotClosePrice = Number(tfD.dot_close);
+      dotDateDisplay = cleanDate(tfD.date);
+    } else if (vipEntry?.base_price) {
+      dotClosePrice = Number(vipEntry.base_price);
+      dotDateDisplay = vipEntry.scan_date_display || null;
+    }
+
+    const dotGainVal = (dotClosePrice && dotClosePrice > 0) ? (((currentClose - dotClosePrice) / dotClosePrice) * 100) : null;
+    const dotGainSign = (dotGainVal !== null && dotGainVal > 0) ? "+" : "";
+    const dotGainClass = dotGainVal > 0 ? "positive" : (dotGainVal < 0 ? "negative" : "neutral");
+
+    // 2. METRIK OPSI 2: Kenaikan Setelah Masuk Rekomendasi Screener (Track Record)
+    const dailyScans = appData.daily_scans || {};
+    const sortedScanDates = Object.keys(dailyScans).sort();
+    const scanHistory = [];
+    sortedScanDates.forEach(dKey => {
+      const scan = dailyScans[dKey];
+      const sFound = (scan.stocks || []).find(st => st.symbol === stock.symbol);
       if (sFound) {
-        if (detectedBase === null) {
-          detectedBase = Number(sFound.close) || 0;
-          firstDetectedDate = scan.date_display || dKey;
-        }
-        const cVal = Number(sFound.close) || 0;
-        const chgVal = Number(sFound.change) || 0;
-        const cumGain = detectedBase > 0 ? ((cVal - detectedBase) / detectedBase) * 100 : 0;
-        dynamicHist.push({
+        scanHistory.push({
           date: dKey,
           date_display: scan.date_display ? scan.date_display.split(' ').slice(0, 2).join(' ') : dKey,
-          close: cVal,
-          daily_change_pct: Number(chgVal.toFixed(2)),
-          cumulative_gain_pct: Number(cumGain.toFixed(2)),
+          full_date_display: scan.date_display || dKey,
+          close: Number(sFound.close) || 0,
+          change: Number(sFound.change) || 0,
           count_green: sFound.count_green || 0
         });
       }
     });
-    if (dynamicHist.length > 0) {
-      perfHistory = dynamicHist;
-      basePrice = detectedBase;
+
+    let recEntryClose = null;
+    let recEntryDateDisplay = null;
+    let recPeakClose = null;
+    let recPeakGainVal = null;
+    let recGainVal = null;
+
+    if (scanHistory.length > 0) {
+      recEntryClose = scanHistory[0].close;
+      recEntryDateDisplay = scanHistory[0].full_date_display;
+      if (recEntryClose > 0) {
+        recGainVal = ((currentClose - recEntryClose) / recEntryClose) * 100;
+        if (scanHistory.length > 1) {
+          recPeakClose = Math.max(...scanHistory.slice(1).map(h => h.close));
+          recPeakGainVal = ((recPeakClose - recEntryClose) / recEntryClose) * 100;
+        }
+      }
     }
-  }
 
-  // Fallback 1 data point awal jika saham baru pertama kali terdeteksi
-  if (perfHistory.length === 0) {
-    basePrice = Number(stock.close) || 0;
-    firstDetectedDate = selectedDate || "Hari Ini";
-    perfHistory = [{
-      date: selectedDate || "today",
-      date_display: "Hari Ini",
-      close: basePrice,
-      daily_change_pct: Number(changeVal.toFixed(2)),
-      cumulative_gain_pct: 0.0,
-      count_green: stock.count_green || 0
-    }];
-  }
+    const recGainSign = (recGainVal !== null && recGainVal > 0) ? "+" : "";
+    const recGainClass = recGainVal > 0 ? "positive" : (recGainVal < 0 ? "negative" : "neutral");
 
-  // Ringkasan Performa
-  const latestPerf = perfHistory[perfHistory.length - 1];
-  const totalCumGain = latestPerf ? Number(latestPerf.cumulative_gain_pct || 0) : 0;
-  const cumSign = totalCumGain > 0 ? "+" : "";
-  const cumClass = totalCumGain > 0 ? "positive" : (totalCumGain < 0 ? "negative" : "flat");
-  const cumFormatted = `${cumSign}${totalCumGain.toFixed(2)}%`;
-  const basePriceFormatted = basePrice ? "Rp " + Number(basePrice).toLocaleString("id-ID") : priceFormatted;
-  const allPrices = perfHistory.map(item => Number(item.close) || 0);
-  const minPriceVal = allPrices.length > 0 ? Math.min(...allPrices) : 0;
-  const maxPriceVal = allPrices.length > 0 ? Math.max(...allPrices) : 0;
-  const entryPriceVal = Number(basePrice) || (allPrices[0] || 0);
-  const latestPriceVal = latestPerf ? Number(latestPerf.close) : entryPriceVal;
-  const minGainPct = entryPriceVal > 0 ? (((minPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
-  const maxGainPct = entryPriceVal > 0 ? (((maxPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
+    // TENTUKAN DATA GRAFIK & TABEL PERFORMA SESUAI MODE
+    // Khusus mode "trackrecord": gunakan Opsi 2 (Close hari pertama masuk screener)
+    // Mode lainnya (3 Rally Good / Rekomendasi Aranter / Daily): gunakan Opsi 1 (Dot Green)
+    let perfHistory = [];
+    let basePrice = null;
+    let firstDetectedDate = null;
+
+    if (currentMode === "trackrecord") {
+      basePrice = recEntryClose || currentClose;
+      firstDetectedDate = recEntryDateDisplay || selectedDate;
+      if (scanHistory.length > 0) {
+        perfHistory = scanHistory.map((sh, idx) => {
+          const cum = basePrice > 0 ? ((sh.close - basePrice) / basePrice) * 100 : 0;
+          return {
+            date: sh.date,
+            date_display: sh.date_display,
+            close: sh.close,
+            daily_change_pct: idx === 0 ? 0.0 : sh.change,
+            cumulative_gain_pct: Number(cum.toFixed(2)),
+            count_green: sh.count_green
+          };
+        });
+      }
+    } else {
+      // Opsi 1: Prioritaskan Dot Close
+      basePrice = dotClosePrice;
+      firstDetectedDate = dotDateDisplay;
+
+      if (!basePrice) {
+        basePrice = vipEntry?.base_price || (scanHistory.length > 0 ? scanHistory[0].close : currentClose);
+        firstDetectedDate = vipEntry?.scan_date_display || (scanHistory.length > 0 ? scanHistory[0].full_date_display : selectedDate);
+      }
+
+      if (vipEntry && Array.isArray(vipEntry.performance_history) && vipEntry.performance_history.length > 0) {
+        perfHistory = [...vipEntry.performance_history];
+      } else if (scanHistory.length > 0) {
+        perfHistory = scanHistory.map((sh) => {
+          const cum = (basePrice && basePrice > 0) ? ((sh.close - basePrice) / basePrice) * 100 : 0;
+          return {
+            date: sh.date,
+            date_display: sh.date_display,
+            close: sh.close,
+            daily_change_pct: sh.change,
+            cumulative_gain_pct: Number(cum.toFixed(2)),
+            count_green: sh.count_green
+          };
+        });
+        // Pastikan titik entry dot green ada di awal jika berbeda dari scan pertama
+        if (basePrice && basePrice > 0 && perfHistory.length > 0 && Number(perfHistory[0].close) !== Number(basePrice)) {
+          perfHistory.unshift({
+            date: firstDetectedDate || "Dot Green",
+            date_display: firstDetectedDate || "Dot Green",
+            close: basePrice,
+            daily_change_pct: 0.0,
+            cumulative_gain_pct: 0.0,
+            count_green: 3
+          });
+        }
+      }
+    }
+
+    // Fallback jika perfHistory masih kosong
+    if (perfHistory.length === 0) {
+      basePrice = currentClose;
+      firstDetectedDate = selectedDate || "Hari Ini";
+      perfHistory = [{
+        date: selectedDate || "today",
+        date_display: "Hari Ini",
+        close: basePrice,
+        daily_change_pct: Number(changeVal.toFixed(2)),
+        cumulative_gain_pct: 0.0,
+        count_green: stock.count_green || 0
+      }];
+    }
+
+    // Ringkasan Performa
+    const latestPerf = perfHistory[perfHistory.length - 1];
+    const totalCumGain = latestPerf ? Number(latestPerf.cumulative_gain_pct || 0) : 0;
+    const cumSign = totalCumGain > 0 ? "+" : "";
+    const cumClass = totalCumGain > 0 ? "positive" : (totalCumGain < 0 ? "negative" : "flat");
+    const cumFormatted = `${cumSign}${totalCumGain.toFixed(2)}%`;
+    const basePriceFormatted = basePrice ? "Rp " + Number(basePrice).toLocaleString("id-ID") : priceFormatted;
+    const allPrices = perfHistory.map(item => Number(item.close) || 0);
+    const minPriceVal = allPrices.length > 0 ? Math.min(...allPrices) : 0;
+    const maxPriceVal = allPrices.length > 0 ? Math.max(...allPrices) : 0;
+    const entryPriceVal = Number(basePrice) || (allPrices[0] || 0);
+    const latestPriceVal = latestPerf ? Number(latestPerf.close) : entryPriceVal;
+    const minGainPct = entryPriceVal > 0 ? (((minPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
+    const maxGainPct = entryPriceVal > 0 ? (((maxPriceVal - entryPriceVal) / entryPriceVal) * 100) : 0;
 
   // Generator Chart Area Trendline Halus (Smooth Spline Curve)
   function generatePerfChartSvg(hist) {
@@ -5352,8 +5757,34 @@ function openStockDetail(symbol) {
 
     const chartW = w - padL - padR;
     const chartH = h - padT - padB;
+    const centerX = padL + chartW / 2;
+    const centerY = padT + chartH / 2;
 
     const prices = hist.map(item => Number(item.close) || 0);
+
+    // KONDISI KHUSUS: MASIH 1 HARI BURSA (Titik & Label Cukup di Tengah)
+    if (hist.length === 1) {
+      const pVal = prices[0];
+      const dateText = hist[0].date_display || 'Hari ke-1';
+      return `
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+          <!-- Garis Referensi Horizontal Tunggal di Tengah -->
+          <line x1="${padL}" y1="${centerY.toFixed(1)}" x2="${(padL + chartW).toFixed(1)}" y2="${centerY.toFixed(1)}" stroke="var(--border-light)" stroke-dasharray="3 3" opacity="0.6" />
+          <text x="${(padL + chartW + 6).toFixed(1)}" y="${(centerY + 3.5).toFixed(1)}" font-size="9.5" font-weight="700" fill="var(--status-green)" text-anchor="start">Rp ${pVal.toLocaleString('id-ID')}</text>
+
+          <!-- Titik Tunggal di Tengah Canvas dengan Pulse Indicator -->
+          <circle cx="${centerX.toFixed(1)}" cy="${centerY.toFixed(1)}" r="10" fill="rgba(16, 185, 129, 0.15)" stroke="var(--status-green)" stroke-width="1.2" opacity="0.7" />
+          <circle cx="${centerX.toFixed(1)}" cy="${centerY.toFixed(1)}" r="5" fill="#ffffff" stroke="var(--status-green)" stroke-width="2.5">
+            <title>${dateText}: Rp ${pVal.toLocaleString('id-ID')} (${hist[0].daily_change_pct > 0 ? '+' : ''}${hist[0].daily_change_pct}% hari ini • Modal Entry)</title>
+          </circle>
+
+          <!-- Sumbu X: CUKUP LABEL TANGGAL DI TENGAH -->
+          <text x="${centerX.toFixed(1)}" y="${h - 5}" font-size="9" font-weight="700" fill="var(--text-secondary)" text-anchor="middle">${dateText}</text>
+        </svg>
+      `;
+    }
+
+    // KONDISI MULTI-HARI (> 1 HARI BURSA)
     const minP = Math.min(...prices);
     const maxP = Math.max(...prices);
     const rangeP = (maxP - minP) || 1;
@@ -5431,7 +5862,7 @@ function openStockDetail(symbol) {
 
         <!-- X-Axis Dates -->
         <text x="${padL}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="start">${hist[0].date_display.split(' ').slice(0, 2).join(' ')} (Entry)</text>
-        <text x="${(padL + chartW / 2).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${hist[Math.floor(hist.length / 2)].date_display.split(' ').slice(0, 2).join(' ')}</text>
+        ${hist.length >= 3 ? `<text x="${(padL + chartW / 2).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="middle">${hist[Math.floor(hist.length / 2)].date_display.split(' ').slice(0, 2).join(' ')}</text>` : ''}
         <text x="${(padL + chartW).toFixed(1)}" y="${h - 5}" font-size="8.5" font-weight="600" fill="var(--text-muted)" text-anchor="end">${hist[hist.length - 1].date_display.split(' ').slice(0, 2).join(' ')} (Hari ${hist.length})</text>
       </svg>
     `;
@@ -5449,7 +5880,9 @@ function openStockDetail(symbol) {
 
     let dotBadge = `<span class="perf-badge-dot dot-off" style="color:var(--text-secondary); background:rgba(148, 163, 184, 0.15); border:1px solid rgba(148, 163, 184, 0.25);">⚪ Masa Pantau</span>`;
     if (idx === 0) {
-      dotBadge = `<span class="perf-badge-dot dot-3">🟢 3-Dot Terdeteksi</span>`;
+      dotBadge = (currentMode === "trackrecord")
+        ? `<span class="perf-badge-dot dot-3">🟢 Entry Screener</span>`
+        : `<span class="perf-badge-dot dot-3">🟢 3-Dot Terdeteksi</span>`;
     } else if (item.count_green === 3) {
       dotBadge = `<span class="perf-badge-dot dot-3">🟢 3-Dot Aktif</span>`;
     }
@@ -5468,7 +5901,9 @@ function openStockDetail(symbol) {
   const minGainSign = minGainPct > 0 ? "+" : "";
   const maxGainSign = maxGainPct > 0 ? "+" : "";
 
-  const perfSectionHtml = `
+    const isDefaultPerfOpen = currentMode === "trackrecord";
+
+    perfSectionHtml = `
     <!-- SECTION 6: RIWAYAT PERFORMA SINYAL (30 HARI BURSA) - COLLAPSIBLE ACCORDION -->
     <div class="modal-perf-section">
       <div class="modal-perf-header" onclick="togglePerfHistoryCollapse()">
@@ -5481,22 +5916,43 @@ function openStockDetail(symbol) {
             <span class="change-pill ${cumClass}" style="font-size:11px; padding:2px 8px;">Kumulatif: ${cumFormatted}</span>
           </div>
           <div class="modal-perf-subtitle">
-            Deteksi Awal: <b>${firstDetectedDate || 'Aktif'}</b> • Modal Entry: <b>${basePriceFormatted}</b> • Hari Terpantau: <b>${perfHistory.length} hari</b>
+            Deteksi Awal: <b>${firstDetectedDate || 'Aktif'}</b> • ${currentMode === 'trackrecord' ? 'Entry Screener' : 'Modal Entry'}: <b>${basePriceFormatted}</b> • Hari Terpantau: <b>${perfHistory.length} hari</b>
           </div>
         </div>
         <button type="button" class="perf-toggle-btn" id="perfToggleBtn" onclick="event.stopPropagation(); togglePerfHistoryCollapse();">
-          <span>▼</span>
-          <span>Buka Grafik & Riwayat</span>
+          <span>${isDefaultPerfOpen ? '▲' : '▼'}</span>
+          <span>${isDefaultPerfOpen ? 'Tutup Riwayat' : 'Buka Grafik & Riwayat'}</span>
         </button>
       </div>
 
-      <!-- Kontainer Grafik & Tabel (Default Tertutup) -->
-      <div class="modal-perf-content" id="modalPerfContent" style="display: none;">
+      <!-- Kontainer Grafik & Tabel (Default Terbuka di Track Record, Tertutup di mode lain) -->
+      <div class="modal-perf-content" id="modalPerfContent" style="display: ${isDefaultPerfOpen ? 'flex' : 'none'};">
         
+        <!-- Kenaikan Setelah Masuk Rekomendasi -->
+        <div class="detail-info-card" style="margin-bottom: 14px; border-color: rgba(22, 163, 74, 0.4); background: linear-gradient(180deg, var(--bg-card) 0%, var(--brand-mint-subtle) 100%);">
+          <div class="detail-info-head">
+            <span>Kenaikan Setelah Masuk Rekomendasi</span>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Harga Close Entry:</span>
+            <span class="detail-info-value">${recEntryClose ? `<b>Rp ${recEntryClose.toLocaleString('id-ID')}</b> ${recEntryDateDisplay ? `(${recEntryDateDisplay})` : ''}` : '-'}</span>
+          </div>
+          <div class="detail-info-row">
+            <span class="detail-info-label">Kenaikan Saat Ini:</span>
+            <span class="detail-info-value" style="color:var(--status-green); font-weight:800; font-size:13px;">${recGainVal !== null ? `${recGainSign}${recGainVal.toFixed(2)}%` : '-'}</span>
+          </div>
+          ${recPeakGainVal !== null && recPeakGainVal > 0 ? `
+          <div class="detail-info-row">
+            <span class="detail-info-label">Peak Cuan Realisasi:</span>
+            <span class="detail-info-value" style="color:var(--status-green); font-weight:800; font-size:13px;">+${recPeakGainVal.toFixed(2)}%</span>
+          </div>
+          ` : ''}
+        </div>
+
         <!-- 4 KPI Stat Cards (Rapi & Tidak Bertumpuk) -->
         <div class="perf-kpi-grid">
           <div class="perf-kpi-card">
-            <span class="perf-kpi-label">MODAL ENTRY (HARI 1)</span>
+            <span class="perf-kpi-label">${currentMode === 'trackrecord' ? 'CLOSE ENTRY (SCREENER)' : 'MODAL ENTRY (DOT GREEN)'}</span>
             <span class="perf-kpi-val">Rp ${entryPriceVal.toLocaleString('id-ID')}</span>
             <span class="perf-kpi-sub">${perfHistory[0]?.date_display || 'Awal'}</span>
           </div>
@@ -5520,7 +5976,10 @@ function openStockDetail(symbol) {
         <!-- Professional Chart Box -->
         <div class="perf-chart-box">
           <div class="perf-chart-header">
-            <span class="perf-chart-title">📈 Kurva Pergerakan Harga Penutupan (Close)</span>
+            <span class="perf-chart-title" style="display:inline-flex; align-items:center; gap:6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-cyan)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+              Kurva Pergerakan Harga Penutupan (Close)
+            </span>
             <span class="perf-chart-dates">${perfHistory[0]?.date_display || ''} s/d ${perfHistory[perfHistory.length - 1]?.date_display || ''} (${perfHistory.length} Hari Bursa)</span>
           </div>
           <div class="perf-chart-svg-wrap">
@@ -5559,6 +6018,7 @@ function openStockDetail(symbol) {
       </div>
     </div>
   `;
+  }
 
   const modalHtml = `
     <div class="modal-dialog" onclick="event.stopPropagation()">
@@ -5869,6 +6329,7 @@ function toggleSidebar(forceState = null) {
 function reloadDashboard() {
   loadDatabase();
 }
+
   </script>
 </body>
 </html>

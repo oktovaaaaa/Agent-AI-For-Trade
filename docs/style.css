@@ -2843,6 +2843,29 @@ body.dark-theme .perf-toggle-btn {
   color: var(--text-muted);
 }
 
+/* ==========================================================================
+   TRACK RECORD STYLING (BUKTI AKURASI CUAN >= 8% & LUXURY CARD >= 25%)
+   ========================================================================== */
+
+/* Luxury Stock Card (Kenaikan >= 25% di Track Record) */
+.stock-card.track-luxury-card {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.05) 100%) !important;
+  box-shadow: 0 4px 16px -2px rgba(245, 158, 11, 0.15) !important;
+}
+
+.stock-card.track-luxury-card:hover {
+  transform: translateY(-3px);
+  border-color: #F59E0B !important;
+  box-shadow: 0 8px 24px -4px rgba(245, 158, 11, 0.28) !important;
+}
+
+body.dark-theme .stock-card.track-luxury-card {
+  border-color: rgba(251, 191, 36, 0.5) !important;
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.08) 100%) !important;
+}
+
+
 @media (max-width: 768px) {
   .modal-backdrop {
     padding: 12px !important;
