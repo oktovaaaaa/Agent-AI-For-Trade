@@ -5,3 +5,8 @@ reports/*.txt
 reports/screenshots/*.png
 scan.log
 .env
+
+# IDE and Editor
+.antigravity/
+.vscode/
+.idea/
