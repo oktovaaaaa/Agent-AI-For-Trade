@@ -1,18 +1,33 @@
-name: Bot Hunter Daily Scan
+name: Bot Hunter IDX Screener & Real-Time Alert
 
 on:
+  schedule:
+    # Catatan: Waktu Cron GitHub Actions menggunakan format UTC (WIB = UTC+7)
+    # 1. Sesi I (Senin - Jumat 09:00 WIB -> 02:00 UTC)
+    - cron: '0 2 * * 1-5'
+    # 2. Sesi II (Senin - Kamis 13:30 WIB -> 06:30 UTC)
+    - cron: '30 6 * * 1-4'
+    # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
+    - cron: '0 7 * * 5'
+    # 4. Standby Penutupan Sore (Senin - Jumat 16:21 WIB -> 09:21 UTC)
+    - cron: '21 9 * * 1-5'
+
   workflow_dispatch:
     inputs:
-      limit:
-        description: 'Batas jumlah saham untuk dianalisis (0 = semua saham)'
+      mode:
+        description: "Mode Pemindaian: 'realtime' (pantau pasar & alert instan) atau 'once' (scan 1x harian)"
         required: false
-        default: '0'
+        default: "realtime"
+      limit:
+        description: "Batas jumlah saham untuk dianalisis (0 = semua saham lolos screener)"
+        required: false
+        default: "0"
 
 jobs:
   run-scan:
-    name: Scan Hunter & Kirim WhatsApp
+    name: Pemantauan IDX & Alert WhatsApp
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
 
     permissions:
       contents: write
@@ -24,8 +39,8 @@ jobs:
       - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-          cache: 'pip'
+          python-version: "3.10"
+          cache: "pip"
 
       - name: Install Dependensi & Playwright Chromium
         run: |
@@ -33,21 +48,36 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps chromium
 
-      - name: Jalankan Scan Saham & Kirim ke WhatsApp
+      - name: Jalankan Bot Hunter
         env:
           FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN || '7ci6H1WRqTDsJUAoFzq5' }}
-          NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '120363430125223310@g.us' }}
-          TRADINGVIEW_SESSIONID: ${{ secrets.TRADINGVIEW_SESSIONID || '999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex' }}
-          NUM_WORKERS: '5'
-          TZ: 'Asia/Jakarta'
+          NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '082111144710' }}
+          TRADINGVIEW_SESSIONID: ${{ secrets.TRADINGVIEW_SESSIONID || '999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1' }}
+          NUM_WORKERS: "5"
+          TZ: "Asia/Jakarta"
         run: |
+          MODE="${{ github.event.inputs.mode || 'realtime' }}"
           LIMIT="${{ github.event.inputs.limit || '0' }}"
-          if [ "$LIMIT" != "0" ] && [ -n "$LIMIT" ]; then
-            echo "Menjalankan scan dengan batas $LIMIT saham..."
-            python bot_hunter.py --now --wa --limit "$LIMIT"
+
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            echo "⏰ Trigger Otomatis Jadwal Bursa IDX. Menjalankan mode real-time intraday per sesi..."
+            python bot_hunter.py --realtime --session
+          elif [ "$MODE" = "once" ]; then
+            if [ "$LIMIT" != "0" ] && [ -n "$LIMIT" ]; then
+              echo "Menjalankan scan 1x dengan batas $LIMIT saham..."
+              python bot_hunter.py --now --wa --limit "$LIMIT"
+            else
+              echo "Menjalankan scan harian 1x seluruh saham Hunter..."
+              python bot_hunter.py --now --wa
+            fi
           else
-            echo "Menjalankan scan seluruh saham Hunter lolos kriteria..."
-            python bot_hunter.py --now --wa
+            if [ "$LIMIT" != "0" ] && [ -n "$LIMIT" ]; then
+              echo "Menjalankan mode real-time intraday dengan batas $LIMIT saham..."
+              python bot_hunter.py --realtime --session --limit "$LIMIT"
+            else
+              echo "Menjalankan mode real-time intraday per sesi..."
+              python bot_hunter.py --realtime --session
+            fi
           fi
 
       - name: Commit & Push Data Web Dashboard
@@ -55,7 +85,7 @@ jobs:
         run: |
           git config --local user.email "oktovaaaaa@gmail.com"
           git config --local user.name "oktovaaaaa"
-          git add docs/data/history.json
+          git add docs/data/history.json docs/data/alerted_signals.json || true
           if git diff --staged --quiet; then
             echo "Tidak ada perubahan data JSON."
           else

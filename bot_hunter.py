@@ -30,13 +30,13 @@ if sys.platform == "win32":
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
 FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "7ci6H1WRqTDsJUAoFzq5")
-NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "120363430125223310@g.us")
+NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "082111144710")
 
 # Session Cookie TradingView (Mendukung multi-akun dipisah tanda koma)
-# Default: 3 Akun TradingView (Akun 1 + Akun 2 + Akun 3)
+# Default: 5 Akun TradingView (Akun 1 + Akun 2 + Akun 3 + Akun 4 + Akun 5)
 TRADINGVIEW_SESSIONIDS_RAW = os.environ.get(
     "TRADINGVIEW_SESSIONID", 
-    "999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex"
+    "999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1"
 )
 TRADINGVIEW_SESSIONIDS = [s.strip() for s in TRADINGVIEW_SESSIONIDS_RAW.split(",") if s.strip()]
 
@@ -48,7 +48,8 @@ JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
 MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
-NUM_WORKERS = int(os.environ.get("NUM_WORKERS", 5))                     # Jumlah worker tab paralel (default 5 worker stabil)
+DEFAULT_WORKERS = 5 if os.environ.get("GITHUB_ACTIONS") else 25
+NUM_WORKERS = int(os.environ.get("NUM_WORKERS", DEFAULT_WORKERS))                    # Jumlah worker tab paralel (default 25 worker: 5 worker per akun)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
 TIMEFRAMES = [
@@ -589,8 +590,306 @@ def kirim_whatsapp(pesan):
         except Exception as e:
             print(f"[EXCEPT] Error koneksi Fonnte: {e}")
             success = False
-            
     return success
+
+# ============================================================================
+# SISTEM ANTI-SPAM & ALERT INSTAN INTRADAY
+# ============================================================================
+ALERTED_SIGNALS_FILE = Path("docs/data/alerted_signals.json")
+
+def load_alerted_keys(now_wib):
+    """Memuat daftar kunci sinyal yang sudah pernah dikirimkan hari ini untuk mencegah spam."""
+    today_str = now_wib.strftime("%Y-%m-%d")
+    target_file = ALERTED_SIGNALS_FILE
+    if not target_file.exists():
+        fallback = REPORTS_DIR / "alerted_signals_today.json"
+        if fallback.exists():
+            target_file = fallback
+
+    if target_file.exists():
+        try:
+            with open(target_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("date") == today_str:
+                    return set(data.get("alerted_keys", []))
+                else:
+                    print(f"🔄 Tanggal baru ({today_str}). Mengosongkan riwayat alert anti-spam.")
+                    return set()
+        except Exception as e:
+            print(f"⚠️ Gagal membaca riwayat alert anti-spam {target_file}: {e}")
+            return set()
+    return set()
+
+def save_alerted_keys(alerted_keys, now_wib):
+    """Menyimpan daftar sinyal yang telah dikirim hari ini ke disk."""
+    today_str = now_wib.strftime("%Y-%m-%d")
+    data = {
+        "date": today_str,
+        "updated_at": now_wib.strftime("%Y-%m-%d %H:%M:%S WIB"),
+        "total_alerts": len(alerted_keys),
+        "alerted_keys": sorted(list(alerted_keys))
+    }
+    for p in [ALERTED_SIGNALS_FILE, REPORTS_DIR / "alerted_signals_today.json"]:
+        try:
+            p.parent.mkdir(parents=True, exist_ok=True)
+            with open(p, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"⚠️ Gagal menyimpan riwayat alert ke {p}: {e}")
+
+def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_to_disk=True):
+    """
+    Mengecek apakah saham ini memiliki sinyal BARU HARI INI:
+    - Dot Green (15M, 1H, 1D)
+    - Scalp BUY (15M, 1H, 1D)
+    - Golden Cross EMA (15M, 1H, 1D)
+    - MACD Bullish Divergence (15M, 1H, 1D)
+    
+    Jika ada sinyal hari ini yang belum pernah dikirim (belum ada di alerted_keys),
+    seketika kirim pesan WhatsApp khusus emiten ini dan catat ke alerted_keys.
+    """
+    sym = stock.get("symbol")
+    today_date = now_wib.date()
+    
+    new_signals_text = []
+    new_keys = []
+    
+    # 1. Cek Dot Green
+    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+        tf_data = tf_results.get(tf_code, {})
+        if tf_data.get("status"):
+            dt = tf_data.get("dt")
+            if dt and dt.date() == today_date:
+                t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                key = f"{sym}|DOT_GREEN|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
+                if key not in alerted_keys:
+                    new_signals_text.append(f"• 🟢 *Dot Green {tf_label}* (Pukul {t_str} WIB)")
+                    new_keys.append(key)
+                    
+    # 2. Cek Scalp BUY
+    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+        sc = tf_results.get(tf_code, {}).get("scalping", {})
+        buy = sc.get("buy")
+        if buy:
+            b_dt = buy.get("dt")
+            if b_dt and b_dt.date() == today_date:
+                t_str = b_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                key = f"{sym}|SCALP_BUY|{tf_code}|{b_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else b_dt.strftime('%Y-%m-%d')}"
+                if key not in alerted_keys:
+                    new_signals_text.append(f"• ⚔️ *Scalp BUY {tf_label}* (Pukul {t_str} WIB)")
+                    new_keys.append(key)
+
+    # 3. Cek Golden Cross
+    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+        donalt = tf_results.get(tf_code, {}).get("donalt", {})
+        g = donalt.get("golden")
+        if g:
+            g_dt = g.get("dt")
+            if g_dt and g_dt.date() == today_date:
+                t_str = g_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                key = f"{sym}|GOLDEN_CROSS|{tf_code}|{g_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else g_dt.strftime('%Y-%m-%d')}"
+                if key not in alerted_keys:
+                    new_signals_text.append(f"• ✨ *Golden Cross {tf_label}* (Pukul {t_str} WIB)")
+                    new_keys.append(key)
+
+    # 4. Cek MACD Bull
+    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+        m = tf_results.get(tf_code, {}).get("macd", {})
+        bull = m.get("bull")
+        if bull:
+            m_dt = bull.get("dt")
+            if m_dt and m_dt.date() == today_date:
+                t_str = m_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                key = f"{sym}|MACD_BULL|{tf_code}|{m_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else m_dt.strftime('%Y-%m-%d')}"
+                if key not in alerted_keys:
+                    new_signals_text.append(f"• 🐂 *MACD Bullish Div {tf_label}* (Pukul {t_str} WIB)")
+                    new_keys.append(key)
+
+    if not new_signals_text:
+        return False
+        
+    # Ambil info Support & Resisten SMC (cari dari 1H, 15M, atau 1D yang punya nilai)
+    smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
+    sup_val = smc.get("demand")
+    res_val = smc.get("supply")
+    status_7d = smc.get("status_7d") or "⚪ Di Antara Demand & Supply"
+    
+    sup_str = f"Rp {sup_val:.0f}" if sup_val else "-"
+    res_str = f"Rp {res_val:.0f}" if res_val else "-"
+    
+    cur_price = stock.get("close", 0)
+    chg_pct = stock.get("change", 0.0)
+    
+    pesan_alert = (
+        f"🚨 *SINYAL BARU TERDETEKSI (INTRADAY)*\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"Emiten   : *{sym}*\n"
+        f"Harga    : Rp {cur_price:.0f} ({chg_pct:+.2f}%)\n"
+        f"Sinyal   :\n"
+        + "\n".join(new_signals_text) + "\n"
+        f"SMC Area :\n"
+        f"• Support (Demand)  : {sup_str}\n"
+        f"• Resisten (Supply) : {res_str}\n"
+        f"• Status            : {status_7d}\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"👉 Cek chart lengkap & riwayat 30 hari:\n"
+        f"https://aranter.web.id/"
+    )
+    
+    print(f"\n🚨 [INSTANT ALERT] Sinyal baru terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
+    sent = kirim_whatsapp(pesan_alert)
+    if sent:
+        for k in new_keys:
+            alerted_keys.add(k)
+        if save_to_disk:
+            save_alerted_keys(alerted_keys, now_wib)
+    return sent
+
+def kirim_pesan_summary_wa(hasil_deteksi, now_wib):
+    """Mengirim pesan rangkuman harian WhatsApp (Daftar saham 3-Dot & 2-Dot Green + link web)."""
+    tgl_analisa_id = format_tanggal_id(now_wib)
+
+    for item in hasil_deteksi:
+        tf = item.get("timeframes", {})
+        item["count_green"] = sum(1 for tf_key in ['D', '60', '15'] if tf.get(tf_key, {}).get('status'))
+
+    saham_3_dot = [item for item in hasil_deteksi if item.get("count_green", 0) == 3]
+    saham_2_dot = [item for item in hasil_deteksi if item.get("count_green", 0) == 2]
+
+    saham_3_dot.sort(key=lambda x: x.get('stock', {}).get('volume', 0), reverse=True)
+    saham_2_dot.sort(key=lambda x: x.get('stock', {}).get('volume', 0), reverse=True)
+
+    pesan_wa = (
+        f"📊 *Aranter — Hunter Screener*\n"
+        f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
+        f"🎯 *Filter*: Rp 10–1.000 | Vol > 10D | Pre-mkt > 500%\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n\n"
+    )
+    
+    # Bagian 1: 3-Dot Green (VVIP)
+    pesan_wa += "🔥 *DOT GREEN 3 TIMEFRAME (VVIP)*:\n"
+    if saham_3_dot:
+        for idx, item in enumerate(saham_3_dot, 1):
+            pesan_wa += f"{idx}. {item['stock']['symbol']}\n"
+    else:
+        pesan_wa += "- (Tidak ada saham 3-Dot)\n"
+
+    # Bagian 2: 2-Dot Green (Potensial)
+    pesan_wa += "\n⚡ *DOT GREEN 2 TIMEFRAME (POTENSIAL)*:\n"
+    if saham_2_dot:
+        for idx, item in enumerate(saham_2_dot, 1):
+            pesan_wa += f"{idx}. {item['stock']['symbol']}\n"
+    else:
+        pesan_wa += "- (Tidak ada saham 2-Dot)\n"
+
+    # Penutup Rekomendasi Website & Tips
+    pesan_wa += (
+        f"\n━━━━━━━━━━━━━━━━━━━━\n"
+        f"🌐 *REKOMENDASI ANALISIS LENGKAP:*\n"
+        f"Untuk keputusan entry yang lebih akurat, sangat direkomendasikan melihat detail teknikal setiap saham langsung di website resmi:\n"
+        f"👉 https://aranter.web.id/\n\n"
+        f"Di website Anda dapat memeriksa:\n"
+        f"• Waktu kemunculan Dot Green (Daily, 1H, 15M) & persen kenaikannya\n"
+        f"• Zona Demand & Supply SMC (area pantul & batas risiko entry)\n"
+        f"• Sinyal Scalping BUY/SELL, Golden Cross EMA & MACD Divergence\n"
+        f"• Pantauan riwayat 30 hari bursa saham 3-Dot Green\n\n"
+        f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
+        f"🤖 _Dashboard Aranter for Trade by Oktovaaaaa_"
+    )
+    return kirim_whatsapp(pesan_wa)
+
+def get_current_idx_session(now_wib):
+    """
+    Menentukan status dan sesi bursa IDX saat ini:
+    Senin - Kamis:
+      Sesi 1   : 09:00 - 12:00 WIB
+      Istirahat: 12:00 - 13:30 WIB
+      Sesi 2   : 13:30 - 15:50 WIB
+    Jumat:
+      Sesi 1   : 09:00 - 11:30 WIB
+      Istirahat: 11:30 - 14:00 WIB
+      Sesi 2   : 14:00 - 15:50 WIB
+    Sabtu & Minggu: Tutup
+    """
+    weekday = now_wib.weekday()  # 0=Senin, ..., 4=Jumat, 5=Sabtu, 6=Minggu
+    cur_time = now_wib.time()
+    
+    # Akhir pekan (Sabtu & Minggu)
+    if weekday in [5, 6]:
+        return {
+            "status": "CLOSED",
+            "session": "WEEKEND",
+            "name": "Bursa Tutup (Akhir Pekan / Weekend)"
+        }
+        
+    t_0900 = datetime.time(9, 0)
+    t_1550 = datetime.time(15, 50)
+    
+    # Hari Jumat
+    if weekday == 4:
+        t_1130 = datetime.time(11, 30)
+        t_1400 = datetime.time(14, 0)
+        
+        if t_0900 <= cur_time < t_1130:
+            return {
+                "status": "OPEN",
+                "session": "SESI_1",
+                "name": "Sesi I Jumat (09:00 - 11:30 WIB)",
+                "end_time": t_1130
+            }
+        elif t_1130 <= cur_time < t_1400:
+            return {
+                "status": "BREAK",
+                "session": "ISTIRAHAT",
+                "name": "Istirahat Sholat Jumat (11:30 - 14:00 WIB)",
+                "resume_time": t_1400
+            }
+        elif t_1400 <= cur_time < t_1550:
+            return {
+                "status": "OPEN",
+                "session": "SESI_2",
+                "name": "Sesi II Jumat (14:00 - 15:50 WIB)",
+                "end_time": t_1550
+            }
+        else:
+            return {
+                "status": "CLOSED",
+                "session": "AFTER_HOURS",
+                "name": "Di Luar Jam Bursa Jumat"
+            }
+            
+    # Senin - Kamis
+    else:
+        t_1200 = datetime.time(12, 0)
+        t_1330 = datetime.time(13, 30)
+        
+        if t_0900 <= cur_time < t_1200:
+            return {
+                "status": "OPEN",
+                "session": "SESI_1",
+                "name": "Sesi I (09:00 - 12:00 WIB)",
+                "end_time": t_1200
+            }
+        elif t_1200 <= cur_time < t_1330:
+            return {
+                "status": "BREAK",
+                "session": "ISTIRAHAT",
+                "name": "Istirahat Siang (12:00 - 13:30 WIB)",
+                "resume_time": t_1330
+            }
+        elif t_1330 <= cur_time < t_1550:
+            return {
+                "status": "OPEN",
+                "session": "SESI_2",
+                "name": "Sesi II (13:30 - 15:50 WIB)",
+                "end_time": t_1550
+            }
+        else:
+            return {
+                "status": "CLOSED",
+                "session": "AFTER_HOURS",
+                "name": "Di Luar Jam Bursa (Senin - Kamis)"
+            }
 
 # ============================================================================
 # TAHAP 1: SCREENER HUNTER (SAHAM ID Rp 10-1000 & VOLUME > AVG 10D)
@@ -1024,6 +1323,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                         })
             
             dot_status = False
+            latest_dot = None
             date_display = None
             dot_close = None
             gain_pct = None
@@ -1226,6 +1526,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
             results[tf_code] = {
                 "status": dot_status,
                 "date": date_display,
+                "dt": latest_dot if dot_status else None,
                 "dot_close": dot_close,
                 "gain_pct": gain_pct,
                 "donalt": donalt_res,
@@ -1501,14 +1802,15 @@ def simpan_database_json(hasil_deteksi, now_wib):
 # ============================================================================
 # TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.21 WIB)
 # ============================================================================
-async def run_daily_scan(send_wa=True):
+async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None):
     now_wib = datetime.datetime.now(WIB_TZ)
     date_str = now_wib.strftime("%Y%m%d")
     tgl_analisa_id = format_tanggal_id(now_wib)
     tgl_awal_id = format_tanggal_id(now_wib - datetime.timedelta(days=LOOKBACK_DAYS))
     
+    mode_tag = "REAL-TIME INTRADAY" if realtime_mode else "SCAN HARIAN"
     print("\n" + "="*70)
-    print(f"🚀 MEMULAI SCAN HARIAN HUNTER - RALLY GOD [{tgl_analisa_id} {now_wib.strftime('%H:%M WIB')}]")
+    print(f"🚀 MEMULAI {mode_tag} HUNTER - RALLY GOD [{tgl_analisa_id} {now_wib.strftime('%H:%M WIB')}]")
     print("="*70)
     
     # Bersihkan file screenshot lama agar disk tetap bersih
@@ -1517,12 +1819,12 @@ async def run_daily_scan(send_wa=True):
     # 1. Ambil saham lolos kriteria Screener HUNTER
     hunter_stocks = get_hunter_stocks()
     if not hunter_stocks:
-        if send_wa:
+        if send_wa and not realtime_mode:
             kirim_whatsapp(f"ℹ️ *SCAN HUNTER {tgl_analisa_id}*\nTidak ada saham IDX Rp 10-1000 yang lolos kriteria volume hari ini.")
-        return
+        return []
         
-    # Kirim notifikasi awal ke WhatsApp saat pemindaian dimulai
-    if send_wa:
+    # Kirim notifikasi awal ke WhatsApp saat pemindaian harian dimulai (dilewati pada mode real-time loop agar tidak spam)
+    if send_wa and not realtime_mode:
         pesan_mulai = (
             f"🚀 *Memulai Analisa Screener Aranter*\n"
             f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
@@ -1702,6 +2004,8 @@ async def run_daily_scan(send_wa=True):
                                     "order_idx": idx,
                                     "dur_sec": dur_saham
                                 })
+                                if realtime_mode and alerted_keys is not None:
+                                    await asyncio.to_thread(check_and_send_instant_alert, stock, tf_results, alerted_keys, now_wib)
                             print(f"⏱️ [{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Selesai {sym} dalam {dur_saham:.1f} detik.")
                             break
                         except Exception as err_saham:
@@ -1991,81 +2295,13 @@ async def run_daily_scan(send_wa=True):
         macd_str = f" [MACD: {', '.join(m_tfs)}]" if m_tfs else ""
         konten_laporan.append(f"- {st['symbol']:<6} : Rp {st['close']:<4.0f} ({st['change']:+6.2f}%) -> {status_text}{golden_str}{scalp_str}{macd_str}")
         
-    # Fitur simpan file TXT ke folder Downloads/reports & buka Notepad telah dihapus (hasil langsung dikirim ke WhatsApp)
-
-    # 5. Susun Pesan Rangkuman WhatsApp (HANYA MINIMAL 2 TIMEFRAME)
-    if send_wa:
-        pesan_wa = (
-            f"📊 *Aranter*\n"
-            f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
-            f"🎯 *Filter*: Rp 10–1.000 | Vol > 10D | Pre-mkt > 500%\n"
-            f"⏱️ *Rentang Sinyal*: 30 Hari Terakhir\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n"
-        )
+    # 5. Susun Pesan Rangkuman WhatsApp (Hanya pada mode scan harian biasa, bukan real-time loop)
+    if send_wa and not realtime_mode:
+        kirim_pesan_summary_wa(hasil_deteksi, now_wib)
+    elif not send_wa:
+        print("ℹ️ Mode Uji Coba: Pengiriman WhatsApp dilewati.")
         
-        if not saham_3_dot:
-            pesan_wa += (
-                f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                f"ℹ️ *STATUS: 0 SAHAM 3-DOT MALAM INI*\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n"
-                f"Hasil scan malam ini belum ada saham yang mengonfirmasi 3 Timeframe (Daily + 1H + 15M) sekaligus.\n\n"
-                f"👀 *Pantau Saham Potensial (2 Timeframe):*\n"
-                f"Tersedia *{len(saham_2_dot)} saham* yang lolos 2-Dot Green dan siap dipantau langsung di website:\n"
-                f"👉 https://aranter.web.id/\n"
-            )
-        else:
-            pesan_wa += (
-                f"\n━━━━━━━━━━━━━━━━━━━━\n"
-                f"🔥 *DOT GREEN 3 TIMEFRAME (VVIP)*\n"
-                f"━━━━━━━━━━━━━━━━━━━━\n"
-                f"🟢 *ANALISA SAHAM INI !!!* 🟢\n\n"
-            )
-            for idx, item in enumerate(saham_3_dot, 1):
-                st = item["stock"]
-                tf = item["timeframes"]
-                gain_str = format_gain_header(tf)
-                gain_line = f"{gain_str.strip()}\n" if gain_str else ""
-                donalt_line = format_donalt_wa(tf)
-                scalp_line = format_scalping_wa(tf)
-                smc_1d = tf.get('D', {}).get('smc')
-                smc_1h = tf.get('60', {}).get('smc')
-                smc_line = format_smc_wa(smc_1d, smc_1h)
-                macd_line = format_macd_wa(tf)
-                pesan_wa += (
-                    f"{idx}. *{st['symbol']}* — Rp {st['close']:.0f}\n"
-                    f"{gain_line}"
-                    f"📊 Volume: {st['volume']:,.0f} lembar\n"
-                    f"• Daily (1D)  : {tf['D']['date']}\n"
-                    f"• 1 Jam (1H)  : {tf['60']['date']}\n"
-                    f"• 15 Mnt (15M): {tf['15']['date']}\n"
-                    f"{donalt_line}"
-                    f"{scalp_line}"
-                    f"{smc_line}"
-                    f"{macd_line}"
-                )
-                if idx < len(saham_3_dot):
-                    pesan_wa += "───────────────────\n"
-
-        pesan_wa += (
-            f"\n━━━━━━━━━━━━━━━━━━━━\n"
-            f"📈 *REKAPITULASI PEMINDAIAN*:\n"
-            f"• Total Saham Screener : {len(hasil_deteksi)} Saham\n"
-            f"• ⏱️ Durasi Pemindaian : {dur_str} ({actual_workers} Worker Paralel)\n"
-            f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (VVIP Prioritas)\n"
-            f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Radar Potensial)\n"
-            f"• ⚪ Saham Lainnya     : {len(saham_1_dot) + len(saham_0_dot)} Saham (Netral)\n"
-            f"━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"🌐 *DASHBOARD & DATA LENGKAP:*\n"
-            f"Untuk melihat analisa mendalam, chart TradingView, status sinyal 2-Dot & 3-Dot, serta arsip 1 bulan terakhir, silakan kunjungi website resmi:\n"
-            f"👉 https://aranter.web.id/\n\n"
-            f"💡 *Tips Hunter:* Utamakan saham dengan volume spike di atas rata-rata 10 hari & selalu perhatikan area demand SMC sebelum entry.\n\n"
-            f"🤖 _Dashboard Aranter for Trade by Oktovaaaaa_"
-        )
-        kirim_whatsapp(pesan_wa)
-    else:
-        print("ℹ️ Mode Uji Coba: Pengiriman WhatsApp dilewati (hanya mencatat ke file Notepad).")
-        
-    # 5. Simpan Data ke Database JSON (Hanya pada scan lengkap seluruh saham, bukan uji coba --limit)
+    # 6. Simpan Data ke Database JSON (Hanya pada scan lengkap seluruh saham, bukan uji coba --limit)
     if LIMIT_SAHAM_SCAN == 0:
         simpan_database_json(hasil_deteksi, now_wib)
     else:
@@ -2073,6 +2309,136 @@ async def run_daily_scan(send_wa=True):
 
     # Pastikan seluruh sisa screenshot dibersihkan
     bersihkan_screenshot()
+    return hasil_deteksi
+
+# ============================================================================
+# MESIN REAL-TIME INTRADAY BURSA IDX
+# ============================================================================
+async def run_realtime_market_session(single_session=False, test_mode=False):
+    """
+    Mesin pemantauan real-time intraday jam bursa IDX.
+    - Melakukan loop scan setiap ~3 menit selama sesi aktif (Sesi 1 atau Sesi 2).
+    - Begitu ada saham yang memunculkan sinyal baru HARI INI (Dot Green, Scalp BUY, Golden Cross, MACD Bull),
+      langsung kirim alert instan ke WhatsApp per emiten tersebut!
+    - Anti-spam: Mencegah pengiriman berulang untuk sinyal yang sama di hari yang sama.
+    - Pada akhir Sesi 1 (12:00 WIB / 11:30 WIB Jumat): Simpan snapshot mid-day ke history.json.
+    - Pada akhir Sesi 2 (15:50 WIB): Simpan data closing ke history.json & kirim rangkuman harian WhatsApp.
+    - Jika single_session=True (misal di GitHub Actions runner): Selesai saat sesi berakhir.
+    """
+    now_wib = datetime.datetime.now(WIB_TZ)
+    alerted_keys = load_alerted_keys(now_wib)
+    
+    print("\n" + "═" * 70)
+    print("🚀 MEMULAI ENGINE PEMANTAUAN REAL-TIME INTRADAY BURSA IDX")
+    print(f"📅 Waktu Saat Ini : {now_wib.strftime('%A, %d %B %Y %H:%M:%S WIB')}")
+    print(f"🛡️ Riwayat Anti-Spam Hari Ini: {len(alerted_keys)} sinyal tersimpan")
+    print("═" * 70)
+
+    # Mode Uji Coba: Langsung jalankan 1 siklus pemantauan
+    if test_mode:
+        print("🧪 [TEST MODE] Menjalankan 1 siklus scan intraday & memeriksa sinyal baru...")
+        hasil = await run_daily_scan(send_wa=True, realtime_mode=True, alerted_keys=alerted_keys)
+        print(f"✅ [TEST MODE] Selesai 1 siklus ({len(hasil)} saham).")
+        return
+
+    while True:
+        now_wib = datetime.datetime.now(WIB_TZ)
+        session_info = get_current_idx_session(now_wib)
+        status = session_info["status"]
+        session_name = session_info["name"]
+
+        if status == "CLOSED":
+            print(f"🛑 [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
+            if single_session:
+                print("🏁 Selesai. Keluar dari runner.")
+                break
+            else:
+                print("💤 Menunggu 60 detik sebelum memeriksa jam bursa kembali...")
+                await asyncio.sleep(60)
+                continue
+
+        elif status == "BREAK":
+            print(f"⏸️ [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
+            if single_session:
+                print("🏁 Sesi berakhir (memasuki waktu istirahat). Keluar dari runner.")
+                break
+            else:
+                resume_time = session_info.get("resume_time")
+                if resume_time:
+                    target_dt = now_wib.replace(hour=resume_time.hour, minute=resume_time.minute, second=0, microsecond=0)
+                    wait_sec = max(10, int((target_dt - now_wib).total_seconds()))
+                    print(f"⏳ Istirahat bursa: Bot tidur selama {wait_sec // 60} menit hingga Sesi II dibuka ({resume_time.strftime('%H:%M')} WIB)...")
+                    await asyncio.sleep(min(wait_sec, 300))
+                else:
+                    await asyncio.sleep(60)
+                continue
+
+        elif status == "OPEN":
+            cur_session_type = session_info.get("session")
+            end_time = session_info.get("end_time")
+            print(f"\n🟢 [{now_wib.strftime('%H:%M:%S WIB')}] {session_name} SEDANG BERJALAN.")
+            
+            t_pass_start = time.time()
+            hasil = await run_daily_scan(send_wa=True, realtime_mode=True, alerted_keys=alerted_keys)
+            pass_dur = time.time() - t_pass_start
+            
+            # Periksa kembali waktu setelah scan selesai
+            now_after = datetime.datetime.now(WIB_TZ)
+            new_session = get_current_idx_session(now_after)
+            
+            # Transisi akhir Sesi 1
+            if cur_session_type == "SESI_1" and (new_session["session"] != "SESI_1" or now_after.time() >= end_time):
+                print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI I TELAH BERAKHIR.")
+                print("💾 Memperbarui data database web (snapshot mid-day)...")
+                simpan_database_json(hasil, now_after)
+                if single_session:
+                    print("🏁 Runner Sesi I selesai.")
+                    break
+
+            # Transisi akhir Sesi 2 (Penutupan Perdagangan)
+            elif cur_session_type == "SESI_2" and (new_session["session"] != "SESI_2" or now_after.time() >= end_time):
+                print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI II TELAH BERAKHIR (PENUTUPAN PASAR).")
+                print("💾 Memperbarui database web penutupan & mengirim Rangkuman Harian WhatsApp...")
+                simpan_database_json(hasil, now_after)
+                kirim_pesan_summary_wa(hasil, now_after)
+                if single_session:
+                    print("🏁 Runner Sesi II selesai.")
+                    break
+
+            # Sesi masih aktif: jeda interval sebelum putaran berikutnya
+            else:
+                INTERVAL_SECONDS = 180  # Loop setiap 3 menit
+                sisa_jeda = max(10, int(INTERVAL_SECONDS - pass_dur))
+                print(f"\n⏳ Selesai 1 siklus dalam {pass_dur:.1f} detik. Stand by {sisa_jeda} detik sebelum pemindaian berikutnya...")
+                await asyncio.sleep(sisa_jeda)
+
+def test_send_sample_alert():
+    """Menguji format pengiriman alert instan ke WhatsApp tujuan."""
+    now_wib = datetime.datetime.now(WIB_TZ)
+    sample_stock = {"symbol": "FORU", "close": 1540, "change": 13.68}
+    sample_tf = {
+        "15": {
+            "status": True,
+            "dt": now_wib,
+            "date": now_wib.strftime("%d %b %Y, %H:%M WIB"),
+            "scalping": {
+                "buy": {
+                    "dt": now_wib,
+                    "date": now_wib.strftime("%d %b %Y, %H:%M WIB"),
+                    "gain_pct": 9.09
+                }
+            },
+            "smc": {
+                "demand": 1420,
+                "supply": 1680,
+                "status_7d": "⚪ Di Antara Demand & Supply"
+            }
+        }
+    }
+    dummy_keys = set()
+    print("🧪 Mengirim contoh alert instan ke WhatsApp...")
+    res = check_and_send_instant_alert(sample_stock, sample_tf, dummy_keys, now_wib, save_to_disk=False)
+    print(f"Hasil pengiriman: {'Berhasil ✅' if res else 'Gagal ❌'}")
 
 # ============================================================================
 # MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.21 WIB
@@ -2092,10 +2458,10 @@ def main():
 
     print("================================================================")
     print("🚀 BOT HUNTER + RALLY GOD (OKTOVAAAAA) DIAKTIFKAN")
-    print(f"⏰ Jadwal Rutin: Setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
+    print(f"⏰ Jadwal Standar: Setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB")
     print("================================================================")
     
-    # Argumen --limit untuk membatasi jumlah saham saat pengujian (contoh: --limit 5 atau --limit 10)
+    # Argumen --limit untuk membatasi jumlah saham saat pengujian (contoh: --limit 5)
     global LIMIT_SAHAM_SCAN
     for i, arg in enumerate(sys.argv):
         if arg == "--limit" and i + 1 < len(sys.argv):
@@ -2105,7 +2471,19 @@ def main():
             except ValueError:
                 pass
 
-    # Argumen --now untuk pengujian langsung
+    # Argumen --test-alert untuk mengetes format WhatsApp
+    if "--test-alert" in sys.argv:
+        test_send_sample_alert()
+        return
+
+    # Argumen --realtime atau environment variable MODE=realtime untuk pemantauan intraday jam bursa
+    if "--realtime" in sys.argv or os.environ.get("MODE") == "realtime":
+        single_sess = ("--session" in sys.argv) or bool(os.environ.get("GITHUB_ACTIONS"))
+        test_mode = ("--now" in sys.argv)
+        asyncio.run(run_realtime_market_session(single_session=single_sess, test_mode=test_mode))
+        return
+
+    # Argumen --now untuk pengujian scan harian langsung 1x
     if len(sys.argv) > 1 and "--now" in sys.argv:
         send_wa = "--wa" in sys.argv
         if send_wa:

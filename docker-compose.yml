@@ -7,10 +7,11 @@ services:
     restart: always
     environment:
       - FONNTE_TOKEN=7ci6H1WRqTDsJUAoFzq5
-      - NOMOR_WHATSAPP_TUJUAN=120363430125223310@g.us
-      - NUM_WORKERS=5
-      - TRADINGVIEW_SESSIONID=999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex
+      - NOMOR_WHATSAPP_TUJUAN=082111144710
+      - NUM_WORKERS=25
+      - TRADINGVIEW_SESSIONID=999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1
       - TZ=Asia/Jakarta
+      - MODE=realtime
       - JAM_SCAN_WIB=16
       - MENIT_SCAN_WIB=21
     volumes:
