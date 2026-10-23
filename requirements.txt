@@ -6,3 +6,4 @@ playwright>=1.40.0
 schedule>=1.2.0
 pillow>=10.0.0
 pytz>=2023.3
+psutil>=5.9.0

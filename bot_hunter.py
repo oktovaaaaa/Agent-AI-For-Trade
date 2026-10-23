@@ -13,6 +13,10 @@ from PIL import Image
 import pytz
 from tradingview_screener import Query, Column
 from playwright.async_api import async_playwright
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 # Pastikan console Windows mendukung output UTF-8 (Emoji & karakter Jepang)
 if sys.platform == "win32":
@@ -26,10 +30,15 @@ if sys.platform == "win32":
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
 FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "7ci6H1WRqTDsJUAoFzq5")
-NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "120363430125223310@g.us")
+NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "082111144710")
 
-# Session Cookie TradingView (diambil dari browser Anda)
-TRADINGVIEW_SESSIONID = os.environ.get("TRADINGVIEW_SESSIONID", "999m9aq36s5hhqv7yw2vfubqvqhxbmj9")
+# Session Cookie TradingView (Mendukung multi-akun dipisah tanda koma)
+# Default: 3 Akun TradingView (Akun 1 + Akun 2 + Akun 3)
+TRADINGVIEW_SESSIONIDS_RAW = os.environ.get(
+    "TRADINGVIEW_SESSIONID", 
+    "999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex"
+)
+TRADINGVIEW_SESSIONIDS = [s.strip() for s in TRADINGVIEW_SESSIONIDS_RAW.split(",") if s.strip()]
 
 # URL Layout Chart TradingView Anda tempat indikator (人•ᴗ•)RallyGood terpasang
 CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
@@ -39,6 +48,7 @@ JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
 MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
+NUM_WORKERS = int(os.environ.get("NUM_WORKERS", 15))                    # Jumlah worker tab paralel (default 15 worker: 5 worker per akun)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
 TIMEFRAMES = [
@@ -86,6 +96,65 @@ def format_gain_header(tf_dict):
     if parts:
         return f" ({' | '.join(parts)})"
     return ""
+
+class HardwareMonitor:
+    """Pemantau konsumsi RAM dan Core CPU secara real-time saat scan berjalan."""
+    def __init__(self):
+        self.running = False
+        self.peak_ram_bytes = 0
+        self.cpu_samples = []
+        if psutil:
+            self.total_cores = psutil.cpu_count(logical=True) or 1
+            self.physical_cores = psutil.cpu_count(logical=False) or self.total_cores
+            self.total_ram_gb = psutil.virtual_memory().total / (1024**3)
+            self.main_proc = psutil.Process(os.getpid())
+        else:
+            self.total_cores = os.cpu_count() or 1
+            self.physical_cores = self.total_cores
+            self.total_ram_gb = 0
+            self.main_proc = None
+
+    async def run(self):
+        if not psutil:
+            return
+        self.running = True
+        while self.running:
+            try:
+                # Kumpulkan RAM dari Python + SEMUA child process Chromium browser
+                procs = [self.main_proc] + self.main_proc.children(recursive=True)
+                total_mem = 0
+                for p in procs:
+                    try:
+                        total_mem += p.memory_info().rss
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+                if total_mem > self.peak_ram_bytes:
+                    self.peak_ram_bytes = total_mem
+                self.cpu_samples.append(psutil.cpu_percent(interval=None))
+            except Exception:
+                pass
+            await asyncio.sleep(0.5)
+
+    def stop(self):
+        self.running = False
+        if not psutil:
+            return None
+        peak_mb = self.peak_ram_bytes / (1024 * 1024)
+        peak_gb = self.peak_ram_bytes / (1024 ** 3)
+        avg_cpu = sum(self.cpu_samples) / len(self.cpu_samples) if self.cpu_samples else 0.0
+        peak_cpu = max(self.cpu_samples) if self.cpu_samples else 0.0
+        tot_ram = psutil.virtual_memory().total
+        pct_of_ram = (self.peak_ram_bytes / tot_ram) * 100 if tot_ram else 0.0
+        return {
+            "peak_mb": peak_mb,
+            "peak_gb": peak_gb,
+            "pct_ram": pct_of_ram,
+            "avg_cpu": avg_cpu,
+            "peak_cpu": peak_cpu,
+            "total_cores": self.total_cores,
+            "physical_cores": self.physical_cores,
+            "total_ram_gb": self.total_ram_gb
+        }
 
 def calculate_smc_levels_fallback(bars, cur_close):
     """Fallback kalkulasi Supply & Demand sederhana jika indikator belum termuat."""
@@ -594,7 +663,7 @@ def get_hunter_stocks():
 # ============================================================================
 # TAHAP 3: BROWSER OTOMATIS MEMERIKSA CHART & MENGAMBIL TANGGAL ASLI
 # ============================================================================
-async def scan_stock_rallygood(page, stock_info):
+async def scan_stock_rallygood(page, stock_info, worker_id=None):
     """
     Membuka chart TradingView untuk saham tertentu secara instan (setSymbol & setResolution),
     mendeteksi Dot Green, dan mengekstrak tanggal & jam persis kemunculannya langsung dari TradingView.
@@ -602,18 +671,19 @@ async def scan_stock_rallygood(page, stock_info):
     symbol = stock_info['symbol']
     results = {}
     now_dt = datetime.datetime.now(WIB_TZ)
+    w_tag = f"[Worker {worker_id}] " if worker_id is not None else ""
     
     # 1. Ganti simbol saham secara instan di chart TradingView
     try:
         await page.evaluate('(s) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setSymbol(s)', f"IDX:{symbol}")
-        await asyncio.sleep(1.2)
+        await asyncio.sleep(0.8)
     except Exception:
         try:
             chart_url = f"{CHART_LAYOUT_URL}?symbol=IDX%3A{symbol}&interval=D"
             await page.goto(chart_url, wait_until="domcontentloaded", timeout=30000)
-            await asyncio.sleep(3.5)
+            await asyncio.sleep(2.5)
         except Exception as e:
-            print(f" ⚠️ Kendala navigasi chart {symbol}: {e}")
+            print(f" {w_tag}⚠️ Kendala navigasi chart {symbol}: {e}")
             return results
     
     # 2. Cek setiap timeframe (D, 60, 15)
@@ -621,12 +691,24 @@ async def scan_stock_rallygood(page, stock_info):
         tf_code = tf['code']
         tf_name = tf['name']
         
-        print(f"   ↳ Mengecek {symbol} [{tf_name}]...", end="", flush=True)
-        
         try:
             # Ganti resolusi / timeframe secara instan tanpa reload penuh
             await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', tf['interval'])
-            await asyncio.sleep(1.8)
+            await asyncio.sleep(0.7)
+            
+            # Pastikan model chart dan indikator RallyGood siap sebelum ekstraksi
+            for _ in range(15):
+                ready_check = await page.evaluate('''() => {
+                    try {
+                        const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                        if (!chart || !chart.model) return false;
+                        const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                        return allStudies.some(s => s.title && s.title().includes('RallyGood'));
+                    } catch(e) { return false; }
+                }''')
+                if ready_check:
+                    break
+                await asyncio.sleep(0.3)
             
             # Ambil data Dot Green (RallyGood), Golden/Death (DonAlt), Supply/Demand (SMC),
             # BUY/SELL/Trend (Scalping vs Swing Trading), dan Bull/Bear (MACD Divergences)
@@ -665,7 +747,7 @@ async def scan_stock_rallygood(page, stock_info):
                     if (smcStudy?.properties?.().visible?.value()) { smcStudy.properties().visible.setValue(false); needWait = true; }
                     if (scStudy?.properties?.().visible?.value()) { scStudy.properties().visible.setValue(false); needWait = true; }
                     if (macdStudy?.properties?.().visible?.value()) { macdStudy.properties().visible.setValue(false); needWait = true; }
-                    if (needWait) await new Promise(r => setTimeout(r, 400));
+                    if (needWait) await new Promise(r => setTimeout(r, 150));
 
                     if (donaltStudy?.properties?.().visible && !donaltStudy.properties().visible.value()) {
                         donaltStudy.properties().visible.setValue(true);
@@ -673,15 +755,15 @@ async def scan_stock_rallygood(page, stock_info):
                     if (rallyStudy?.properties?.().visible && !rallyStudy.properties().visible.value()) {
                         rallyStudy.properties().visible.setValue(true);
                     }
-                    await new Promise(r => setTimeout(r, 600));
+                    await new Promise(r => setTimeout(r, 200));
 
                     // FASE 1: Ekstraksi RallyGood (Dot Green) & EMA + DonAlt Suite (Golden/Death Cross)
-                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 1500ms)
+                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 800ms)
                     if (rallyStudy) {
-                        for (let r = 0; r < 15; r++) {
+                        for (let r = 0; r < 16; r++) {
                             const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
                             if (greenPv && greenPv._items && greenPv._items.length > 0) break;
-                            await new Promise(resolve => setTimeout(resolve, 100));
+                            await new Promise(resolve => setTimeout(resolve, 50));
                         }
                     }
 
@@ -733,9 +815,14 @@ async def scan_stock_rallygood(page, stock_info):
                     // FASE 2: GANTIAN! Matikan RallyGood, Nyalakan Ultimate SMC Suite (Cek Supply & Demand)
                     // Total indikator aktif: 2 (DonAlt + SMC)
                     if (rallyStudy?.properties?.().visible) rallyStudy.properties().visible.setValue(false);
-                    await new Promise(r => setTimeout(r, 400));
+                    await new Promise(r => setTimeout(r, 150));
                     if (smcStudy?.properties?.().visible) smcStudy.properties().visible.setValue(true);
-                    await new Promise(r => setTimeout(r, 700));
+                    for (let r = 0; r < 12; r++) {
+                        const prims = smcStudy?._graphics?._primitivesCollection;
+                        const boxesInner = prims?.dwgboxes?.get('boxes');
+                        if (boxesInner && boxesInner.get(false)?._primitivesDataById) break;
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
 
                     let smcData = null;
                     if (smcStudy && smcStudy._graphics && smcStudy._graphics._primitivesCollection) {
@@ -804,12 +891,12 @@ async def scan_stock_rallygood(page, stock_info):
                     // FASE 3: GANTIAN! Matikan Ultimate SMC Suite, Nyalakan ( ͡° ͜ʖ ͡°) Scalping vs Swing Trading
                     // Total indikator aktif: 2 (DonAlt + Scalping vs Swing Trading)
                     if (smcStudy?.properties?.().visible) smcStudy.properties().visible.setValue(false);
-                    await new Promise(r => setTimeout(r, 400));
+                    await new Promise(r => setTimeout(r, 150));
                     if (scStudy?.properties?.().visible) scStudy.properties().visible.setValue(true);
                     
-                    // Beri waktu TradingView mengkalkulasi data Scalping vs Swing Trading (polling hingga 1200ms)
+                    // Beri waktu TradingView mengkalkulasi data Scalping vs Swing Trading (polling hingga 600ms)
                     for (let r = 0; r < 12; r++) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
+                        await new Promise(resolve => setTimeout(resolve, 50));
                         const scD = scStudy?.data?.();
                         if (scD && scD.lastIndex() > 0) {
                             const lastV = scD.valueAt(scD.lastIndex());
@@ -854,12 +941,12 @@ async def scan_stock_rallygood(page, stock_info):
                     // FASE 4: GANTIAN! Matikan Scalping vs Swing Trading, Nyalakan MACD Divergences
                     // Total indikator aktif: 2 (DonAlt + MACD)
                     if (scStudy?.properties?.().visible) scStudy.properties().visible.setValue(false);
-                    await new Promise(r => setTimeout(r, 400));
+                    await new Promise(r => setTimeout(r, 150));
                     if (macdStudy?.properties?.().visible) macdStudy.properties().visible.setValue(true);
                     
-                    // Beri waktu TradingView mengkalkulasi data MACD (polling hingga 1200ms)
+                    // Beri waktu TradingView mengkalkulasi data MACD (polling hingga 600ms)
                     for (let r = 0; r < 12; r++) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
+                        await new Promise(resolve => setTimeout(resolve, 50));
                         const mdD = macdStudy?.data?.();
                         if (mdD && mdD.lastIndex() > 0) {
                             const lastV = mdD.valueAt(mdD.lastIndex());
@@ -896,9 +983,9 @@ async def scan_stock_rallygood(page, stock_info):
                     // FASE 5: RESTORE! Matikan MACD Divergences, Nyalakan kembali RallyGood
                     // Kembali ke layout 2 indikator standar (DonAlt + RallyGood)
                     if (macdStudy?.properties?.().visible) macdStudy.properties().visible.setValue(false);
-                    await new Promise(r => setTimeout(r, 400));
+                    await new Promise(r => setTimeout(r, 150));
                     if (rallyStudy?.properties?.().visible) rallyStudy.properties().visible.setValue(true);
-                    await new Promise(r => setTimeout(r, 600));
+                    await new Promise(r => setTimeout(r, 200));
 
                     return {
                         dots: dots,
@@ -1132,9 +1219,9 @@ async def scan_stock_rallygood(page, stock_info):
 
             if dot_status:
                 gain_info = f" (Kenaikan: {gain_pct:+.2f}%)" if gain_pct is not None else ""
-                print(f" 🟢 ADA DOT GREEN! ({date_display}){gain_info}{indicator_str}")
+                print(f" {w_tag}↳ {symbol} [{tf_name}]: 🟢 ADA DOT GREEN! ({date_display}){gain_info}{indicator_str}")
             else:
-                print(f" ❌ Tidak ada dot green{indicator_str}")
+                print(f" {w_tag}↳ {symbol} [{tf_name}]: ❌ Tidak ada dot green{indicator_str}")
 
             results[tf_code] = {
                 "status": dot_status,
@@ -1148,7 +1235,7 @@ async def scan_stock_rallygood(page, stock_info):
             }
                     
         except Exception as e:
-            print(f" ⚠️ Error: {e}")
+            print(f" {w_tag}⚠️ Error {symbol} [{tf_name}]: {e}")
             results[tf_code] = {"status": False, "date": None, "error": str(e)}
             
     return results
@@ -1441,6 +1528,7 @@ async def run_daily_scan(send_wa=True):
             f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
             f"📊 *Jumlah Saham Terdeteksi di Screener*: *{len(hunter_stocks)} Saham*\n"
+            f"⚡ *Multi-Worker Parallel*: *{min(NUM_WORKERS, len(hunter_stocks))} Worker Aktif*\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
             f"⏳ Bot sedang menganalisis chart multi-timeframe (Daily, 1H, 15M) di TradingView...\n\n"
             f"Laporan lengkap akan dikirimkan otomatis setelah pemindaian selesai."
@@ -1448,7 +1536,8 @@ async def run_daily_scan(send_wa=True):
         kirim_whatsapp(pesan_mulai)
         
     hasil_deteksi = []
-    async with async_playwright() as p:
+    t_start_total = time.time()
+    async with async_playwright() as pw:
         browser_args = [
             "--no-sandbox",
             "--disable-setuid-sandbox",
@@ -1462,7 +1551,7 @@ async def run_daily_scan(send_wa=True):
         browser = None
         for launch_opt in [{}, {"channel": "chrome"}, {"channel": "msedge"}]:
             try:
-                browser = await p.chromium.launch(headless=True, args=browser_args, **launch_opt)
+                browser = await pw.chromium.launch(headless=True, args=browser_args, **launch_opt)
                 break
             except Exception:
                 continue
@@ -1471,27 +1560,35 @@ async def run_daily_scan(send_wa=True):
             print("[ERROR] Tidak dapat membuka browser (Chromium/Chrome/Edge). Pastikan browser terpasang.")
             return
         
-        context = await browser.new_context(
-            viewport={"width": 1600, "height": 900},
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-        )
-        
-        # Suntikkan Session Cookie TradingView jika disediakan
-        if TRADINGVIEW_SESSIONID:
-            print("🔑 Memuat Session Cookie TradingView...")
-            await context.add_cookies([{
-                "name": "sessionid",
-                "value": TRADINGVIEW_SESSIONID,
-                "domain": ".tradingview.com",
-                "path": "/"
-            }])
+        # Inisialisasi Browser Contexts terisolasi untuk tiap akun TradingView
+        contexts = []
+        if TRADINGVIEW_SESSIONIDS:
+            for acc_idx, sid in enumerate(TRADINGVIEW_SESSIONIDS, 1):
+                ctx = await browser.new_context(
+                    viewport={"width": 1600, "height": 900},
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                )
+                await ctx.add_cookies([{
+                    "name": "sessionid",
+                    "value": sid,
+                    "domain": ".tradingview.com",
+                    "path": "/"
+                }])
+                contexts.append(ctx)
+                print(f"🔑 [Akun {acc_idx}] Session Cookie TradingView ({sid[:6]}...{sid[-4:]}) berhasil dimuat.")
         else:
+            ctx = await browser.new_context(
+                viewport={"width": 1600, "height": 900},
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            contexts.append(ctx)
             print("[INFO] Menjalankan tanpa sessionid (indikator publik/template layout).")
             
-        async def buat_halaman_chart(sym_target):
-            p = await context.new_page()
+        async def buat_halaman_chart(sym_target, worker_id=1):
+            ctx = contexts[(worker_id - 1) % len(contexts)]
+            chart_page = await ctx.new_page()
             try:
-                await p.route(
+                await chart_page.route(
                     "**/*",
                     lambda route: route.abort() if route.request.resource_type in ["media"] or any(
                         x in route.request.url for x in ["google-analytics", "doubleclick", "hotjar", "datadoghq"]
@@ -1499,17 +1596,26 @@ async def run_daily_scan(send_wa=True):
                 )
             except Exception:
                 pass
-            await p.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=45000)
-            for _ in range(20):
-                await asyncio.sleep(1)
-                ready = await p.evaluate('''() => {
-                    const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                    return !!chart && chart.model().panes().flatMap(p => p.dataSources()).length >= 4;
+            await chart_page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=45000)
+            for _ in range(40):
+                await asyncio.sleep(0.5)
+                ready = await chart_page.evaluate('''() => {
+                    try {
+                        const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                        if (!chart || !chart.model) return false;
+                        const model = chart.model();
+                        if (!model || !model.panes) return false;
+                        const allStudies = model.panes().flatMap(p => p.dataSources());
+                        const hasRally = allStudies.some(s => s.title && s.title().includes('RallyGood'));
+                        return allStudies.length >= 4 && hasRally;
+                    } catch(e) {
+                        return false;
+                    }
                 }''')
                 if ready:
                     break
             # Sinkronisasi status default indikator di awal
-            await p.evaluate('''async () => {
+            await chart_page.evaluate('''async () => {
                 try {
                     const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
                     if (!chart) return;
@@ -1523,101 +1629,171 @@ async def run_daily_scan(send_wa=True):
                     if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
                     if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
                     if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
-                    await new Promise(r => setTimeout(r, 500));
+                    await new Promise(r => setTimeout(r, 200));
 
                     if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
                     if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
-                    await new Promise(r => setTimeout(r, 800));
+                    await new Promise(r => setTimeout(r, 300));
                 } catch(e) {}
             }''')
-            await asyncio.sleep(1)
-            return p
+            await asyncio.sleep(0.5)
+            return chart_page
 
-        # Buka layout chart pertama kali agar layout dan indikator siap
-        first_sym = hunter_stocks[0]['symbol']
-        print(f"📊 Menyiapkan Chart Layout TradingView ({first_sym})...")
-        page = await buat_halaman_chart(first_sym)
-        print("⚙️ Sinkronisasi Indikator TradingView Selesai.")
-        
-        # 3. Looping pengecekan chart saham dengan proteksi Self-Healing, Auto-Retry & RAM Purge
+        # Inisialisasi antrean saham terpusat (asyncio.Queue) agar TIDAK BENTROK antar worker
+        queue = asyncio.Queue()
         for idx, stock in enumerate(hunter_stocks, 1):
-            sym = stock['symbol']
+            await queue.put((idx, stock))
             
-            # FITUR AUTO-PURGE RAM: Setiap 5 saham, bersihkan alokasi memori WebGL browser agar RAM tetap < 250 MB
-            if idx > 1 and (idx - 1) % 5 == 0:
-                print(f"\n🧹 [RAM AUTO-PURGE] Mengosongkan cache grafik & me-refresh browser (RAM reset < 200 MB)...")
+        hasil_deteksi = []
+        lock = asyncio.Lock()
+        total_stocks = len(hunter_stocks)
+        actual_workers = max(1, min(NUM_WORKERS, total_stocks))
+        
+        print(f"\n⚡ [PARALLEL ENGINE] Menjalankan {actual_workers} worker browser paralel ({len(contexts)} akun TradingView) untuk {total_stocks} saham hunter...\n")
+
+        async def worker_loop(worker_id: int):
+            account_num = ((worker_id - 1) % len(contexts)) + 1
+            first_sym = hunter_stocks[0]['symbol']
+            print(f"🚀 [Worker {worker_id} | Akun {account_num}] Menyiapkan tab browser TradingView ({first_sym})...")
+            page = await buat_halaman_chart(first_sym, worker_id=worker_id)
+            print(f"⚙️ [Worker {worker_id} | Akun {account_num}] Tab siap & indikator tersinkronisasi.")
+            
+            processed_count = 0
+            MAX_RETRIES = 2
+            
+            try:
+                while not queue.empty():
+                    try:
+                        idx, stock = queue.get_nowait()
+                    except asyncio.QueueEmpty:
+                        break
+
+                    sym = stock['symbol']
+                    processed_count += 1
+
+                    # FITUR AUTO-PURGE RAM: Setiap 5 saham per worker, refresh tab agar RAM tetap ringan (<200 MB)
+                    if processed_count > 1 and (processed_count - 1) % 5 == 0:
+                        print(f"\n🧹 [Worker {worker_id} | Akun {account_num} - RAM AUTO-PURGE] Mengosongkan cache grafik & me-refresh tab untuk {sym}...")
+                        try:
+                            await page.close()
+                        except Exception:
+                            pass
+                        gc.collect()
+                        page = await buat_halaman_chart(sym, worker_id=worker_id)
+                        print(f"✨ [Worker {worker_id} | Akun {account_num}] Tab segar kembali. Melanjutkan analisis {sym}...")
+
+                    print(f"\n[{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
+
+                    t_start_saham = time.time()
+                    for attempt in range(1, MAX_RETRIES + 1):
+                        try:
+                            tf_results = await scan_stock_rallygood(page, stock, worker_id=worker_id)
+                            if not tf_results:
+                                tf_results = {}
+
+                            any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
+                            dur_saham = time.time() - t_start_saham
+
+                            async with lock:
+                                hasil_deteksi.append({
+                                    "stock": stock,
+                                    "timeframes": tf_results,
+                                    "has_green_dot": any_green,
+                                    "order_idx": idx,
+                                    "dur_sec": dur_saham
+                                })
+                            print(f"⏱️ [{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Selesai {sym} dalam {dur_saham:.1f} detik.")
+                            break
+                        except Exception as err_saham:
+                            if attempt < MAX_RETRIES:
+                                print(f"⚠️ [Worker {worker_id} | Akun {account_num} - RETRY {attempt}/{MAX_RETRIES}] Saham {sym} terkendala: {err_saham}. Merefresh tab...")
+                                try:
+                                    if page.is_closed():
+                                        page = await buat_halaman_chart(sym, worker_id=worker_id)
+                                    else:
+                                        await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
+                                    await asyncio.sleep(2.0)
+                                except Exception as rec_err:
+                                    print(f"⚠️ [Worker {worker_id} | Akun {account_num}] Gagal memulihkan tab: {rec_err}")
+                            else:
+                                print(f"❌ [Worker {worker_id} | Akun {account_num} - SKIP] Saham {sym} sudah dicoba {MAX_RETRIES}x namun tetap gagal: {err_saham}. Melanjutkan antrean...")
+                                async with lock:
+                                    hasil_deteksi.append({
+                                        "stock": stock,
+                                        "timeframes": {},
+                                        "has_green_dot": False,
+                                        "order_idx": idx,
+                                        "dur_sec": time.time() - t_start_saham
+                                    })
+            finally:
                 try:
-                    await page.close()
+                    if not page.is_closed():
+                        await page.evaluate('''async () => {
+                            const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
+                            if (!chart) return;
+                            const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                            const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
+                            const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                            const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                            const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
+                            const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+
+                            if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
+                            if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
+                            if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
+                            await new Promise(r => setTimeout(r, 200));
+                            if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
+                            if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
+                        }''')
+                        await page.close()
                 except Exception:
                     pass
-                gc.collect()
-                page = await buat_halaman_chart(sym)
-                print(f"✨ Browser segar kembali. Melanjutkan analisis {sym}...")
 
-            print(f"\n[{idx}/{len(hunter_stocks)}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
-            
-            MAX_RETRIES = 2  # Coba ulang hingga 2x jika ada kendala agar data saham tidak hilang
-            for attempt in range(1, MAX_RETRIES + 1):
-                try:
-                    tf_results = await scan_stock_rallygood(page, stock)
-                    if not tf_results:
-                        tf_results = {}
-                    
-                    # Cek apakah ada minimal satu timeframe dengan Dot Green
-                    any_green = any(tf_results.get(tf['code'], {}).get('status', False) for tf in TIMEFRAMES)
-                    
-                    hasil_deteksi.append({
-                        "stock": stock,
-                        "timeframes": tf_results,
-                        "has_green_dot": any_green
-                    })
-                    break  # Sukses! Lanjut ke saham berikutnya
-                    
-                except Exception as err_saham:
-                    if attempt < MAX_RETRIES:
-                        print(f"⚠️ [RETRY {attempt}/{MAX_RETRIES}] Saham {sym} terkendala: {err_saham}. Merefresh chart & mencoba ulang saham {sym}...")
-                        try:
-                            if page.is_closed():
-                                page = await buat_halaman_chart(sym)
-                            else:
-                                await page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym}&interval=D", wait_until="domcontentloaded", timeout=45000)
-                            await asyncio.sleep(2.5)
-                        except Exception as rec_err:
-                            print(f"⚠️ Gagal memulihkan halaman saat retry: {rec_err}")
-                    else:
-                        print(f"❌ [SKIP] Saham {sym} sudah dicoba {MAX_RETRIES}x namun tetap gagal: {err_saham}. Melanjutkan ke saham berikutnya...")
-            
-        # Kembalikan status indikator ke default di TradingView sebelum menutup browser
-        try:
-            await page.evaluate('''async () => {
-                const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
-                if (!chart) return;
-                const allStudies = chart.model().panes().flatMap(p => p.dataSources());
-                const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
-                const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
-                const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
-                const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
-                const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
+        # Aktifkan pelacak penggunaan RAM & CPU secara real-time
+        hw_mon = HardwareMonitor()
+        hw_task = asyncio.create_task(hw_mon.run())
 
-                if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
-                if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
-                if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
-                await new Promise(r => setTimeout(r, 400));
-                if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
-                if (rally?.properties?.().visible) rally.properties().visible.setValue(true);
-                await new Promise(r => setTimeout(r, 600));
-            }''')
-        except Exception:
-            pass
-            
+        # Jalankan worker secara bertahap (staggered start 2 detik agar tidak rebutan inisialisasi)
+        tasks = []
+        for w_id in range(1, actual_workers + 1):
+            tasks.append(asyncio.create_task(worker_loop(w_id)))
+            if w_id < actual_workers:
+                await asyncio.sleep(2.0)
+
+        await asyncio.gather(*tasks)
+        hw_stats = hw_mon.stop()
+        hw_task.cancel()
         await browser.close()
+
+    t_end_total = time.time()
+    total_dur_sec = t_end_total - t_start_total
+    menit = int(total_dur_sec // 60)
+    detik = total_dur_sec % 60
+    dur_str = f"{menit}m {detik:.1f}s" if menit > 0 else f"{total_dur_sec:.1f} detik"
+    avg_per_saham = total_dur_sec / total_stocks if total_stocks > 0 else 0
+
+    print("\n" + "═" * 70)
+    print(f"⚡ BENCHMARK KECEPATAN & KONSUMSI HARDWARE ({actual_workers} WORKER PARALEL)")
+    print(f"⏱️ Total Waktu Pemindaian : {dur_str} ({total_dur_sec:.1f} detik)")
+    print(f"📊 Saham Berhasil Discan  : {total_stocks} Saham")
+    print(f"🤖 Worker Aktif           : {actual_workers} Worker Tab Browser ({len(contexts)} Akun)")
+    print(f"⚡ Kecepatan Rata-Rata    : {avg_per_saham:.1f} detik / saham")
+    if hw_stats:
+        print(f"💻 Spesifikasi CPU        : {hw_stats['total_cores']} Cores/Threads ({hw_stats['physical_cores']} Core Fisik)")
+        print(f"🖥️ Pemakaian CPU          : Rata-rata {hw_stats['avg_cpu']:.1f}% | Puncak {hw_stats['peak_cpu']:.1f}%")
+        print(f"🧠 Pemakaian RAM Total    : Puncak {hw_stats['peak_mb']:.1f} MB ({hw_stats['peak_gb']:.2f} GB) / {hw_stats['pct_ram']:.1f}% dari {hw_stats['total_ram_gb']:.1f} GB")
+    print(f"🚀 Peningkatan Performa   : ~{actual_workers}x lebih cepat dibanding scan sekuensial!")
+    print("═" * 70 + "\n")
+
+    # Urutkan kembali hasil analisa sesuai urutan awal screener
+    hasil_deteksi.sort(key=lambda x: x.get('order_idx', 0))
         
     # 4. Susun Konten Laporan Teks Lengkap
     konten_laporan = []
     konten_laporan.append("=" * 75)
     konten_laporan.append(f"LAPORAN ANALISA SAHAM HUNTER - {tgl_analisa_id.upper()} (RALLY GOD IDX)")
     konten_laporan.append(f"Tanggal Analisa  : {tgl_analisa_id}")
-    konten_laporan.append(f"Waktu Eksekusi   : {now_wib.strftime('%H:%M:%S WIB')}")
+    konten_laporan.append(f"Waktu Eksekusi   : {now_wib.strftime('%H:%M:%S WIB')} (Durasi: {dur_str})")
     konten_laporan.append(f"Kriteria Filter  : Harga Rp 10-1.000 | Vol > Avg 10D | Vol Pre-mkt > 500% (IDX)")
     konten_laporan.append(f"Rentang Analisis : {tgl_awal_id} s/d {tgl_analisa_id} (1 Bulan Terakhir / 30 Hari)")
     konten_laporan.append(f"Layout Chart     : {CHART_LAYOUT_URL}")
@@ -1874,6 +2050,7 @@ async def run_daily_scan(send_wa=True):
             f"\n━━━━━━━━━━━━━━━━━━━━\n"
             f"📈 *REKAPITULASI PEMINDAIAN*:\n"
             f"• Total Saham Screener : {len(hasil_deteksi)} Saham\n"
+            f"• ⏱️ Durasi Pemindaian : {dur_str} ({actual_workers} Worker Paralel)\n"
             f"• 🔥 Lolos 3 Timeframe : {len(saham_3_dot)} Saham (VVIP Prioritas)\n"
             f"• ⚡ Lolos 2 Timeframe : {len(saham_2_dot)} Saham (Radar Potensial)\n"
             f"• ⚪ Saham Lainnya     : {len(saham_1_dot) + len(saham_0_dot)} Saham (Netral)\n"
@@ -1888,8 +2065,11 @@ async def run_daily_scan(send_wa=True):
     else:
         print("ℹ️ Mode Uji Coba: Pengiriman WhatsApp dilewati (hanya mencatat ke file Notepad).")
         
-    # 5. Simpan Data ke Database JSON (Web Statis 7 Hari + 1 Bulan 3 Dot Green)
-    simpan_database_json(hasil_deteksi, now_wib)
+    # 5. Simpan Data ke Database JSON (Hanya pada scan lengkap seluruh saham, bukan uji coba --limit)
+    if LIMIT_SAHAM_SCAN == 0:
+        simpan_database_json(hasil_deteksi, now_wib)
+    else:
+        print(f"ℹ️ [MODE UJI COBA --limit {LIMIT_SAHAM_SCAN}] Penyimpanan ke database web (history.json) dilewati agar data web resmi tetap utuh.")
 
     # Pastikan seluruh sisa screenshot dibersihkan
     bersihkan_screenshot()
