@@ -731,9 +731,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         f"• Support (Demand)  : {sup_str}\n"
         f"• Resisten (Supply) : {res_str}\n"
         f"• Status            : {status_7d}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"👉 Cek chart lengkap & riwayat 30 hari:\n"
-        f"https://aranter.web.id/"
+        f"━━━━━━━━━━━━━━━━━━━━"
     )
     
     print(f"\n🚨 [INSTANT ALERT] Sinyal baru terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
@@ -745,8 +743,8 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             save_alerted_keys(alerted_keys, now_wib)
     return sent
 
-def kirim_pesan_summary_wa(hasil_deteksi, now_wib):
-    """Mengirim pesan rangkuman harian WhatsApp (Daftar saham 3-Dot & 2-Dot Green + link web)."""
+def kirim_pesan_summary_wa(hasil_deteksi, now_wib, sesi_label=None):
+    """Mengirim pesan rangkuman WhatsApp (Daftar saham 3-Dot & 2-Dot Green + link web resmi)."""
     tgl_analisa_id = format_tanggal_id(now_wib)
 
     for item in hasil_deteksi:
@@ -759,8 +757,9 @@ def kirim_pesan_summary_wa(hasil_deteksi, now_wib):
     saham_3_dot.sort(key=lambda x: x.get('stock', {}).get('volume', 0), reverse=True)
     saham_2_dot.sort(key=lambda x: x.get('stock', {}).get('volume', 0), reverse=True)
 
+    header_sesi = f" ({sesi_label})" if sesi_label else ""
     pesan_wa = (
-        f"📊 *Aranter — Hunter Screener*\n"
+        f"📊 *Aranter — Hunter Screener*{header_sesi}\n"
         f"📅 *{tgl_analisa_id}* • ⏰ *{now_wib.strftime('%H:%M WIB')}*\n"
         f"🎯 *Filter*: Rp 10–1.000 | Vol > 10D | Pre-mkt > 500%\n"
         f"━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -2386,21 +2385,23 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
             now_after = datetime.datetime.now(WIB_TZ)
             new_session = get_current_idx_session(now_after)
             
-            # Transisi akhir Sesi 1
+            # Transisi akhir Sesi 1 (Jam Istirahat Siang / Sholat Jumat)
             if cur_session_type == "SESI_1" and (new_session["session"] != "SESI_1" or now_after.time() >= end_time):
-                print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI I TELAH BERAKHIR.")
+                print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI I TELAH BERAKHIR (JAM ISTIRAHAT).")
                 print("💾 Memperbarui data database web (snapshot mid-day)...")
                 simpan_database_json(hasil, now_after)
+                print("📱 Mengirim Rangkuman Siang (Sesi I) ke WhatsApp...")
+                kirim_pesan_summary_wa(hasil, now_after, sesi_label="Istirahat Siang")
                 if single_session:
                     print("🏁 Runner Sesi I selesai.")
                     break
 
-            # Transisi akhir Sesi 2 (Penutupan Perdagangan)
+            # Transisi akhir Sesi 2 (Penutupan Perdagangan / Closing)
             elif cur_session_type == "SESI_2" and (new_session["session"] != "SESI_2" or now_after.time() >= end_time):
                 print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI II TELAH BERAKHIR (PENUTUPAN PASAR).")
-                print("💾 Memperbarui database web penutupan & mengirim Rangkuman Harian WhatsApp...")
+                print("💾 Memperbarui database web penutupan & mengirim Rangkuman Penutupan WhatsApp...")
                 simpan_database_json(hasil, now_after)
-                kirim_pesan_summary_wa(hasil, now_after)
+                kirim_pesan_summary_wa(hasil, now_after, sesi_label="Penutupan Pasar")
                 if single_session:
                     print("🏁 Runner Sesi II selesai.")
                     break
