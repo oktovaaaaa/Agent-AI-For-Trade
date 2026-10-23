@@ -2,6 +2,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 reports/*.txt
+reports/*.png
 reports/screenshots/*.png
 scan.log
 .env
