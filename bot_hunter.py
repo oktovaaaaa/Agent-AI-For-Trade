@@ -30,7 +30,7 @@ if sys.platform == "win32":
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
 FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "7ci6H1WRqTDsJUAoFzq5")
-NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "082111144710")
+NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "120363430125223310@g.us")
 
 # Session Cookie TradingView (Mendukung multi-akun dipisah tanda koma)
 # Default: 3 Akun TradingView (Akun 1 + Akun 2 + Akun 3)
@@ -48,7 +48,7 @@ JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
 MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
-NUM_WORKERS = int(os.environ.get("NUM_WORKERS", 15))                    # Jumlah worker tab paralel (default 15 worker: 5 worker per akun)
+NUM_WORKERS = int(os.environ.get("NUM_WORKERS", 5))                     # Jumlah worker tab paralel (default 5 worker stabil)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
 TIMEFRAMES = [
