@@ -1163,25 +1163,18 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     }
 
                     const allStudies = model.panes().flatMap(p => p.dataSources());
-                    // Pastikan memilih indikator RallyGood yang aktif dan memiliki views/data (hindari ghost instance di pane 0)
-                    const rallyStudies = allStudies.filter(s => s.title && s.title().includes('RallyGood'));
-                    const rallyStudy = rallyStudies.find(s => (s._paneViews && s._paneViews.length > 0) || (s.data && s.data())) || rallyStudies[rallyStudies.length - 1];
                     const smcStudy = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
                     const donaltStudy = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
+                    const rallyStudy = allStudies.find(s => s.title && s.title().includes('RallyGood'));
                     const scStudy = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
                     const macdStudy = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
 
                     // FASE 0: Keamanan awal - pastikan hanya EMA + DonAlt & RallyGood yang aktif (Maksimal 2 Indikator)
-                    // Matikan dulu indikator sekunder & indikator liar lainnya sebelum menyalakan indikator utama agar TradingView tidak menolak batas indikator
+                    // Matikan dulu indikator sekunder sebelum menyalakan indikator utama agar TradingView tidak menolak batas 2 indikator
                     let needWait = false;
-                    for (const s of allStudies) {
-                        const t = s.title ? s.title() : '';
-                        if (!t.includes('RallyGood') && !t.includes('EMA + DonAlt Suite')) {
-                            if (s?.properties?.().visible?.value()) {
-                                try { s.properties().visible.setValue(false); needWait = true; } catch(e) {}
-                            }
-                        }
-                    }
+                    if (smcStudy?.properties?.().visible?.value()) { smcStudy.properties().visible.setValue(false); needWait = true; }
+                    if (scStudy?.properties?.().visible?.value()) { scStudy.properties().visible.setValue(false); needWait = true; }
+                    if (macdStudy?.properties?.().visible?.value()) { macdStudy.properties().visible.setValue(false); needWait = true; }
                     if (needWait) await new Promise(r => setTimeout(r, 150));
 
                     if (donaltStudy?.properties?.().visible && !donaltStudy.properties().visible.value()) {
@@ -1193,14 +1186,12 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     await new Promise(r => setTimeout(r, 200));
 
                     // FASE 1: Ekstraksi RallyGood (Dot Green & Dot Red) & EMA + DonAlt Suite (Golden/Death Cross)
-                    // Tunggu hingga RallyGood siap (polling hingga 1250ms untuk kestabilan di runner headless)
+                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 1250ms untuk kestabilan di runner headless)
                     if (rallyStudy) {
                         for (let r = 0; r < 25; r++) {
                             const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
                             const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
-                            const hasPvData = (greenPv && greenPv._items && greenPv._items.length > 0) || (redPv && redPv._items && redPv._items.length > 0);
-                            const hasDataObj = rallyStudy.data && rallyStudy.data() && rallyStudy.data().lastIndex() > 0;
-                            if (hasPvData || hasDataObj) break;
+                            if ((greenPv && greenPv._items && greenPv._items.length > 0) || (redPv && redPv._items && redPv._items.length > 0)) break;
                             await new Promise(resolve => setTimeout(resolve, 50));
                         }
                     }
@@ -1227,74 +1218,78 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     let dots = [];
                     let redDots = [];
                     if (rallyStudy) {
-                        // Jalur 1: Ekstraksi via _paneViews
-                        const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
-                        if (greenPv && greenPv._items && greenPv._items.length > 0) {
-                            const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
-                            dots = activeDots.map(dot => {
-                                const tp = ts.indexToTimePoint(dot.timePointIndex);
-                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
+                        const rallyData = rallyStudy.data ? rallyStudy.data() : null;
+                        if (rallyData && rallyData.lastIndex && rallyData.lastIndex() > 0) {
+                            const fIdx = Math.max(0, rallyData.firstIndex());
+                            const lIdx = rallyData.lastIndex();
+                            for (let i = fIdx; i <= lIdx; i++) {
+                                const val = rallyData.valueAt(i);
+                                if (!val || !Array.isArray(val)) continue;
+                                const barTime = val[0];
                                 let dotClose = null;
                                 if (barsObj && barsObj.valueAt) {
-                                    const bar = barsObj.valueAt(dot.timePointIndex);
+                                    const bar = barsObj.valueAt(i);
                                     if (bar && bar.length > 4) dotClose = bar[4];
                                 }
-                                return {
-                                    timestamp: itemTime,
-                                    dotClose: dotClose,
-                                    currentClose: currentClose
-                                };
-                            }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
-                        }
-
-                        const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
-                        if (redPv && redPv._items && redPv._items.length > 0) {
-                            const activeReds = (redPv._items || []).filter(it => !isNaN(it.y));
-                            redDots = activeReds.map(dot => {
-                                const tp = ts.indexToTimePoint(dot.timePointIndex);
-                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
-                                let dotClose = null;
-                                if (barsObj && barsObj.valueAt) {
-                                    const bar = barsObj.valueAt(dot.timePointIndex);
-                                    if (bar && bar.length > 4) dotClose = bar[4];
+                                // val[3] adalah plot_2 (Green dot shape: nilai 0 atau >= 0)
+                                if (val[3] === 0 || val[3] > 0) {
+                                    dots.push({
+                                        timestamp: barTime,
+                                        dotClose: dotClose,
+                                        currentClose: currentClose
+                                    });
                                 }
-                                return {
-                                    timestamp: itemTime,
-                                    dotClose: dotClose,
-                                    currentClose: currentClose
-                                };
-                            }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
+                                // val[2] adalah plot_1 (Red dot shape: nilai 0 atau >= 0)
+                                if (val[2] === 0 || val[2] > 0) {
+                                    redDots.push({
+                                        timestamp: barTime,
+                                        dotClose: dotClose,
+                                        currentClose: currentClose
+                                    });
+                                }
+                            }
                         }
 
-                        // Jalur 2: Ekstraksi langsung via rallyStudy.data() jika _paneViews kosong di browser headless
-                        if (dots.length === 0 && redDots.length === 0 && rallyStudy.data) {
-                            const rData = rallyStudy.data();
-                            if (rData && rData.lastIndex && rData.lastIndex() > 0) {
-                                for (let i = Math.max(0, rData.firstIndex()); i <= rData.lastIndex(); i++) {
-                                    const val = rData.valueAt(i);
-                                    if (val && Array.isArray(val)) {
-                                        const tp = ts.indexToTimePoint(i);
-                                        const barVal = barsObj ? barsObj.valueAt(i) : null;
-                                        const barTime = barVal ? barVal[0] : (typeof tp === 'number' ? tp : (tp?.time || (tp?.year ? Math.floor(Date.UTC(tp.year, tp.month - 1, tp.day) / 1000) : null)));
-                                        const barClose = barVal ? barVal[4] : null;
-
-                                        // val[3] = plot_2 (Green Dot), val[2] = plot_1 (Red Dot)
-                                        if (val[3] !== null && val[3] !== undefined && !isNaN(val[3])) {
-                                            dots.push({
-                                                timestamp: barTime,
-                                                dotClose: barClose,
-                                                currentClose: currentClose
-                                            });
-                                        }
-                                        if (val[2] !== null && val[2] !== undefined && !isNaN(val[2])) {
-                                            redDots.push({
-                                                timestamp: barTime,
-                                                dotClose: barClose,
-                                                currentClose: currentClose
-                                            });
-                                        }
+                        // Fallback ke _paneViews jika data() kosong
+                        if (dots.length === 0) {
+                            const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
+                            if (greenPv) {
+                                const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
+                                dots = activeDots.map(dot => {
+                                    const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                    const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
+                                    let dotClose = null;
+                                    if (barsObj && barsObj.valueAt) {
+                                        const bar = barsObj.valueAt(dot.timePointIndex);
+                                        if (bar && bar.length > 4) dotClose = bar[4];
                                     }
-                                }
+                                    return {
+                                        timestamp: itemTime,
+                                        dotClose: dotClose,
+                                        currentClose: currentClose
+                                    };
+                                }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
+                            }
+                        }
+
+                        if (redDots.length === 0) {
+                            const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
+                            if (redPv) {
+                                const activeReds = (redPv._items || []).filter(it => !isNaN(it.y));
+                                redDots = activeReds.map(dot => {
+                                    const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                    const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
+                                    let dotClose = null;
+                                    if (barsObj && barsObj.valueAt) {
+                                        const bar = barsObj.valueAt(dot.timePointIndex);
+                                        if (bar && bar.length > 4) dotClose = bar[4];
+                                    }
+                                    return {
+                                        timestamp: itemTime,
+                                        dotClose: dotClose,
+                                        currentClose: currentClose
+                                    };
+                                }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
                             }
                         }
                     }
@@ -2409,18 +2404,15 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                     const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
                     if (!chart) return;
                     const allStudies = chart.model().panes().flatMap(p => p.dataSources());
+                    const smc = allStudies.find(s => s.title && s.title().includes('Ultimate SMC Suite'));
                     const donalt = allStudies.find(s => s.title && s.title().includes('EMA + DonAlt Suite'));
-                    const rallyStudies = allStudies.filter(s => s.title && s.title().includes('RallyGood'));
-                    const rally = rallyStudies.find(s => (s._paneViews && s._paneViews.length > 0) || (s.data && s.data())) || rallyStudies[rallyStudies.length - 1];
+                    const rally = allStudies.find(s => s.title && s.title().includes('RallyGood'));
+                    const sc = allStudies.find(s => s.title && s.title().includes('Scalping vs Swing Trading'));
+                    const macd = allStudies.find(s => s.title && s.title().includes('MACD Divergences'));
                     
-                    for (const s of allStudies) {
-                        const t = s.title ? s.title() : '';
-                        if (!t.includes('RallyGood') && !t.includes('EMA + DonAlt Suite')) {
-                            if (s?.properties?.().visible?.value()) {
-                                try { s.properties().visible.setValue(false); } catch(e) {}
-                            }
-                        }
-                    }
+                    if (smc?.properties?.().visible) smc.properties().visible.setValue(false);
+                    if (sc?.properties?.().visible) sc.properties().visible.setValue(false);
+                    if (macd?.properties?.().visible) macd.properties().visible.setValue(false);
                     await new Promise(r => setTimeout(r, 200));
 
                     if (donalt?.properties?.().visible) donalt.properties().visible.setValue(true);
