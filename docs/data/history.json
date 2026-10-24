@@ -81939,15 +81939,15 @@
           "low": 426.0,
           "change": 0.0,
           "volume": 382399100.0,
-          "count_green": 3,
-          "has_green_dot": true,
+          "count_green": 0,
+          "has_green_dot": false,
           "is_vip_audit": false,
           "timeframes": {
             "D": {
-              "status": true,
-              "date": "23 Okt 2026",
-              "dot_close": 432,
-              "gain_pct": 0.0,
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
               "red_dot": {
                 "status": false,
                 "active": false,
@@ -81982,10 +81982,10 @@
               }
             },
             "60": {
-              "status": true,
-              "date": "23 Okt 2026, 16:00 WIB",
-              "dot_close": 432,
-              "gain_pct": 0.0,
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
               "red_dot": {
                 "status": false,
                 "active": false,
@@ -82038,10 +82038,10 @@
               }
             },
             "15": {
-              "status": true,
-              "date": "23 Okt 2026, 16:00 WIB",
-              "dot_close": 432,
-              "gain_pct": 0.0,
+              "status": false,
+              "date": null,
+              "dot_close": null,
+              "gain_pct": null,
               "red_dot": {
                 "status": false,
                 "active": false,
@@ -93775,194 +93775,6 @@
       "exit_date": "2026-10-23",
       "exit_date_display": "23 Oktober 2026",
       "exit_label": "🏁 Selesai / Take Profit"
-    },
-    {
-      "symbol": "BRMS",
-      "scan_date": "2026-10-23",
-      "scan_date_display": "23 Oktober 2026",
-      "base_price": 432.0,
-      "entry_session": "SESI_SORE",
-      "entry_session_label": "Penutupan Sore",
-      "entry_time": "13:15 WIB",
-      "status": "ACTIVE",
-      "is_active": true,
-      "exit_reason": null,
-      "exit_label": "🟢 Aktif Dipantau",
-      "data": {
-        "symbol": "BRMS",
-        "name": "BRMS",
-        "close": 432.0,
-        "high": 444.0,
-        "low": 426.0,
-        "change": 0.0,
-        "volume": 382399100.0,
-        "count_green": 3,
-        "has_green_dot": true,
-        "is_vip_audit": false,
-        "timeframes": {
-          "D": {
-            "status": true,
-            "date": "23 Okt 2026",
-            "dot_close": 432,
-            "gain_pct": 0.0,
-            "red_dot": {
-              "status": false,
-              "active": false,
-              "date": null,
-              "dt": null,
-              "dot_close": null
-            },
-            "donalt": {
-              "golden": null,
-              "death": null
-            },
-            "scalping": {
-              "buy": null,
-              "sell": {
-                "date": "28 Sep 2026",
-                "dt": "2026-09-28 09:00:00+07:00",
-                "price": 655,
-                "reversed": false
-              },
-              "trend": "SELL (Red)"
-            },
-            "smc": {
-              "supply": 750,
-              "demand": 540,
-              "pct_to_supply": 73.61111111111111,
-              "pct_to_demand": 25.0,
-              "status_7d": "⚠️ BREAKDOWN DEMAND (Menembus Rp 540)"
-            },
-            "macd": {
-              "bull": null,
-              "bear": null
-            }
-          },
-          "60": {
-            "status": true,
-            "date": "23 Okt 2026, 16:00 WIB",
-            "dot_close": 432,
-            "gain_pct": 0.0,
-            "red_dot": {
-              "status": false,
-              "active": false,
-              "date": null,
-              "dt": null,
-              "dot_close": null
-            },
-            "donalt": {
-              "golden": null,
-              "death": {
-                "date": "28 Sep 2026, 11:00 WIB",
-                "dt": "2026-09-28 11:00:00+07:00",
-                "price": 645,
-                "reversed": false
-              }
-            },
-            "scalping": {
-              "buy": {
-                "date": "22 Okt 2026, 10:00 WIB",
-                "dt": "2026-10-22 10:00:00+07:00",
-                "price": 442,
-                "exit_price": 432,
-                "reversed": false,
-                "gain_pct": -2.262443438914027
-              },
-              "sell": {
-                "date": "12 Okt 2026, 13:00 WIB",
-                "dt": "2026-10-12 13:00:00+07:00",
-                "price": 570,
-                "reversed": true
-              },
-              "trend": "BUY (Green)"
-            },
-            "smc": {
-              "supply": 446,
-              "demand": 422,
-              "pct_to_supply": 3.2407407407407405,
-              "pct_to_demand": -2.314814814814815,
-              "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
-            },
-            "macd": {
-              "bull": {
-                "type": "Bull",
-                "date": "5 Okt 2026, 10:00 WIB",
-                "dt": "2026-10-05 10:00:00+07:00",
-                "price": 570,
-                "reversed": false
-              },
-              "bear": null
-            }
-          },
-          "15": {
-            "status": true,
-            "date": "23 Okt 2026, 16:00 WIB",
-            "dot_close": 432,
-            "gain_pct": 0.0,
-            "red_dot": {
-              "status": false,
-              "active": false,
-              "date": null,
-              "dt": null,
-              "dot_close": null
-            },
-            "donalt": {
-              "golden": null,
-              "death": null
-            },
-            "scalping": {
-              "buy": {
-                "date": "20 Okt 2026, 11:45 WIB",
-                "dt": "2026-10-20 11:45:00+07:00",
-                "price": 434,
-                "exit_price": 432,
-                "reversed": false,
-                "gain_pct": -0.4608294930875576
-              },
-              "sell": {
-                "date": "16 Okt 2026, 09:15 WIB",
-                "dt": "2026-10-16 09:15:00+07:00",
-                "price": 468,
-                "reversed": true
-              },
-              "trend": "BUY (Green)"
-            },
-            "smc": {
-              "supply": 444,
-              "demand": 428,
-              "pct_to_supply": 2.7777777777777777,
-              "pct_to_demand": -0.9259259259259258,
-              "status_7d": "🟢 Di Area Demand (Potensi Pantulan)"
-            },
-            "macd": {
-              "bull": {
-                "type": "Bull",
-                "date": "20 Okt 2026, 11:00 WIB",
-                "dt": "2026-10-20 11:00:00+07:00",
-                "price": 430,
-                "reversed": false
-              },
-              "bear": null
-            }
-          }
-        },
-        "entry_session": "SESI_SORE",
-        "midday_price": null
-      },
-      "performance_history": [
-        {
-          "date": "2026-10-23",
-          "date_display": "24 Oct 2026",
-          "close": 432.0,
-          "high": 444.0,
-          "low": 426.0,
-          "daily_change_pct": 0.0,
-          "cumulative_gain_pct": 0.0,
-          "peak_gain_pct": 0.0,
-          "entry_session": "SESI_SORE",
-          "count_green": 3
-        }
-      ]
     },
     {
       "symbol": "PADI",

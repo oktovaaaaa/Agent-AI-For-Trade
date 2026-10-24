@@ -1218,79 +1218,42 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     let dots = [];
                     let redDots = [];
                     if (rallyStudy) {
-                        const rallyData = rallyStudy.data ? rallyStudy.data() : null;
-                        if (rallyData && rallyData.lastIndex && rallyData.lastIndex() > 0) {
-                            const fIdx = Math.max(0, rallyData.firstIndex());
-                            const lIdx = rallyData.lastIndex();
-                            for (let i = fIdx; i <= lIdx; i++) {
-                                const val = rallyData.valueAt(i);
-                                if (!val || !Array.isArray(val)) continue;
-                                const barTime = val[0];
+                        const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
+                        if (greenPv) {
+                            const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
+                            dots = activeDots.map(dot => {
+                                const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
                                 let dotClose = null;
                                 if (barsObj && barsObj.valueAt) {
-                                    const bar = barsObj.valueAt(i);
+                                    const bar = barsObj.valueAt(dot.timePointIndex);
                                     if (bar && bar.length > 4) dotClose = bar[4];
                                 }
-                                // val[3] adalah plot_2 (Green dot shape: nilai 0 atau >= 0)
-                                if (val[3] === 0 || val[3] > 0) {
-                                    dots.push({
-                                        timestamp: barTime,
-                                        dotClose: dotClose,
-                                        currentClose: currentClose
-                                    });
-                                }
-                                // val[2] adalah plot_1 (Red dot shape: nilai 0 atau >= 0)
-                                if (val[2] === 0 || val[2] > 0) {
-                                    redDots.push({
-                                        timestamp: barTime,
-                                        dotClose: dotClose,
-                                        currentClose: currentClose
-                                    });
-                                }
-                            }
+                                return {
+                                    timestamp: itemTime,
+                                    dotClose: dotClose,
+                                    currentClose: currentClose
+                                };
+                            }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
                         }
 
-                        // Fallback ke _paneViews jika data() kosong
-                        if (dots.length === 0) {
-                            const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
-                            if (greenPv) {
-                                const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
-                                dots = activeDots.map(dot => {
-                                    const tp = ts.indexToTimePoint(dot.timePointIndex);
-                                    const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
-                                    let dotClose = null;
-                                    if (barsObj && barsObj.valueAt) {
-                                        const bar = barsObj.valueAt(dot.timePointIndex);
-                                        if (bar && bar.length > 4) dotClose = bar[4];
-                                    }
-                                    return {
-                                        timestamp: itemTime,
-                                        dotClose: dotClose,
-                                        currentClose: currentClose
-                                    };
-                                }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
-                            }
-                        }
-
-                        if (redDots.length === 0) {
-                            const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
-                            if (redPv) {
-                                const activeReds = (redPv._items || []).filter(it => !isNaN(it.y));
-                                redDots = activeReds.map(dot => {
-                                    const tp = ts.indexToTimePoint(dot.timePointIndex);
-                                    const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
-                                    let dotClose = null;
-                                    if (barsObj && barsObj.valueAt) {
-                                        const bar = barsObj.valueAt(dot.timePointIndex);
-                                        if (bar && bar.length > 4) dotClose = bar[4];
-                                    }
-                                    return {
-                                        timestamp: itemTime,
-                                        dotClose: dotClose,
-                                        currentClose: currentClose
-                                    };
-                                }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
-                            }
+                        const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
+                        if (redPv) {
+                            const activeReds = (redPv._items || []).filter(it => !isNaN(it.y));
+                            redDots = activeReds.map(dot => {
+                                const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
+                                let dotClose = null;
+                                if (barsObj && barsObj.valueAt) {
+                                    const bar = barsObj.valueAt(dot.timePointIndex);
+                                    if (bar && bar.length > 4) dotClose = bar[4];
+                                }
+                                return {
+                                    timestamp: itemTime,
+                                    dotClose: dotClose,
+                                    currentClose: currentClose
+                                };
+                            }).filter(d => d.timestamp !== null && d.timestamp !== undefined);
                         }
                     }
 
