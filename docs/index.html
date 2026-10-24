@@ -4396,8 +4396,12 @@ async function loadDatabase() {
       document.getElementById("footerSyncText").innerText = "Update Terakhir: " + appData.last_updated;
     }
     
-    // Update VIP badge count
-    const vipCount = (appData.vip_3dot_history || []).length;
+    // Update VIP badge count (hanya saham yang masih aktif 3-Dot)
+    const vipCount = (appData.vip_3dot_history || []).filter(item => {
+      const isCompleted = item.status === "COMPLETED" || item.is_active === false;
+      const s = item.data || item;
+      return !isCompleted && (s.count_green === 3);
+    }).length;
     document.getElementById("vipNavCount").innerText = vipCount;
 
     // Update Rekomendasi Aranter badge count
@@ -5046,8 +5050,9 @@ function getAranterRecommendations() {
 
   const poolMap = new Map();
 
-  // 1. Kumpulkan dari vip_3dot_history (arsip 30 hari)
+  // 1. Kumpulkan dari vip_3dot_history (hanya yang masih aktif 3-Dot)
   (appData.vip_3dot_history || []).forEach(item => {
+    if (item.status === "COMPLETED" || item.is_active === false) return;
     const stock = item.data || item;
     if (stock && stock.symbol && !poolMap.has(stock.symbol)) {
       poolMap.set(stock.symbol, {
@@ -5141,65 +5146,122 @@ function getTrackRecordStocks() {
           high: Number(sFound.high) || Number(sFound.close) || 0,
           low: Number(sFound.low) || Number(sFound.close) || 0,
           count_green: sFound.count_green || 0,
+          entry_session: sFound.entry_session || item.entry_session || null,
+          midday_price: sFound.midday_price || null,
           stock: sFound
         });
       }
     });
 
-    // Track Record: Entry adalah harga CLOSE pada hari saham resmi masuk screener / terkonfirmasi sinyal
-    // Kenaikan HANYA dihitung mulai BESOKNYA (hari bursa berikutnya setelah sinyal keluar pas market tutup)
-    if (scanHistory.length < 2) {
-      // Belum ada hari bursa berikutnya setelah terdeteksi di screener (Day 1)
-      return;
-    }
+    const perfHistory = item.performance_history || [];
+    const basePrice = Number(item.base_price) || (scanHistory[0] ? scanHistory[0].close : 0);
+    if (basePrice <= 0) return;
 
-    const entryDay0 = scanHistory[0];
-    const subsFrom0 = scanHistory.slice(1);
-    const highs0 = subsFrom0.map(p => p.high).filter(h => h > 0);
-    const closes0 = subsFrom0.map(p => p.close).filter(c => c > 0);
-    if (entryDay0.close <= 0 || highs0.length === 0) return;
+    let bestEntry = null;
+    let bestPeakHigh = 0;
+    let bestGain = 0;
+    let bestPeakClose = 0;
+    let isSameDayMiddayWin = false;
 
-    let bestEntry = entryDay0;
-    let bestPeakHigh = Math.max(...highs0);
-    let bestGain = ((bestPeakHigh - entryDay0.close) / entryDay0.close) * 100;
-    let bestPeakClose = Math.max(...closes0);
+    // Penentuan apakah saham ini masuk / terdeteksi pada Sesi Siang (Istirahat Bursa):
+    const isMiddayEntry = item.entry_session === "SESI_SIANG" || 
+                          (scanHistory[0] && scanHistory[0].entry_session === "SESI_SIANG") ||
+                          (item.entry_session_label && item.entry_session_label.includes("Siang"));
 
-    // Cek jika saham terkonfirmasi ulang sinyal 3-Dot di tanggal scan berikutnya (misal SOLA tgl 20 Okt @ 59)
-    // dan memiliki hari bursa berikutnya lagi (misal tgl 21 Okt)
-    for (let idx = 1; idx < scanHistory.length - 1; idx++) {
-      const cand = scanHistory[idx];
-      const candSubs = scanHistory.slice(idx + 1);
-      const candHighs = candSubs.map(p => p.high).filter(h => h > 0);
-      const candCloses = candSubs.map(p => p.close).filter(c => c > 0);
-      if (candHighs.length > 0 && cand.close > 0) {
-        const candPeak = Math.max(...candHighs);
-        const candGain = ((candPeak - cand.close) / cand.close) * 100;
-        if (candGain > bestGain) {
-          bestEntry = cand;
-          bestPeakHigh = candPeak;
-          bestGain = candGain;
-          bestPeakClose = Math.max(...candCloses);
+    // SKENARIO 1: Saham Baru Terdeteksi Hari Ini (1 Hari / Day 0)
+    // Jika saham terdeteksi saat Sesi Siang (istirahat bursa), trader bisa entry di pembukaan Sesi II.
+    // Kenaikan hingga closing sore hari itu SAH dihitung sebagai hasil rekomendasi hari itu!
+    if (scanHistory.length === 1 || (scanHistory.length === 0 && perfHistory.length === 1)) {
+      if (isMiddayEntry) {
+        const todayHigh = Math.max(
+          Number(s.high) || 0,
+          scanHistory[0] ? scanHistory[0].high : 0,
+          perfHistory[0] ? Number(perfHistory[0].high) || 0 : 0
+        );
+        const todayClose = Number(s.close) || (scanHistory[0] ? scanHistory[0].close : 0) || (perfHistory[0] ? Number(perfHistory[0].close) || 0 : 0);
+
+        if (todayHigh > basePrice) {
+          const intradayGain = ((todayHigh - basePrice) / basePrice) * 100;
+          if (intradayGain >= 8.0) {
+            bestGain = intradayGain;
+            bestPeakHigh = todayHigh;
+            bestPeakClose = todayClose;
+            bestEntry = {
+              close: basePrice,
+              date_display: (item.scan_date_display || (scanHistory[0] && scanHistory[0].date_display) || "Hari Ini") + " (Sesi Siang)"
+            };
+            isSameDayMiddayWin = true;
+          }
+        }
+      }
+      // Jika baru muncul di penutupan sore (SESI_SORE), trader baru bisa beli besok (D+1), jadi tunggu candle besok.
+      if (!isSameDayMiddayWin) {
+        return;
+      }
+    } else if (scanHistory.length >= 2) {
+      // SKENARIO 2: Saham Sudah Berjalan Multi-Hari (Day 1 s/d Day 30)
+      const entryDay0 = scanHistory[0];
+      const subsFrom0 = scanHistory.slice(1);
+      const highs0 = subsFrom0.map(p => p.high).filter(h => h > 0);
+      const closes0 = subsFrom0.map(p => p.close).filter(c => c > 0);
+
+      // Jika entry di Sesi Siang, sertakan juga High di hari pertama (Sesi II Day 0)
+      if (isMiddayEntry && entryDay0.high > basePrice) {
+        highs0.unshift(entryDay0.high);
+        closes0.unshift(entryDay0.close);
+      }
+
+      if (highs0.length > 0) {
+        bestEntry = {
+          close: basePrice,
+          date_display: entryDay0.date_display + (isMiddayEntry ? " (Sesi Siang)" : "")
+        };
+        bestPeakHigh = Math.max(...highs0);
+        bestGain = ((bestPeakHigh - basePrice) / basePrice) * 100;
+        bestPeakClose = Math.max(...closes0);
+
+        // Cek jika ada re-trigger sinyal 3-Dot di tanggal berikutnya yang menghasilkan gain lebih tinggi
+        for (let idx = 1; idx < scanHistory.length - 1; idx++) {
+          const cand = scanHistory[idx];
+          const candSubs = scanHistory.slice(idx + 1);
+          const candHighs = candSubs.map(p => p.high).filter(h => h > 0);
+          const candCloses = candSubs.map(p => p.close).filter(c => c > 0);
+          if (candHighs.length > 0 && cand.close > 0) {
+            const candPeak = Math.max(...candHighs);
+            const candGain = ((candPeak - cand.close) / cand.close) * 100;
+            if (candGain > bestGain) {
+              bestEntry = cand;
+              bestPeakHigh = candPeak;
+              bestGain = candGain;
+              bestPeakClose = Math.max(...candCloses);
+            }
+          }
         }
       }
     }
 
-    // Syarat Kriteria Track Record: Minimal kenaikan peak high >= +8% dari harga close hari kemunculan sinyal
-    if (bestGain >= 8.0) {
+    // Syarat Kriteria Track Record: Minimal kenaikan peak high >= +8% dari harga entry sinyal
+    if (bestGain >= 8.0 && bestEntry) {
+      const isItemActive = (item.is_active !== false) && (item.status !== "COMPLETED");
+      const entryClose = Number(bestEntry.close) || basePrice;
       results.push({
         stock: s,
         vipItem: item,
         symbol: sym,
         name: s.name || sym,
         close: Number(s.close) || bestPeakClose,
-        basePrice: bestEntry.close,
-        peakPrice: bestPeakHigh, // Puncak Kenaikan Tertinggi (High) besoknya
+        basePrice: entryClose,
+        peakPrice: bestPeakHigh,
         peakGain: Number(bestGain.toFixed(2)),
         peakClosePrice: bestPeakClose,
-        peakCloseGain: Number((((bestPeakClose - bestEntry.close) / bestEntry.close) * 100).toFixed(2)),
+        peakCloseGain: Number((((bestPeakClose - entryClose) / entryClose) * 100).toFixed(2)),
         isLuxury: bestGain >= 25.0,
         detectedDate: bestEntry.date_display || "Hari Pertama Sinyal",
-        screenerPrice: entryDay0.close,
-        screenerGain: Number((((Math.max(...highs0) - entryDay0.close) / entryDay0.close) * 100).toFixed(2))
+        screenerPrice: basePrice,
+        screenerGain: Number(bestGain.toFixed(2)),
+        isActive: isItemActive,
+        status: item.status || "ACTIVE",
+        isSameDayMiddayWin: isSameDayMiddayWin
       });
     }
   });
@@ -5348,7 +5410,13 @@ function renderVipView() {
   document.body.classList.remove("mode-guide");
   applyGridCardMode("vip");
   const grid = document.getElementById("stocksGrid");
-  const vipList = appData.vip_3dot_history || [];
+  const fullVipList = appData.vip_3dot_history || [];
+  // Menu VIP 1 Bulan HANYA menampilkan saham yang MASIH AKTIF (Belum Kena Red Dot)
+  const vipList = fullVipList.filter(item => {
+    const isCompleted = item.status === "COMPLETED" || item.is_active === false;
+    const s = item.data || item;
+    return !isCompleted && (s.count_green === 3);
+  });
 
   document.getElementById("pageMainHeading").innerText = "3 Rally Good 1 bulan terakhir";
   document.getElementById("pageSubHeading").innerText = "Do Your Own Research !";
@@ -5694,7 +5762,10 @@ function renderTrackRecordView() {
       peakPrice: item.peakPrice,
       detectedDate: item.detectedDate,
       screenerPrice: item.screenerPrice,
-      screenerGain: item.screenerGain
+      screenerGain: item.screenerGain,
+      isActive: item.isActive,
+      status: item.status,
+      isSameDayMiddayWin: item.isSameDayMiddayWin
     });
   }).join("");
 
@@ -6943,9 +7014,10 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
     const screenerExtra = (trackRecordInfo.screenerPrice && trackRecordInfo.screenerPrice !== trackRecordInfo.basePrice)
       ? `<span style="opacity:0.8; font-size:10px;">(Awal Screener: Rp ${Number(trackRecordInfo.screenerPrice).toLocaleString('id-ID')} / +${trackRecordInfo.screenerGain.toFixed(1)}%)</span>`
       : '';
+    const entryLabel = trackRecordInfo.isSameDayMiddayWin ? "Entry Siang" : "Entry Close";
     vipDateRow = `
       <div style="font-size:11px; font-weight:600; color:var(--text-secondary); margin-top:3px; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-        <span>Entry Close: <b>${entryStr}</b> \u2794 Peak High: <b>${peakStr}</b></span>
+        <span>${entryLabel}: <b>${entryStr}</b> \u2794 Peak High: <b>${peakStr}</b></span>
         <span style="opacity:0.8;">(${trackRecordInfo.detectedDate})</span>
         ${screenerExtra}
       </div>
@@ -6971,6 +7043,14 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
               <span class="vip-badge-pill" style="${isLuxury ? 'background:linear-gradient(135deg, #F59E0B, #D97706); color:#fff; font-weight:800;' : 'background:var(--status-green-bg); color:var(--status-green-text); border:1px solid rgba(22,163,74,0.3); font-weight:700;'}">
                 ${isLuxury ? '★ ' : ''}+${trackRecordInfo.peakGain.toFixed(1)}% PEAK
               </span>
+              <span class="badge-chip" style="${trackRecordInfo.isActive ? 'background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3);' : 'background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);'} font-size:10px; font-weight:700; padding:2px 7px; border-radius:6px;">
+                ${trackRecordInfo.isActive ? '🟢 Aktif Dipantau' : '🏁 Selesai / Take Profit'}
+              </span>
+              ${trackRecordInfo.isSameDayMiddayWin ? `
+                <span class="badge-chip" style="background:rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.3); font-size:10px; font-weight:700; padding:2px 7px; border-radius:6px;">
+                  ⚡ Cuan Siang \u2794 Closing
+                </span>
+              ` : ''}
             ` : ''}
           </div>
           <span class="symbol-name">${stock.name || stock.symbol}</span>

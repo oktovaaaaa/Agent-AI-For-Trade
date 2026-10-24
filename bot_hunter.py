@@ -1882,15 +1882,45 @@ def simpan_database_json(hasil_deteksi, now_wib):
         # Khusus Website Screener Hari Ini: Hanya simpan saham yang memang lolos screener (bukan audit vip sepi)
         saham_web = [s for s in clean_stocks if s.get("count_green", 0) >= 2 and not s.get("is_vip_audit", False)]
         
+        # Deteksi Sesi Bursa saat Penyimpanan Database (Midday / Istirahat vs Penutupan Sore)
+        cur_t = now_wib.time()
+        t_0900 = datetime.time(9, 0)
+        t_1430 = datetime.time(14, 30)
+        is_midday = (t_0900 <= cur_t < t_1430) and (now_wib.weekday() < 5)
+        cur_session_tag = "SESI_SIANG" if is_midday else "SESI_SORE"
+        cur_session_label = "Sesi Siang (Istirahat)" if is_midday else "Penutupan Sore"
+
         # Simpan scan hari ini
         history["last_updated"] = now_wib.strftime("%Y-%m-%d %H:%M:%S WIB")
         if "daily_scans" not in history or not isinstance(history["daily_scans"], dict):
             history["daily_scans"] = {}
-            
+
+        # Simpan info harga & sesi entry awal jika saham sudah terdeteksi di Sesi Siang
+        existing_today_stocks = {}
+        if date_key in history.get("daily_scans", {}):
+            for st_old in history["daily_scans"][date_key].get("stocks", []):
+                if st_old.get("symbol"):
+                    existing_today_stocks[st_old["symbol"]] = st_old
+
+        for s in saham_web:
+            sym_w = s.get("symbol")
+            old_w = existing_today_stocks.get(sym_w)
+            if is_midday:
+                s["entry_session"] = "SESI_SIANG"
+                s["midday_price"] = float(s.get("close", 0))
+            elif old_w and old_w.get("midday_price"):
+                s["entry_session"] = "SESI_SIANG"
+                s["midday_price"] = old_w["midday_price"]
+            else:
+                s["entry_session"] = "SESI_SORE"
+                s["midday_price"] = None
+
         history["daily_scans"][date_key] = {
             "date": date_key,
             "date_display": tgl_id,
             "time_display": now_wib.strftime("%H:%M WIB"),
+            "session": cur_session_tag,
+            "session_label": cur_session_label,
             "summary": {
                 "total_screener": len(saham_web),
                 "count_3_dot": len(saham_3_dot),
@@ -1917,22 +1947,24 @@ def simpan_database_json(hasil_deteksi, now_wib):
         if "vip_3dot_history" not in history or not isinstance(history["vip_3dot_history"], list):
             history["vip_3dot_history"] = []
 
-        # Pangkas dari vip_3dot_history:
-        # - Saham dengan Red Dot aktif di 1D + 1H (purged_symbols)
-        # - Saham yang discan hari ini namun count_green < 3 (misal ada Red Dot di 1H sehingga turun jadi 2-dot)
+        # Penanganan Status Saham VIP 3-Dot (Track Record Testimoni vs Rekomendasi Aktif):
+        # Saham TIDAK DIHAPUS dari vip_3dot_history agar tetap bertahan 30 hari bursa sebagai etalase testimoni keuntungan!
+        # Namun diberi status "COMPLETED" (Selesai / Take Profit) jika terkena Red Dot 1H atau Red Dot 1D + 1H:
         symbols_scanned_today = {s["symbol"]: s for s in clean_stocks}
         demoted_vip_symbols = {sym for sym, s in symbols_scanned_today.items() if s.get("count_green", 0) < 3}
-        remove_from_vip = purged_symbols.union(demoted_vip_symbols)
+        completed_vip_symbols = purged_symbols.union(demoted_vip_symbols)
 
-        if remove_from_vip:
-            before_vip_len = len(history["vip_3dot_history"])
-            history["vip_3dot_history"] = [
-                h for h in history["vip_3dot_history"]
-                if h.get("symbol") not in remove_from_vip
-            ]
-            diff_vip = before_vip_len - len(history["vip_3dot_history"])
-            if diff_vip > 0:
-                print(f"🗑️ [VIP 3-DOT] Menghapus {diff_vip} saham dari menu VIP 3-Dot karena Red Dot / count_green < 3.")
+        for h in history["vip_3dot_history"]:
+            sym = h.get("symbol")
+            if sym in completed_vip_symbols:
+                if h.get("status") != "COMPLETED":
+                    h["status"] = "COMPLETED"
+                    h["is_active"] = False
+                    h["exit_reason"] = "RED_DOT_1D_1H" if sym in purged_symbols else "RED_DOT_1H"
+                    h["exit_date"] = date_key
+                    h["exit_date_display"] = tgl_id
+                    h["exit_label"] = "🏁 Selesai / Take Profit"
+                    print(f"🏁 [TRACK RECORD TESTIMONI] {sym}: Terdeteksi Red Dot. Ditandai 'Selesai / Take Profit' (tetap disimpan 30 hari sebagai testimoni, dinonaktifkan dari menu VIP).")
 
         stock_lookup = {s["symbol"]: s for s in clean_stocks}
         saham_3_dot_lookup = {s["symbol"]: s for s in saham_3_dot}
@@ -1983,10 +2015,17 @@ def simpan_database_json(hasil_deteksi, now_wib):
             if sym in saham_3_dot_lookup:
                 s3 = saham_3_dot_lookup[sym]
                 h["data"] = s3
+                h["status"] = "ACTIVE"
+                h["is_active"] = True
+                h["exit_reason"] = None
+                h["exit_label"] = "🟢 Aktif Dipantau"
                 h["last_trigger_date"] = date_key
                 h["last_trigger_date_display"] = tgl_id
                 if not h.get("base_price"):
                     h["base_price"] = float(s3.get("close", 0))
+                if not h.get("entry_session"):
+                    h["entry_session"] = "SESI_SIANG" if is_midday else "SESI_SORE"
+                    h["entry_session_label"] = "Sesi Siang (Istirahat)" if is_midday else "Penutupan Sore"
 
             # Update data harian berjalan (Tracking harian 30 hari bursa)
             if sym in stock_lookup:
@@ -2000,6 +2039,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     h["base_price"] = base_p
                 
                 cum_gain = round(((c_val - base_p) / base_p) * 100, 2) if base_p > 0 else 0.0
+                peak_gain_today = round(((h_val - base_p) / base_p) * 100, 2) if base_p > 0 else 0.0
 
                 if sym in scanned_symbols:
                     h["data"] = cur_s
@@ -2025,6 +2065,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
                     existing_entry["low"] = l_val
                     existing_entry["daily_change_pct"] = chg_val
                     existing_entry["cumulative_gain_pct"] = cum_gain
+                    existing_entry["peak_gain_pct"] = peak_gain_today
                     existing_entry["count_green"] = cg_status
                 else:
                     h["performance_history"].append({
@@ -2035,6 +2076,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
                         "low": l_val,
                         "daily_change_pct": chg_val,
                         "cumulative_gain_pct": cum_gain,
+                        "peak_gain_pct": peak_gain_today,
                         "count_green": cg_status
                     })
 
@@ -2047,11 +2089,22 @@ def simpan_database_json(hasil_deteksi, now_wib):
                 h_val = max(float(s3.get("high", c_val)), c_val)
                 l_val = min(float(s3.get("low", c_val)), c_val)
                 chg_val = round(float(s3.get("change", 0.0)), 2)
+
+                ent_session = "SESI_SIANG" if is_midday else "SESI_SORE"
+                ent_session_label = "Sesi Siang (Istirahat)" if is_midday else "Penutupan Sore"
+
                 record_item = {
                     "symbol": sym,
                     "scan_date": date_key,
                     "scan_date_display": tgl_id,
                     "base_price": c_val,
+                    "entry_session": ent_session,
+                    "entry_session_label": ent_session_label,
+                    "entry_time": now_wib.strftime("%H:%M WIB"),
+                    "status": "ACTIVE",
+                    "is_active": True,
+                    "exit_reason": None,
+                    "exit_label": "🟢 Aktif Dipantau",
                     "data": s3,
                     "performance_history": [{
                         "date": date_key,
@@ -2061,6 +2114,8 @@ def simpan_database_json(hasil_deteksi, now_wib):
                         "low": l_val,
                         "daily_change_pct": 0.0,
                         "cumulative_gain_pct": 0.0,
+                        "peak_gain_pct": 0.0,
+                        "entry_session": ent_session,
                         "count_green": 3
                     }]
                 }
@@ -2106,9 +2161,10 @@ def get_missing_vip_stocks(current_stocks):
                 if sym:
                     current_symbols.add(sym)
         vip_list = hist.get("vip_3dot_history", [])
+        # HANYA audit saham VIP yang MASIH AKTIF (yang belum COMPLETED) agar efisien
         missing = [
             v.get("symbol") for v in vip_list
-            if v.get("symbol") and v.get("symbol") not in current_symbols
+            if v.get("symbol") and v.get("symbol") not in current_symbols and v.get("status") != "COMPLETED"
         ]
         if not missing:
             return []
@@ -2716,7 +2772,9 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
         if status == "CLOSED":
             print(f"🛑 [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
             if single_session:
-                print("🏁 Selesai. Keluar dari runner.")
+                print("🌙 [DI LUAR JAM BURSA] Menjalankan 1x scan harian penuh & memperbarui database web...")
+                await run_daily_scan(send_wa=True, realtime_mode=False)
+                print("🏁 Selesai scan di luar jam bursa. Keluar dari runner.")
                 break
             else:
                 print("💤 Menunggu 60 detik sebelum memeriksa jam bursa kembali...")
@@ -2726,7 +2784,9 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
         elif status == "BREAK":
             print(f"⏸️ [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
             if single_session:
-                print("🏁 Sesi berakhir (memasuki waktu istirahat). Keluar dari runner.")
+                print("🍽️ [JAM ISTIRAHAT BURSA] Menjalankan 1x scan snapshot Sesi Siang & memperbarui database web...")
+                await run_daily_scan(send_wa=True, realtime_mode=False)
+                print("🏁 Selesai scan snapshot istirahat siang. Keluar dari runner.")
                 break
             else:
                 resume_time = session_info.get("resume_time")
