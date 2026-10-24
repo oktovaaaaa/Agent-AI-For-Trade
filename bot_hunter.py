@@ -1039,7 +1039,7 @@ def get_current_idx_session(now_wib):
     """
     weekday = now_wib.weekday()  # 0=Senin, ..., 4=Jumat, 5=Sabtu, 6=Minggu
     cur_time = now_wib.time()
-    
+
     # Akhir pekan (Sabtu & Minggu)
     if weekday in [5, 6]:
         return {
@@ -1938,7 +1938,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
 # ============================================================================
 # TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (RETENSI 30 HARI / 1 BULAN BERGULIR)
 # ============================================================================
-def simpan_database_json(hasil_deteksi, now_wib):
+def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
     """
     Menyimpan hasil analisa ke database JSON untuk Web Statis Dashboard:
     - Retensi 30 hari (1 bulan bergulir) untuk semua data scan harian.
@@ -2037,7 +2037,7 @@ def simpan_database_json(hasil_deteksi, now_wib):
         cur_session_label = "Sesi Siang (Istirahat)" if is_midday else "Penutupan Sore"
 
         # Cek apakah data penutupan hari ini 100% sama persis dengan yang sudah tersimpan untuk date_key ini
-        if date_key in history.get("daily_scans", {}):
+        if not force_save and date_key in history.get("daily_scans", {}):
             old_day_data = history["daily_scans"][date_key]
             old_stocks = old_day_data.get("stocks", [])
             if old_stocks and len(old_stocks) == len(saham_web):
@@ -2466,7 +2466,16 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                 )
             except Exception:
                 pass
-            await chart_page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=45000)
+            for attempt in range(2):
+                try:
+                    await chart_page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=60000)
+                    break
+                except Exception as e_goto:
+                    if attempt == 0:
+                        print(f"⚠️ [Worker {worker_id}] Koneksi lambat, mencoba reload chart {sym_target}...")
+                        await asyncio.sleep(2)
+                    else:
+                        print(f"⚠️ [Worker {worker_id}] Gagal memuat chart {sym_target}: {e_goto}")
             for _ in range(40):
                 await asyncio.sleep(0.5)
                 ready = await chart_page.evaluate('''() => {
@@ -3002,7 +3011,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                 print("🔍 Menjalankan Audit & Perbaikan Saham VIP 3-Dot di penutupan pasar...")
                 hasil_closing = await run_daily_scan(send_wa=False, realtime_mode=False, alerted_keys=alerted_keys, audit_vip=True)
                 print("💾 Memperbarui database web penutupan & mengirim Rangkuman Penutupan WhatsApp...")
-                simpan_database_json(hasil_closing, now_after)
+                simpan_database_json(hasil_closing, now_after, force_save=True)
                 saham_hunter_closing = [item for item in hasil_closing if not item.get("stock", {}).get("is_vip_audit", False)]
                 kirim_pesan_summary_wa(saham_hunter_closing, now_after, sesi_label="Penutupan Pasar")
                 if single_session:
@@ -3011,7 +3020,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
 
             # Sesi masih aktif: jeda interval sebelum putaran berikutnya
             else:
-                INTERVAL_SECONDS = 180  # Loop setiap 3 menit
+                INTERVAL_SECONDS = 180  # Loop setiap ~3 menit selama sesi bursa aktif
                 sisa_jeda = max(10, int(INTERVAL_SECONDS - pass_dur))
                 print(f"\n⏳ Selesai 1 siklus dalam {pass_dur:.1f} detik. Stand by {sisa_jeda} detik sebelum pemindaian berikutnya...")
                 await asyncio.sleep(sisa_jeda)

@@ -16,7 +16,7 @@ jobs:
   run-scan:
     name: Pemantauan IDX & Alert WhatsApp
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 300
 
     permissions:
       contents: write
