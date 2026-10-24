@@ -1581,6 +1581,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
             latest_red = None
             red_date_display = None
             red_close = None
+            red_drop_pct = None
             if valid_red_dots:
                 latest_r = max(valid_red_dots, key=lambda x: x["dt"])
                 latest_red = latest_r["dt"]
@@ -1590,6 +1591,9 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                 else:
                     red_date_display = f"{latest_red.day} {b_str} {latest_red.year}, {latest_red.strftime('%H:%M')} WIB"
                 red_close = latest_r.get("dot_close")
+                cur_close = latest_r.get("current_close") or stock_info["close"]
+                if red_close and cur_close and red_close > 0:
+                    red_drop_pct = ((cur_close - red_close) / red_close) * 100
                 red_status = True
 
             # Evaluasi pertentangan Dot Red vs Dot Green:
@@ -1846,7 +1850,8 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     "active": active_red,
                     "date": red_date_display,
                     "dt": latest_red,
-                    "dot_close": red_close
+                    "dot_close": red_close,
+                    "drop_pct": red_drop_pct
                 },
                 "donalt": donalt_res,
                 "scalping": scalping_res,
