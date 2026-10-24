@@ -2199,7 +2199,20 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
                 peak_gain_today = round(((h_val - base_p) / base_p) * 100, 2) if base_p > 0 else 0.0
 
                 if sym in scanned_symbols:
-                    h["data"] = cur_s
+                    # Jika saham masih memiliki 3-Dot Green aktif hari ini, perbarui seluruh datanya
+                    if cur_s.get("count_green", 0) == 3:
+                        h["data"] = cur_s
+                    else:
+                        # Jika saham count_green < 3 (sudah padam/audit), jangan timpa timeframes aslinya!
+                        # Pertahankan data sinyal 3-Dot Green entry, hanya perbarui harga & metrik berjalan
+                        if "data" in h and isinstance(h["data"], dict):
+                            h["data"]["close"] = c_val
+                            h["data"]["high"] = h_val
+                            h["data"]["low"] = l_val
+                            h["data"]["change"] = chg_val
+                            h["data"]["volume"] = float(cur_s.get("volume", 0))
+                        else:
+                            h["data"] = cur_s
                     cg_status = cur_s.get("count_green", 0)
                 else:
                     # Saham sepi/tidak masuk screener hari ini: update harga close, high, low, change, volume

@@ -7167,23 +7167,67 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
 // ============================================================================
 
 function findStockBySymbol(symbol) {
-  // 1. Cek di scan tanggal aktif
+  let stock = null;
+  // 1. Cek di scan tanggal aktif jika sedang di mode daily
   if (currentMode === "daily" && appData.daily_scans?.[selectedDate]?.stocks) {
     const found = appData.daily_scans[selectedDate].stocks.find(s => s.symbol === symbol);
-    if (found) return found;
+    if (found) stock = found;
   }
-  // 2. Cek di daftar VIP
-  if (appData.vip_3dot_history) {
+  // 2. Cek di daftar VIP 3-Dot History
+  if (!stock && appData.vip_3dot_history) {
     const foundVip = appData.vip_3dot_history.find(h => h.symbol === symbol || h.data?.symbol === symbol);
-    if (foundVip) return foundVip.data || foundVip;
+    if (foundVip) stock = foundVip.data || foundVip;
   }
   // 3. Cek di seluruh riwayat harian
-  for (const dKey of Object.keys(appData.daily_scans || {})) {
-    const list = appData.daily_scans[dKey].stocks || [];
-    const found = list.find(s => s.symbol === symbol);
-    if (found) return found;
+  if (!stock) {
+    for (const dKey of Object.keys(appData.daily_scans || {})) {
+      const list = appData.daily_scans[dKey].stocks || [];
+      const found = list.find(s => s.symbol === symbol);
+      if (found) { stock = found; break; }
+    }
   }
-  return null;
+  if (!stock) return null;
+
+  // Clone agar modifikasi tidak mencemari state asli
+  stock = { ...stock };
+
+  // Cek apakah data timeframes Dot Green lengkap. Jika kosong atau tidak punya tanggal Dot Green:
+  // Fallback cerdas: cari riwayat scan harian di mana saham ini memiliki timeframes lengkap (3-Dot Green)
+  if (!stock.timeframes?.D?.date || !stock.timeframes?.['60']?.date) {
+    const sortedDates = Object.keys(appData.daily_scans || {}).sort().reverse();
+    for (const dKey of sortedDates) {
+      const sFound = (appData.daily_scans[dKey]?.stocks || []).find(s => s.symbol === symbol && s.timeframes?.D?.date);
+      if (sFound && sFound.timeframes) {
+        stock.timeframes = JSON.parse(JSON.stringify(sFound.timeframes));
+        stock.count_green = stock.count_green || sFound.count_green;
+        break;
+      }
+    }
+  }
+
+  // Jika saham berasal dari VIP yang berstatus COMPLETED dengan exit_reason RED_DOT, pastikan info Red Dot tersemat
+  if (appData.vip_3dot_history) {
+    const vipEntry = appData.vip_3dot_history.find(h => h.symbol === symbol);
+    if (vipEntry && vipEntry.exit_reason && vipEntry.exit_reason.includes("RED_DOT")) {
+      const exitDateDisp = vipEntry.exit_date_display || vipEntry.exit_date;
+      if (stock.timeframes?.['60']) {
+        stock.timeframes['60'].red_dot = stock.timeframes['60'].red_dot || {};
+        stock.timeframes['60'].red_dot.status = true;
+        stock.timeframes['60'].red_dot.active = true;
+        stock.timeframes['60'].red_dot.date = exitDateDisp;
+        stock.timeframes['60'].red_dot.dot_close = stock.timeframes['60'].red_dot.dot_close || stock.close;
+      }
+      if (vipEntry.exit_reason.includes("RED_DOT_1D") && stock.timeframes?.D) {
+        stock.timeframes.D.red_dot = stock.timeframes.D.red_dot || {};
+        stock.timeframes.D.red_dot.status = true;
+        stock.timeframes.D.red_dot.active = true;
+        stock.timeframes.D.red_dot.date = exitDateDisp;
+        stock.timeframes.D.red_dot.dot_close = stock.timeframes.D.red_dot.dot_close || stock.close;
+      }
+    }
+  }
+
+  return stock;
 }
 
 function openStockDetail(symbol) {
