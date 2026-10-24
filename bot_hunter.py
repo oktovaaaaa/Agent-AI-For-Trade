@@ -597,14 +597,111 @@ def kirim_whatsapp(pesan):
 # ============================================================================
 ALERTED_SIGNALS_FILE = Path("docs/data/alerted_signals.json")
 
+# Cache status pasar bursa hari ini berdasarkan detak jantung BBCA
+_CACHED_BBCA_MARKET_STATUS = {}
+
+def check_bbca_market_status(now_wib=None):
+    """
+    Memeriksa status operasional bursa IDX hari ini melalui saham patokan BBCA di TradingView:
+    - Akhir pekan (Sabtu & Minggu): Otomatis TUTUP (WEEKEND).
+    - Hari kerja (Senin - Jumat): Cek tanggal candle terakhir BBCA via TradingView Screener API.
+      * Jika tanggal candle == hari ini: BUKA (TRADING_DAY).
+      * Jika tanggal candle < hari ini: TUTUP (HOLIDAY / LIBUR NASIONAL).
+    """
+    global _CACHED_BBCA_MARKET_STATUS
+    if now_wib is None:
+        now_wib = datetime.datetime.now(WIB_TZ)
+        
+    today_dt = now_wib.date()
+    cache_key = today_dt.strftime("%Y-%m-%d")
+    
+    # Gunakan cache jika sudah dicek hari ini
+    if cache_key in _CACHED_BBCA_MARKET_STATUS and _CACHED_BBCA_MARKET_STATUS[cache_key].get("session") == "TRADING_DAY":
+        return _CACHED_BBCA_MARKET_STATUS[cache_key]
+
+    # 1. Akhir pekan (Sabtu & Minggu)
+    if now_wib.weekday() in [5, 6]:
+        res = {
+            "is_open": False,
+            "session": "WEEKEND",
+            "reason": "Bursa Tutup (Akhir Pekan / Weekend)",
+            "trading_date": today_dt - datetime.timedelta(days=1 if now_wib.weekday() == 5 else 2)
+        }
+        _CACHED_BBCA_MARKET_STATUS[cache_key] = res
+        return res
+
+    # 2. Hari kerja sebelum jam 09:00 WIB
+    if now_wib.time() < datetime.time(8, 59):
+        prev_trading = today_dt - datetime.timedelta(days=3 if now_wib.weekday() == 0 else 1)
+        return {
+            "is_open": False,
+            "session": "PRE_MARKET",
+            "reason": "Sebelum Jam Pembukaan Bursa (< 09:00 WIB)",
+            "trading_date": prev_trading
+        }
+
+    # 3. Jam bursa aktif: Periksa candle terbaru BBCA
+    try:
+        q = Query().set_markets('indonesia').select('name', 'close', 'volume', 'time').where(Column('name') == 'BBCA')
+        df = q.get_scanner_data()[1]
+        if not df.empty:
+            row = df.iloc[0]
+            ts = row.get('time')
+            if ts and not pd.isna(ts):
+                candle_dt = datetime.datetime.fromtimestamp(int(ts), WIB_TZ).date()
+                
+                # Toleransi pembukaan tepat jam 09:00: Jika candle masih kemarin dan waktu < 09:02, tunggu sebentar untuk feed
+                if candle_dt < today_dt and now_wib.time() < datetime.time(9, 2):
+                    print("⏳ [09:00 WIB] Menunggu 20 detik untuk sinkronisasi feed pembukaan BBCA...")
+                    time.sleep(20)
+                    now_wib = datetime.datetime.now(WIB_TZ)
+                    q = Query().set_markets('indonesia').select('name', 'close', 'volume', 'time').where(Column('name') == 'BBCA')
+                    df = q.get_scanner_data()[1]
+                    if not df.empty:
+                        row = df.iloc[0]
+                        ts = row.get('time')
+                        if ts and not pd.isna(ts):
+                            candle_dt = datetime.datetime.fromtimestamp(int(ts), WIB_TZ).date()
+
+                if candle_dt == today_dt:
+                    res = {
+                        "is_open": True,
+                        "session": "TRADING_DAY",
+                        "reason": f"Bursa Buka (Candle BBCA aktif hari ini: {candle_dt})",
+                        "trading_date": candle_dt
+                    }
+                    _CACHED_BBCA_MARKET_STATUS[cache_key] = res
+                    return res
+                else:
+                    res = {
+                        "is_open": False,
+                        "session": "HOLIDAY",
+                        "reason": f"Bursa Libur / Tidak Ada Perdagangan Hari Ini (Candle BBCA terakhir tertanggal {candle_dt})",
+                        "trading_date": candle_dt
+                    }
+                    _CACHED_BBCA_MARKET_STATUS[cache_key] = res
+                    return res
+    except Exception as e:
+        print(f"⚠️ [WARNING] Gagal memeriksa status BBCA via screener: {e}")
+
+    # Fallback jika terjadi error koneksi ke scanner
+    return {
+        "is_open": True,
+        "session": "TRADING_DAY",
+        "reason": "Fallback (Gagal koneksi screener BBCA)",
+        "trading_date": today_dt
+    }
+
 def get_latest_trading_date(now_wib):
     """
     Mengembalikan tanggal sesi bursa IDX terbaru:
-    - Jika saat jam bursa atau hari kerja (Senin-Jumat) setelah jam 09:00 WIB: tanggal hari ini.
-    - Jika hari Sabtu: hari Jumat (kemarin).
-    - Jika hari Minggu: hari Jumat (2 hari lalu).
-    - Jika Senin-Jumat sebelum jam 09:00 WIB (pasar belum buka): hari bursa sebelumnya (kemarin atau Jumat lalu).
+    - Menggunakan tanggal candle bursa terbaru dari saham patokan BBCA.
+    - Menghindari pembuatan tanggal baru pada hari libur nasional atau akhir pekan.
     """
+    bbca_info = check_bbca_market_status(now_wib)
+    if bbca_info and bbca_info.get("trading_date"):
+        return bbca_info["trading_date"]
+
     dt = now_wib.date()
     if now_wib.weekday() == 5:
         return dt - datetime.timedelta(days=1)
@@ -950,6 +1047,16 @@ def get_current_idx_session(now_wib):
             "session": "WEEKEND",
             "name": "Bursa Tutup (Akhir Pekan / Weekend)"
         }
+
+    # Cek apakah hari kerja ini merupakan Hari Libur Nasional / Cuti Bersama via detak jantung BBCA
+    if cur_time >= datetime.time(9, 0):
+        bbca_info = check_bbca_market_status(now_wib)
+        if not bbca_info.get("is_open") and bbca_info.get("session") == "HOLIDAY":
+            return {
+                "status": "CLOSED",
+                "session": "HOLIDAY",
+                "name": bbca_info.get("reason", "Bursa Tutup (Hari Libur Nasional)")
+            }
         
     t_0900 = datetime.time(9, 0)
     t_1550 = datetime.time(15, 50)
@@ -1929,6 +2036,17 @@ def simpan_database_json(hasil_deteksi, now_wib):
         cur_session_tag = "SESI_SIANG" if is_midday else "SESI_SORE"
         cur_session_label = "Sesi Siang (Istirahat)" if is_midday else "Penutupan Sore"
 
+        # Cek apakah data penutupan hari ini 100% sama persis dengan yang sudah tersimpan untuk date_key ini
+        if date_key in history.get("daily_scans", {}):
+            old_day_data = history["daily_scans"][date_key]
+            old_stocks = old_day_data.get("stocks", [])
+            if old_stocks and len(old_stocks) == len(saham_web):
+                old_map = {s["symbol"]: (s.get("close"), s.get("volume"), s.get("count_green")) for s in old_stocks if s.get("symbol")}
+                new_map = {s["symbol"]: (s.get("close"), s.get("volume"), s.get("count_green")) for s in saham_web if s.get("symbol")}
+                if old_map == new_map and old_day_data.get("session") == cur_session_tag:
+                    print(f"ℹ️ [DATABASE WEB] Data scan untuk {date_key} ({cur_session_label}) 100% identik dengan database sebelumnya. Melewati penulisan file agar git diff tetap bersih.")
+                    return
+
         # Simpan scan hari ini
         history["last_updated"] = now_wib.strftime("%Y-%m-%d %H:%M:%S WIB")
         if "daily_scans" not in history or not isinstance(history["daily_scans"], dict):
@@ -2811,6 +2929,10 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
         if status == "CLOSED":
             print(f"🛑 [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
             if single_session:
+                if session_info.get("session") in ["WEEKEND", "HOLIDAY"]:
+                    print(f"🛑 [BURSA LIBUR] Hari ini tidak ada sesi perdagangan aktif bursa IDX ({session_name}).")
+                    print("🏁 Runner selesai dengan aman tanpa mengubah database web.")
+                    break
                 print("🌙 [DI LUAR JAM BURSA] Menjalankan 1x scan harian penuh & memperbarui database web...")
                 await run_daily_scan(send_wa=True, realtime_mode=False)
                 print("🏁 Selesai scan di luar jam bursa. Keluar dari runner.")
