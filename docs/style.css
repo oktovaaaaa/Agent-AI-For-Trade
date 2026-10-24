@@ -3055,7 +3055,7 @@ body.dark-theme .perf-toggle-btn {
   font-size: 10.5px;
 }
 
-/* Scrollable Chart Viewport */
+/* Scrollable Chart Viewport (TradingView Drag & Pan) */
 .perf-chart-svg-wrap {
   width: 100%;
   height: 155px;
@@ -3065,6 +3065,18 @@ body.dark-theme .perf-toggle-btn {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   padding-bottom: 4px;
+  cursor: grab;
+}
+
+.perf-chart-svg-wrap.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.perf-chart-svg-wrap.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  pointer-events: none !important;
 }
 
 .perf-chart-svg-wrap::-webkit-scrollbar {

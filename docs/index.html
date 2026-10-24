@@ -3070,7 +3070,7 @@ body.dark-theme .perf-toggle-btn {
   font-size: 10.5px;
 }
 
-/* Scrollable Chart Viewport */
+/* Scrollable Chart Viewport (TradingView Drag & Pan) */
 .perf-chart-svg-wrap {
   width: 100%;
   height: 155px;
@@ -3080,6 +3080,18 @@ body.dark-theme .perf-toggle-btn {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   padding-bottom: 4px;
+  cursor: grab;
+}
+
+.perf-chart-svg-wrap.is-dragging {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.perf-chart-svg-wrap.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  pointer-events: none !important;
 }
 
 .perf-chart-svg-wrap::-webkit-scrollbar {
@@ -7999,7 +8011,7 @@ function openStockDetail(symbol) {
               Kurva & Rentang Harga (High • Low • Close)
             </span>
             <div style="display:flex; align-items:center; gap:8px;">
-              <span class="perf-chart-hint-badge">↔ Geser & Klik Titik</span>
+              <span class="perf-chart-hint-badge" id="perfChartHintBadge">↔ Geser & Klik Titik</span>
               <span class="perf-chart-dates">${perfHistory[0]?.date_display || ''} s/d ${perfHistory[perfHistory.length - 1]?.date_display || ''} (${perfHistory.length} Hari Bursa)</span>
             </div>
           </div>
@@ -8266,12 +8278,89 @@ function openStockDetail(symbol) {
   if (activePerfHistory && activePerfHistory.length > 0) {
     setTimeout(() => {
       const wrap = document.getElementById("perfChartScrollWrap");
-      if (wrap) wrap.scrollLeft = wrap.scrollWidth;
+      if (wrap) {
+        wrap.scrollLeft = wrap.scrollWidth;
+        setupTradingViewPan(wrap);
+      }
     }, 100);
   }
 }
 
+/**
+ * Fitur Drag-to-Pan & Mouse Wheel Translation (Gaya TradingView)
+ * Mengizinkan pengguna laptop untuk drag chart dengan klik kiri tahan dan mouse wheel horizontal
+ */
+function setupTradingViewPan(wrap) {
+  if (!wrap) return;
+
+  const updateHintBadge = () => {
+    const hintBadge = document.getElementById("perfChartHintBadge");
+    if (!hintBadge) return;
+    if (wrap.scrollWidth <= wrap.clientWidth + 5) {
+      hintBadge.innerHTML = "👆 Klik Titik untuk Detail (Tampil Penuh)";
+    } else {
+      hintBadge.innerHTML = "↔ Drag / Geser &amp; Klik Titik";
+    }
+  };
+  updateHintBadge();
+
+  if (wrap._tvPanInitialized) return;
+  wrap._tvPanInitialized = true;
+
+  let isDown = false;
+  let startX = 0;
+  let scrollStart = 0;
+  let hasDragged = false;
+
+  wrap.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return; // Hanya klik kiri utama
+    isDown = true;
+    hasDragged = false;
+    wrap.classList.add("is-dragging");
+    startX = e.pageX - wrap.offsetLeft;
+    scrollStart = wrap.scrollLeft;
+  });
+
+  window.addEventListener("mousemove", (e) => {
+    if (!isDown) return;
+    const x = e.pageX - wrap.offsetLeft;
+    const walk = x - startX;
+    if (Math.abs(walk) > 3) {
+      hasDragged = true;
+      wrap._hasDraggedRecently = true;
+    }
+    wrap.scrollLeft = scrollStart - walk;
+  });
+
+  const stopDrag = () => {
+    if (!isDown) return;
+    isDown = false;
+    wrap.classList.remove("is-dragging");
+    if (hasDragged) {
+      setTimeout(() => {
+        wrap._hasDraggedRecently = false;
+      }, 120);
+    } else {
+      wrap._hasDraggedRecently = false;
+    }
+  };
+
+  window.addEventListener("mouseup", stopDrag);
+
+  // Mouse wheel horizontal translation (TradingView style)
+  wrap.addEventListener("wheel", (e) => {
+    if (wrap.scrollWidth > wrap.clientWidth) {
+      if (Math.abs(e.deltaX) < Math.abs(e.deltaY)) {
+        e.preventDefault();
+        wrap.scrollLeft += (e.deltaY > 0 ? 80 : -80);
+      }
+    }
+  }, { passive: false });
+}
+
 function selectPerfDay(idx) {
+  const wrap = document.getElementById("perfChartScrollWrap");
+  if (wrap && wrap._hasDraggedRecently) return; // Blokir klik titik jika baru saja melakukan drag
   const hist = window.currentPerfHistory;
   if (!hist || !hist[idx]) return;
   const item = hist[idx];
@@ -8340,6 +8429,13 @@ function togglePerfHistoryCollapse() {
   if (isHidden) {
     content.style.display = "flex";
     if (btn) btn.innerHTML = `<span>▲</span><span>Tutup Riwayat</span>`;
+    setTimeout(() => {
+      const wrap = document.getElementById("perfChartScrollWrap");
+      if (wrap) {
+        wrap.scrollLeft = wrap.scrollWidth;
+        setupTradingViewPan(wrap);
+      }
+    }, 60);
   } else {
     content.style.display = "none";
     if (btn) btn.innerHTML = `<span>▼</span><span>Buka Grafik & Riwayat</span>`;
