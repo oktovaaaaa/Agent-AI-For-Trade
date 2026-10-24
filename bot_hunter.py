@@ -1186,15 +1186,34 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                     await new Promise(r => setTimeout(r, 200));
 
                     // FASE 1: Ekstraksi RallyGood (Dot Green & Dot Red) & EMA + DonAlt Suite (Golden/Death Cross)
-                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 800ms)
+                    // Tunggu hingga RallyGood paneViews terisi (polling hingga 1250ms untuk kestabilan di runner headless)
                     if (rallyStudy) {
-                        for (let r = 0; r < 16; r++) {
+                        for (let r = 0; r < 25; r++) {
                             const greenPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_2');
                             const redPv = (rallyStudy._paneViews || []).find(pv => pv._plotName === 'plot_1');
                             if ((greenPv && greenPv._items && greenPv._items.length > 0) || (redPv && redPv._items && redPv._items.length > 0)) break;
                             await new Promise(resolve => setTimeout(resolve, 50));
                         }
                     }
+
+                    const parseBarOrTpTime = (idx, rawTp) => {
+                        let barTime = null;
+                        if (barsObj && barsObj.valueAt) {
+                            const bar = barsObj.valueAt(idx);
+                            if (bar && bar.length > 0 && typeof bar[0] === 'number') {
+                                barTime = bar[0];
+                            }
+                        }
+                        if (barTime !== null) return barTime;
+                        if (typeof rawTp === 'number') return rawTp;
+                        if (rawTp && typeof rawTp === 'object') {
+                            if (typeof rawTp.time === 'number') return rawTp.time;
+                            if (rawTp.year && rawTp.month && rawTp.day) {
+                                return Math.floor(Date.UTC(rawTp.year, rawTp.month - 1, rawTp.day, 0, 0, 0) / 1000);
+                            }
+                        }
+                        return null;
+                    };
 
                     let dots = [];
                     let redDots = [];
@@ -1204,13 +1223,14 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                             const activeDots = (greenPv._items || []).filter(it => !isNaN(it.y));
                             dots = activeDots.map(dot => {
                                 const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
                                 let dotClose = null;
                                 if (barsObj && barsObj.valueAt) {
                                     const bar = barsObj.valueAt(dot.timePointIndex);
                                     if (bar && bar.length > 4) dotClose = bar[4];
                                 }
                                 return {
-                                    timestamp: tp,
+                                    timestamp: itemTime,
                                     dotClose: dotClose,
                                     currentClose: currentClose
                                 };
@@ -1222,13 +1242,14 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                             const activeReds = (redPv._items || []).filter(it => !isNaN(it.y));
                             redDots = activeReds.map(dot => {
                                 const tp = ts.indexToTimePoint(dot.timePointIndex);
+                                const itemTime = parseBarOrTpTime(dot.timePointIndex, tp);
                                 let dotClose = null;
                                 if (barsObj && barsObj.valueAt) {
                                     const bar = barsObj.valueAt(dot.timePointIndex);
                                     if (bar && bar.length > 4) dotClose = bar[4];
                                 }
                                 return {
-                                    timestamp: tp,
+                                    timestamp: itemTime,
                                     dotClose: dotClose,
                                     currentClose: currentClose
                                 };
@@ -1459,14 +1480,28 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
             macd_raw = eval_data.get('macd', {})
             recent_bars = eval_data.get('bars', [])
             
+            def _parse_tp_dt(tp_val):
+                if tp_val is None:
+                    return None
+                if isinstance(tp_val, (int, float)):
+                    return datetime.datetime.fromtimestamp(tp_val, WIB_TZ)
+                elif isinstance(tp_val, dict):
+                    if "time" in tp_val and isinstance(tp_val["time"], (int, float)):
+                        return datetime.datetime.fromtimestamp(tp_val["time"], WIB_TZ)
+                    y = tp_val.get("year")
+                    m = tp_val.get("month")
+                    d_day = tp_val.get("day")
+                    if y and m and d_day:
+                        return datetime.datetime(int(y), int(m), int(d_day), 9, 0, 0, tzinfo=WIB_TZ)
+                return None
+
             # 1. Olah RallyGood Dot Green & Dot Red (30 hari terakhir)
             valid_dots = []
             for d in dot_data:
-                tp = d.get('timestamp')
-                if tp and isinstance(tp, (int, float)):
-                    dot_dt = datetime.datetime.fromtimestamp(tp, WIB_TZ)
+                dot_dt = _parse_tp_dt(d.get('timestamp'))
+                if dot_dt:
                     diff_days = (now_dt - dot_dt).total_seconds() / 86400
-                    if 0 <= diff_days <= LOOKBACK_DAYS:
+                    if -1 <= diff_days <= LOOKBACK_DAYS:
                         valid_dots.append({
                             "dt": dot_dt,
                             "dot_close": d.get("dotClose"),
@@ -1475,11 +1510,10 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
 
             valid_red_dots = []
             for d in red_data:
-                tp = d.get('timestamp')
-                if tp and isinstance(tp, (int, float)):
-                    rd_dt = datetime.datetime.fromtimestamp(tp, WIB_TZ)
+                rd_dt = _parse_tp_dt(d.get('timestamp'))
+                if rd_dt:
                     diff_days = (now_dt - rd_dt).total_seconds() / 86400
-                    if 0 <= diff_days <= LOOKBACK_DAYS:
+                    if -1 <= diff_days <= LOOKBACK_DAYS:
                         valid_red_dots.append({
                             "dt": rd_dt,
                             "dot_close": d.get("dotClose"),
