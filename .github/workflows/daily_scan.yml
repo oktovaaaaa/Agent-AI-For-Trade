@@ -40,7 +40,7 @@ jobs:
       - name: Jalankan Bot Hunter
         env:
           FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN || '7ci6H1WRqTDsJUAoFzq5' }}
-          NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '082111144710' }}
+          NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '120363430125223310@g.us' }}
           TRADINGVIEW_SESSIONID: ${{ secrets.TRADINGVIEW_SESSIONID || '999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1' }}
           NUM_WORKERS: "5"
           TZ: "Asia/Jakarta"

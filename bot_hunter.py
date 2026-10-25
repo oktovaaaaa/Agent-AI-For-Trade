@@ -30,7 +30,7 @@ if sys.platform == "win32":
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
 FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "7ci6H1WRqTDsJUAoFzq5")
-NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "082111144710")
+NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "120363430125223310@g.us")
 
 # Session Cookie TradingView (Mendukung multi-akun dipisah tanda koma)
 # Default: 5 Akun TradingView (Akun 1 + Akun 2 + Akun 3 + Akun 4 + Akun 5)
@@ -852,7 +852,6 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         f"• Resisten (Supply) : {res_str}\n"
         f"• Status            : {status_7d}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"> _Sent via Aranter_"
     )
     
     print(f"\n🟢 [BULLISH ALERT] Sinyal baru (Entry/Bullish) terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
@@ -958,7 +957,6 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
         f"• Resisten (Supply) : {res_str}\n"
         f"• Status            : {status_7d}\n"
         f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"> _Sent via Aranter_"
     )
     
     print(f"\n⚠️ [BEARISH ALERT] Sinyal exit/bearish terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
