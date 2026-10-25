@@ -48,8 +48,8 @@ JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
 MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
-DEFAULT_WORKERS = 5 if os.environ.get("GITHUB_ACTIONS") else 25
-NUM_WORKERS = int(os.environ.get("NUM_WORKERS", DEFAULT_WORKERS))                    # Jumlah worker tab paralel (default 25 worker: 5 worker per akun)
+DEFAULT_WORKERS = len(TRADINGVIEW_SESSIONIDS) if TRADINGVIEW_SESSIONIDS else 5
+NUM_WORKERS = int(os.environ.get("NUM_WORKERS", DEFAULT_WORKERS))                    # Jumlah worker tab paralel (1 worker per akun untuk stabilitas maksimal)
 
 # Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
 TIMEFRAMES = [
@@ -1928,7 +1928,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                 "raw_green_status": raw_green_status,
                 "date": date_display if dot_status else None,
                 "dt": latest_dot if dot_status else None,
-                "dot_close": dot_close,
+                "dot_close": dot_close if dot_status else None,
                 "gain_pct": gain_pct if dot_status else None,
                 "red_dot": {
                     "status": red_status,
@@ -1953,7 +1953,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
 # ============================================================================
 # TAHAP 3.5: SIMPAN DATA UNTUK WEB STATIS (RETENSI 30 HARI / 1 BULAN BERGULIR)
 # ============================================================================
-def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
+def simpan_database_json(hasil_deteksi, now_wib, force_save=False, target_date=None):
     """
     Menyimpan hasil analisa ke database JSON untuk Web Statis Dashboard:
     - Retensi 30 hari (1 bulan bergulir) untuk semua data scan harian.
@@ -1977,7 +1977,13 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
             except Exception:
                 pass
                 
-        trading_dt = get_latest_trading_date(now_wib)
+        if target_date:
+            if isinstance(target_date, str):
+                trading_dt = datetime.datetime.strptime(target_date, "%Y-%m-%d").date()
+            else:
+                trading_dt = target_date
+        else:
+            trading_dt = get_latest_trading_date(now_wib)
         date_key = trading_dt.strftime("%Y-%m-%d")
         tgl_id = format_tanggal_id(trading_dt)
         
@@ -1987,8 +1993,8 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
         for item in hasil_deteksi:
             sym = item.get('stock', {}).get('symbol')
             tf = item.get('timeframes', {})
-            red_d = tf.get('D', {}).get('red_dot', {}).get('active', False)
-            red_60 = tf.get('60', {}).get('red_dot', {}).get('active', False)
+            red_d = ((tf.get('D') or {}).get('red_dot') or {}).get('active', False)
+            red_60 = ((tf.get('60') or {}).get('red_dot') or {}).get('active', False)
             if red_d and red_60:
                 purged_symbols.add(sym)
                 print(f"🚫 [PURGE 1D+1H RED DOT] {sym}: Memiliki Red Dot aktif di Daily DAN 1 Jam! Terhapus dari website hari ini & menu VIP.")
@@ -2129,18 +2135,24 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
         for h in history["vip_3dot_history"]:
             sym = h.get("symbol")
             if sym in completed_vip_symbols:
-                if h.get("status") != "COMPLETED":
+                if h.get("status") != "COMPLETED" or h.get("exit_date") == date_key:
                     h["status"] = "COMPLETED"
                     h["is_active"] = False
                     # Tentukan alasan keluar secara akurat berdasarkan timeframe yang benar-benar memicu Red Dot:
                     s_cur = symbols_scanned_today.get(sym) or {}
                     cur_tf = s_cur.get("timeframes", {})
                     rd_reasons = []
-                    if cur_tf.get("D", {}).get("red_dot", {}).get("active"):
+                    tf_d = cur_tf.get("D") or {}
+                    rd_d = tf_d.get("red_dot") or {}
+                    if rd_d.get("active"):
                         rd_reasons.append("RED_DOT_1D")
-                    if cur_tf.get("60", {}).get("red_dot", {}).get("active"):
+                    tf_60 = cur_tf.get("60") or {}
+                    rd_60 = tf_60.get("red_dot") or {}
+                    if rd_60.get("active"):
                         rd_reasons.append("RED_DOT_1H")
-                    if cur_tf.get("15", {}).get("red_dot", {}).get("active"):
+                    tf_15 = cur_tf.get("15") or {}
+                    rd_15 = tf_15.get("red_dot") or {}
+                    if rd_15.get("active"):
                         rd_reasons.append("RED_DOT_15M")
                     
                     if rd_reasons:
@@ -2330,7 +2342,7 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
         ]
 
         # Urutkan vip_3dot_history berdasarkan tanggal sinyal terbaru
-        history["vip_3dot_history"].sort(key=lambda x: (max(x.get("last_trigger_date", ""), x.get("scan_date", "")), x.get("data", {}).get("volume", 0)), reverse=True)
+        history["vip_3dot_history"].sort(key=lambda x: (max(x.get("last_trigger_date", ""), x.get("scan_date", "")), ((x.get("data") or {}).get("volume", 0) or 0)), reverse=True)
         
         # Tulis ke file JSON history.json
         with open(history_file, "w", encoding="utf-8") as f:
@@ -2399,11 +2411,19 @@ def get_missing_vip_stocks(current_stocks):
 # ============================================================================
 # TAHAP 4: EKSEKUSI UTAMA (SCAN HARIAN JAM 16.21 WIB)
 # ============================================================================
-async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, audit_vip=False, custom_stocks=None):
+async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, audit_vip=False, custom_stocks=None, target_date=None):
     now_wib = datetime.datetime.now(WIB_TZ)
-    date_str = now_wib.strftime("%Y%m%d")
-    tgl_analisa_id = format_tanggal_id(now_wib)
-    tgl_awal_id = format_tanggal_id(now_wib - datetime.timedelta(days=LOOKBACK_DAYS))
+    if target_date:
+        if isinstance(target_date, str):
+            trading_dt = datetime.datetime.strptime(target_date, "%Y-%m-%d").date()
+        else:
+            trading_dt = target_date
+    else:
+        trading_dt = get_latest_trading_date(now_wib)
+
+    date_str = trading_dt.strftime("%Y%m%d")
+    tgl_analisa_id = format_tanggal_id(trading_dt)
+    tgl_awal_id = format_tanggal_id(trading_dt - datetime.timedelta(days=LOOKBACK_DAYS))
     
     mode_tag = "REAL-TIME INTRADAY" if realtime_mode else ("AUDIT VIP" if custom_stocks is not None else "SCAN HARIAN")
     print("\n" + "="*70)
@@ -2510,9 +2530,11 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                 )
             except Exception:
                 pass
+            goto_ok = False
             for attempt in range(2):
                 try:
                     await chart_page.goto(f"{CHART_LAYOUT_URL}?symbol=IDX%3A{sym_target}&interval=D", wait_until="domcontentloaded", timeout=60000)
+                    goto_ok = True
                     break
                 except Exception as e_goto:
                     if attempt == 0:
@@ -2520,6 +2542,12 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                         await asyncio.sleep(2)
                     else:
                         print(f"⚠️ [Worker {worker_id}] Gagal memuat chart {sym_target}: {e_goto}")
+            if not goto_ok:
+                try:
+                    await chart_page.close()
+                except Exception:
+                    pass
+                return None
             for _ in range(40):
                 await asyncio.sleep(0.5)
                 ready = await chart_page.evaluate('''() => {
@@ -2579,6 +2607,9 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             first_sym = stocks_to_scan[0]['symbol']
             print(f"🚀 [Worker {worker_id} | Akun {account_num}] Menyiapkan tab browser TradingView ({first_sym})...")
             page = await buat_halaman_chart(first_sym, worker_id=worker_id)
+            if not page:
+                print(f"❌ [Worker {worker_id} | Akun {account_num}] Gagal membuka tab chart. Worker berhenti.")
+                return
             print(f"⚙️ [Worker {worker_id} | Akun {account_num}] Tab siap & indikator tersinkronisasi.")
             
             processed_count = 0
@@ -2594,16 +2625,26 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                     sym = stock['symbol']
                     processed_count += 1
 
-                    # FITUR AUTO-PURGE RAM: Setiap 5 saham per worker, refresh tab agar RAM tetap ringan (<200 MB)
-                    if processed_count > 1 and (processed_count - 1) % 5 == 0:
+                    # FITUR AUTO-PURGE RAM: Setiap 30 saham per worker, refresh tab agar RAM tetap ringan
+                    if processed_count > 1 and (processed_count - 1) % 30 == 0:
                         print(f"\n🧹 [Worker {worker_id} | Akun {account_num} - RAM AUTO-PURGE] Mengosongkan cache grafik & me-refresh tab untuk {sym}...")
                         try:
                             await page.close()
                         except Exception:
                             pass
                         gc.collect()
-                        page = await buat_halaman_chart(sym, worker_id=worker_id)
-                        print(f"✨ [Worker {worker_id} | Akun {account_num}] Tab segar kembali. Melanjutkan analisis {sym}...")
+                        new_page = await buat_halaman_chart(sym, worker_id=worker_id)
+                        if new_page:
+                            page = new_page
+                            print(f"✨ [Worker {worker_id} | Akun {account_num}] Tab segar kembali. Melanjutkan analisis {sym}...")
+                        else:
+                            print(f"⚠️ [Worker {worker_id} | Akun {account_num}] Refresh tab gagal, mencoba buka ulang tab...")
+                            for _ in range(3):
+                                await asyncio.sleep(2)
+                                new_page = await buat_halaman_chart(sym, worker_id=worker_id)
+                                if new_page:
+                                    page = new_page
+                                    break
 
                     print(f"\n[{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Memeriksa Saham: {sym} (Rp {stock['close']:.0f} | {stock['change']:+.2f}%)")
 
@@ -2933,7 +2974,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
         
     # 6. Simpan Data ke Database JSON (Hanya pada scan lengkap seluruh saham, bukan uji coba --limit atau audit parsial)
     if LIMIT_SAHAM_SCAN == 0 and custom_stocks is None:
-        simpan_database_json(hasil_deteksi, now_wib)
+        simpan_database_json(hasil_deteksi, now_wib, force_save=True, target_date=trading_dt)
     elif custom_stocks is not None:
         pass  # Penyimpanan database dikelola oleh fungsi pemanggil (misal transisi sesi)
     else:
@@ -3190,6 +3231,13 @@ def main():
             except ValueError:
                 pass
 
+    # Argumen --date untuk menentukan tanggal target scan (misal: --date 2026-10-23)
+    target_date_cli = None
+    for i, arg in enumerate(sys.argv):
+        if arg == "--date" and i + 1 < len(sys.argv):
+            target_date_cli = sys.argv[i + 1]
+            print(f"📅 Target tanggal analisis disetel ke: {target_date_cli}")
+
     # Argumen --test-alert untuk mengetes format WhatsApp
     if "--test-alert" in sys.argv:
         test_send_sample_alert()
@@ -3209,7 +3257,7 @@ def main():
             print("[TEST MODE] Menjalankan scan langsung saat ini & MENGIRIM NOTIFIKASI KE WHATSAPP...")
         else:
             print("[TEST MODE] Menjalankan scan langsung saat ini (tanpa kirim ke WhatsApp, tambahkan --wa untuk kirim ke WA)...")
-        asyncio.run(run_daily_scan(send_wa=send_wa))
+        asyncio.run(run_daily_scan(send_wa=send_wa, target_date=target_date_cli))
         return
 
     kirim_whatsapp(f"🤖 *BOT HUNTER RALLY GOD SIAP!*\nBot server standby dan akan otomatis melakukan scan setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB.")

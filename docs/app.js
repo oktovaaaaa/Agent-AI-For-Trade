@@ -2948,13 +2948,35 @@ function openStockDetail(symbol) {
     }
 
     const redDot = tfObj.red_dot || {};
-    const hasRedDot = Boolean(redDot.status && redDot.date);
     const isRedActive = Boolean(redDot.active);
-    
-    // Hitung penurunan setelah Dot Red jika belum ada di data
-    let redDropText = "";
-    let redDropClass = "negative";
-    if (hasRedDot) {
+
+    // KASUS 1: Dot Green Aktif (Menang atas Red Dot masa lalu)
+    // Sinyal Red Dot masa lalu otomatis kadaluarsa & disembunyikan agar tampilan bersih & akurat
+    if (active) {
+      return `
+        <div class="modal-tf-card active">
+          <div class="modal-tf-card-head">
+            <span class="modal-tf-title">${label}</span>
+            <span class="modal-tf-status active">AKTIF</span>
+          </div>
+
+          <div class="modal-tf-gain-box">
+            <span class="gain-label">Kenaikan Setelah Dot Green:</span>
+            <span class="gain-val ${gainClass}">${gainText || 'Sinyal Baru Terkonfirmasi'}</span>
+          </div>
+
+          <div class="modal-tf-detail-text">
+            <div><b>Waktu Dot Green:</b> ${dateText}</div>
+            ${tfObj.dot_close ? `<div><b>Harga Saat Dot Green:</b> Rp ${Number(tfObj.dot_close).toLocaleString('id-ID')}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    // KASUS 2: Dot Red Aktif (Menang atas Dot Green)
+    if (isRedActive) {
+      let redDropText = "";
+      let redDropClass = "negative";
       let dropVal = redDot.drop_pct;
       if ((dropVal === undefined || dropVal === null) && redDot.dot_close && stock.close) {
         dropVal = ((stock.close - redDot.dot_close) / redDot.dot_close) * 100;
@@ -2963,48 +2985,46 @@ function openStockDetail(symbol) {
         redDropText = (dropVal >= 0 ? "+" : "") + Number(dropVal).toFixed(2) + "%";
         redDropClass = dropVal < 0 ? "negative" : (dropVal > 0 ? "positive" : "neutral");
       }
+
+      return `
+        <div class="modal-tf-card" style="border-color: rgba(239, 68, 68, 0.4);">
+          <div class="modal-tf-card-head">
+            <span class="modal-tf-title">${label}</span>
+            <span class="modal-tf-status inactive" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35);">
+              RED DOT
+            </span>
+          </div>
+
+          <div class="modal-tf-gain-box" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2);">
+            <span class="gain-label" style="color: #ef4444;">Perubahan Pasca Dot Red:</span>
+            <span class="gain-val ${redDropClass}">${redDropText || '-'}</span>
+          </div>
+
+          <div class="modal-tf-detail-text">
+            <div><b>Waktu Dot Red:</b> <span style="color:#ef4444; font-weight:600;">${cleanDate(redDot.date)}</span></div>
+            ${redDot.dot_close ? `<div><b>Harga Saat Dot Red:</b> Rp ${Number(redDot.dot_close).toLocaleString('id-ID')}</div>` : ''}
+            <div style="color: var(--text-dim); font-size:11px; margin-top:4px;"><i>* Sinyal Dot Green dibatalkan oleh Dot Red terbaru</i></div>
+          </div>
+        </div>
+      `;
     }
 
-    let statusBadgeText = active ? 'AKTIF' : 'BELUM AKTIF';
-    let statusBadgeClass = active ? 'active' : 'inactive';
-    if (isRedActive) {
-      statusBadgeText = 'RED DOT';
-      statusBadgeClass = 'inactive';
-    }
-
+    // KASUS 3: Belum Ada Dot Green Maupun Dot Red Aktif
     return `
-      <div class="modal-tf-card ${active ? 'active' : ''}" style="${isRedActive ? 'border-color: rgba(239, 68, 68, 0.4);' : ''}">
+      <div class="modal-tf-card">
         <div class="modal-tf-card-head">
           <span class="modal-tf-title">${label}</span>
-          <span class="modal-tf-status ${statusBadgeClass}" style="${isRedActive ? 'background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35);' : ''}">
-            ${statusBadgeText}
-          </span>
+          <span class="modal-tf-status inactive">BELUM AKTIF</span>
         </div>
 
         <div class="modal-tf-gain-box">
           <span class="gain-label">Kenaikan Setelah Dot Green:</span>
-          <span class="gain-val ${gainClass}">${gainText || (active ? 'Sinyal Baru Terkonfirmasi' : '-')}</span>
+          <span class="gain-val neutral">-</span>
         </div>
 
         <div class="modal-tf-detail-text">
-          <div><b>Waktu Dot Green:</b> ${dateText}</div>
-          ${tfObj.dot_close ? `<div><b>Harga Saat Dot Green:</b> Rp ${Number(tfObj.dot_close).toLocaleString('id-ID')}</div>` : ''}
+          <div><b>Waktu Dot Green:</b> -</div>
         </div>
-
-        ${hasRedDot ? `
-          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(239, 68, 68, 0.25); font-size: 11.5px; line-height: 1.5;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3px;">
-              <span style="color: #ef4444; font-weight: 700; display:flex; align-items:center; gap:4px;">
-                🔴 Sinyal Dot Red
-                ${isRedActive ? '<span style="font-size:9.5px; padding:1px 5px; border-radius:3px; background:#ef4444; color:#fff;">AKTIF</span>' : ''}
-              </span>
-              ${redDropText ? `<span class="gain-val ${redDropClass}" style="font-size:12px; font-weight:700;">${redDropText}</span>` : ''}
-            </div>
-            <div style="color: var(--text-secondary);"><b>Waktu Dot Red:</b> <span style="color:var(--text-primary);">${cleanDate(redDot.date)}</span></div>
-            ${redDot.dot_close ? `<div style="color: var(--text-secondary);"><b>Harga Saat Dot Red:</b> Rp ${Number(redDot.dot_close).toLocaleString('id-ID')}</div>` : ''}
-            ${redDropText ? `<div style="color: var(--text-secondary); margin-top:2px;"><b>Perubahan Pasca Dot Red:</b> <span style="color:${redDropClass === 'negative' ? 'var(--status-red)' : 'var(--status-green)'}; font-weight:600;">${redDropText}</span></div>` : ''}
-          </div>
-        ` : ''}
       </div>
     `;
   }
