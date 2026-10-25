@@ -5049,7 +5049,39 @@ function calculateAranterScore(s, refDate) {
   };
 }
 
-// Helper: Mengambil Seluruh Saham 30 Hari yang Memenuhi Kriteria Rekomendasi Aranter
+// Helper: Cek apakah saham memiliki sinyal Dot Red aktif atau berstatus keluar/selesai karena Red Dot
+// ATURAN MUTLAK: Jika ada Dot Red, maka sinyal Dot Green GUGUR / TIDAK BERLAKU LAGI!
+function checkHasActiveRedDot(s, sym = null) {
+  if (!s) return false;
+  const targetSym = sym || s.symbol;
+
+  // 1. Cek di tracking VIP: jika status COMPLETED, is_active false, atau exit_reason memiliki RED_DOT
+  if (appData.vip_3dot_history && targetSym) {
+    const vipEntry = appData.vip_3dot_history.find(h => h.symbol === targetSym);
+    if (vipEntry) {
+      if (vipEntry.status === "COMPLETED" || vipEntry.is_active === false) return true;
+      if (vipEntry.exit_reason && vipEntry.exit_reason.includes("RED_DOT")) return true;
+    }
+  }
+
+  // 2. Cek di seluruh timeframe objek saham: jika ada sinyal red_dot aktif (active === true)
+  if (s.timeframes) {
+    for (const tf of ['D', '60', '15']) {
+      const rd = s.timeframes[tf]?.red_dot;
+      if (rd && rd.active) return true;
+    }
+  }
+
+  return false;
+}
+
+// Helper: Mengambil Seluruh Saham yang Memenuhi Kriteria Rekomendasi Aranter (Standar Emas 5 Konfluensi)
+// KRITERIA WAJIB:
+// 1. Wajib 3-Dot Green Aktif (3/3 Timeframe) & BEBAS DARI DOT RED (Dot Green gugur jika ada Dot Red)
+// 2. Minimal 1 DonAlt EMA Golden Cross
+// 3. Harga dekat / condong ke Area Demand / Support (SMC)
+// 4. Swing atau Scalping minimal 1 sinyal BUY
+// 5. MACD Divergences minimal 1 sinyal Bullish Divergence
 function getAranterRecommendations() {
   let refDate = new Date();
   if (appData.daily_scans) {
@@ -5062,11 +5094,16 @@ function getAranterRecommendations() {
 
   const poolMap = new Map();
 
-  // 1. Kumpulkan dari vip_3dot_history (hanya yang masih aktif 3-Dot)
+  // 1. Kumpulkan HANYA dari saham VIP 3-Dot yang MASIH AKTIF (Belum Kena Dot Red / Belum Selesai)
   (appData.vip_3dot_history || []).forEach(item => {
     if (item.status === "COMPLETED" || item.is_active === false) return;
+    if (item.exit_reason && item.exit_reason.includes("RED_DOT")) return;
     const stock = item.data || item;
-    if (stock && stock.symbol && !poolMap.has(stock.symbol)) {
+    if (!stock || !stock.symbol) return;
+    if (stock.count_green !== 3) return;
+    if (checkHasActiveRedDot(stock, stock.symbol)) return;
+
+    if (!poolMap.has(stock.symbol)) {
       poolMap.set(stock.symbol, {
         stock: stock,
         scan_date: item.scan_date,
@@ -5075,28 +5112,35 @@ function getAranterRecommendations() {
     }
   });
 
-  // 2. Kumpulkan dari daily_scans (30 hari terakhir)
-  Object.entries(appData.daily_scans || {}).forEach(([dateKey, scanObj]) => {
-    (scanObj.stocks || []).forEach(stock => {
-      if (stock.count_green === 3 && !poolMap.has(stock.symbol)) {
+  // 2. Kumpulkan dari tanggal scan TERBARU saja jika ada saham baru yang belum tercatat di VIP
+  const availableDates = Object.keys(appData.daily_scans || {}).sort();
+  const latestDateKey = availableDates.length > 0 ? availableDates[availableDates.length - 1] : null;
+  if (latestDateKey && appData.daily_scans[latestDateKey]?.stocks) {
+    (appData.daily_scans[latestDateKey].stocks || []).forEach(stock => {
+      if (stock.count_green === 3 && !checkHasActiveRedDot(stock, stock.symbol) && !poolMap.has(stock.symbol)) {
         poolMap.set(stock.symbol, {
           stock: stock,
-          scan_date: dateKey,
-          scan_date_display: scanObj.date_display || dateKey
+          scan_date: latestDateKey,
+          scan_date_display: appData.daily_scans[latestDateKey].date_display || latestDateKey
         });
       }
     });
-  });
+  }
 
   const list = [];
   for (const [sym, entry] of poolMap.entries()) {
     const s = entry.stock;
-    // 5 Filter Konfluensi Aranter:
-    // 1. 3 Dot Green
+
+    // Filter Mutlak 1: Pastikan TIDAK MEMILIKI DOT RED aktif (Dot Green Gugur jika ada Dot Red)
+    if (checkHasActiveRedDot(s, sym)) continue;
+
+    // Filter Mutlak 2: 3 Dot Green Aktif Penuh (3/3 Timeframe)
     if (s.count_green !== 3) continue;
-    // 2. Minimal 1 Golden Cross
+
+    // 5 Filter Konfluensi Aranter:
+    // 2. Minimal 1 Golden Cross (DonAlt EMA Suite)
     if (!checkHasGolden(s)) continue;
-    // 3. Harga sekitaran / condong ke demand atau support
+    // 3. Harga sekitaran / condong ke demand atau support (SMC)
     if (!checkIsNearOrLeaningDemand(s)) continue;
     // 4. Swing atau Scalping minimal 1 BUY
     if (!checkHasScalpSwingBuy(s)) continue;
@@ -7205,27 +7249,7 @@ function findStockBySymbol(symbol) {
     }
   }
 
-  // Jika saham berasal dari VIP yang berstatus COMPLETED dengan exit_reason RED_DOT, pastikan info Red Dot tersemat
-  if (appData.vip_3dot_history) {
-    const vipEntry = appData.vip_3dot_history.find(h => h.symbol === symbol);
-    if (vipEntry && vipEntry.exit_reason && vipEntry.exit_reason.includes("RED_DOT")) {
-      const exitDateDisp = vipEntry.exit_date_display || vipEntry.exit_date;
-      if (stock.timeframes?.['60']) {
-        stock.timeframes['60'].red_dot = stock.timeframes['60'].red_dot || {};
-        stock.timeframes['60'].red_dot.status = true;
-        stock.timeframes['60'].red_dot.active = true;
-        stock.timeframes['60'].red_dot.date = exitDateDisp;
-        stock.timeframes['60'].red_dot.dot_close = stock.timeframes['60'].red_dot.dot_close || stock.close;
-      }
-      if (vipEntry.exit_reason.includes("RED_DOT_1D") && stock.timeframes?.D) {
-        stock.timeframes.D.red_dot = stock.timeframes.D.red_dot || {};
-        stock.timeframes.D.red_dot.status = true;
-        stock.timeframes.D.red_dot.active = true;
-        stock.timeframes.D.red_dot.date = exitDateDisp;
-        stock.timeframes.D.red_dot.dot_close = stock.timeframes.D.red_dot.dot_close || stock.close;
-      }
-    }
-  }
+
 
   return stock;
 }
@@ -7237,10 +7261,10 @@ function openStockDetail(symbol) {
     return;
   }
 
-  // Cek apakah saham ini masuk dalam Rekomendasi Aranter (5 Konfluensi)
+  // Cek apakah saham ini masuk dalam Rekomendasi Aranter (5 Konfluensi Aktif & Bebas Dot Red)
   const recItem = getAranterRecommendations().find(r => r.symbol === stock.symbol);
-  const recScore = recItem ? recItem.aranterScore : (stock.aranterScore || null);
-  const recMetadata = recItem ? recItem.aranterMetadata : (stock.aranterMetadata || null);
+  const recScore = recItem ? recItem.aranterScore : null;
+  const recMetadata = recItem ? recItem.aranterMetadata : null;
 
   const tf = stock.timeframes || {};
   const tfD = tf.D || {};

@@ -2117,7 +2117,23 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False):
                 if h.get("status") != "COMPLETED":
                     h["status"] = "COMPLETED"
                     h["is_active"] = False
-                    h["exit_reason"] = "RED_DOT_1D_1H" if sym in purged_symbols else "RED_DOT_1H"
+                    # Tentukan alasan keluar secara akurat berdasarkan timeframe yang benar-benar memicu Red Dot:
+                    s_cur = symbols_scanned_today.get(sym) or {}
+                    cur_tf = s_cur.get("timeframes", {})
+                    rd_reasons = []
+                    if cur_tf.get("D", {}).get("red_dot", {}).get("active"):
+                        rd_reasons.append("RED_DOT_1D")
+                    if cur_tf.get("60", {}).get("red_dot", {}).get("active"):
+                        rd_reasons.append("RED_DOT_1H")
+                    if cur_tf.get("15", {}).get("red_dot", {}).get("active"):
+                        rd_reasons.append("RED_DOT_15M")
+                    
+                    if rd_reasons:
+                        h["exit_reason"] = "_".join(rd_reasons)
+                    elif sym in purged_symbols:
+                        h["exit_reason"] = "RED_DOT_PURGED"
+                    else:
+                        h["exit_reason"] = "DOT_EXTINGUISHED"
                     h["exit_date"] = date_key
                     h["exit_date_display"] = tgl_id
                     h["exit_label"] = "🏁 Selesai / Take Profit"

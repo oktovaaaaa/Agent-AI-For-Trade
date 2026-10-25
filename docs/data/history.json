@@ -89829,7 +89829,7 @@
                 "active": false,
                 "date": "7 Okt 2026, 10:00 WIB",
                 "dt": "2026-10-07 10:00:00+07:00",
-                "dot_close": 252
+                "dot_close": 197
               },
               "donalt": {
                 "golden": null,
@@ -96687,7 +96687,7 @@
               "active": false,
               "date": "7 Okt 2026, 10:00 WIB",
               "dt": "2026-10-07 10:00:00+07:00",
-              "dot_close": 252
+              "dot_close": 197
             },
             "donalt": {
               "golden": null,
@@ -96828,7 +96828,7 @@
       "last_trigger_date_display": "23 Oktober 2026",
       "status": "COMPLETED",
       "is_active": false,
-      "exit_reason": "RED_DOT_1H",
+      "exit_reason": "RED_DOT_15M",
       "exit_date": "2026-10-23",
       "exit_date_display": "23 Oktober 2026",
       "exit_label": "🏁 Selesai / Take Profit"
