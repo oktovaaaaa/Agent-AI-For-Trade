@@ -1228,22 +1228,37 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
         
         try:
             # Ganti resolusi / timeframe secara instan tanpa reload penuh
-            await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', tf['interval'])
-            await asyncio.sleep(0.7)
+            target_interval = tf['interval']
+            await page.evaluate('(r) => window._exposed_chartWidgetCollection?.activeChartWidget?.value()?.setResolution(r)', target_interval)
             
-            # Pastikan model chart dan indikator RallyGood siap sebelum ekstraksi
-            for _ in range(15):
-                ready_check = await page.evaluate('''() => {
+            # Pastikan model chart benar-benar sudah beralih ke resolusi target dan selesai loading bar
+            for _ in range(25):
+                ready_check = await page.evaluate('''(targetRes) => {
                     try {
                         const chart = window._exposed_chartWidgetCollection?.activeChartWidget?.value();
                         if (!chart || !chart.model) return false;
+                        const ms = chart.model().mainSeries();
+                        if (!ms) return false;
+                        
+                        // 1. Verifikasi resolusi aktif chart saat ini benar-benar sesuai targetRes
+                        const curRes = chart.resolution ? chart.resolution() : (ms.interval ? ms.interval() : null);
+                        if (curRes && curRes !== targetRes) return false;
+                        
+                        // 2. Verifikasi main series tidak sedang loading bar baru
+                        if (ms.status && typeof ms.status === 'function' && ms.status() === 2) return false;
+                        
+                        // 3. Verifikasi ketersediaan data bar
+                        const bars = ms.bars ? ms.bars() : null;
+                        if (!bars || (!bars.last && !bars.valueAt)) return false;
+                        
+                        // 4. Pastikan indikator RallyGood siap
                         const allStudies = chart.model().panes().flatMap(p => p.dataSources());
                         return allStudies.some(s => s.title && s.title().includes('RallyGood'));
                     } catch(e) { return false; }
-                }''')
+                }''', target_interval)
                 if ready_check:
                     break
-                await asyncio.sleep(0.3)
+                await asyncio.sleep(0.25)
             
             # Ambil data Dot Green (RallyGood), Golden/Death (DonAlt), Supply/Demand (SMC),
             # BUY/SELL/Trend (Scalping vs Swing Trading), dan Bull/Bear (MACD Divergences)

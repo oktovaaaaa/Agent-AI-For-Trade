@@ -21528,6 +21528,14 @@
                   "price": 276
                 },
                 "bear": null
+              },
+              "red_dot": {
+                "status": true,
+                "active": false,
+                "date": "1 Okt 2026, 15:00 WIB",
+                "dt": "2026-10-01 15:00:00+07:00",
+                "dot_close": 370,
+                "drop_pct": -37.84
               }
             },
             "15": {
@@ -21581,6 +21589,14 @@
                   "price": 366
                 },
                 "bear": null
+              },
+              "red_dot": {
+                "status": false,
+                "active": false,
+                "date": null,
+                "dt": null,
+                "dot_close": null,
+                "drop_pct": null
               }
             }
           }
@@ -57991,7 +58007,7 @@
           "low": 242.0,
           "change": 1.6666666666666667,
           "volume": 145900.0,
-          "count_green": 3,
+          "count_green": 2,
           "has_green_dot": true,
           "timeframes": {
             "D": {
@@ -58068,12 +58084,20 @@
                   "price": 276
                 },
                 "bear": null
+              },
+              "red_dot": {
+                "status": true,
+                "active": false,
+                "date": "1 Okt 2026, 15:00 WIB",
+                "dt": "2026-10-01 15:00:00+07:00",
+                "dot_close": 370,
+                "drop_pct": -34.05
               }
             },
             "15": {
-              "status": true,
-              "date": "5 Okt 2026, 09:00 WIB",
-              "dot_close": 260,
+              "status": false,
+              "date": null,
+              "dot_close": 236,
               "gain_pct": -6.153846153846154,
               "donalt": {
                 "golden": null,
@@ -58105,6 +58129,14 @@
               "macd": {
                 "bull": null,
                 "bear": null
+              },
+              "red_dot": {
+                "status": true,
+                "active": true,
+                "date": "20 Okt 2026, 11:15 WIB",
+                "dt": "2026-10-20 11:15:00+07:00",
+                "dot_close": 268,
+                "drop_pct": -8.96
               }
             }
           }
@@ -85222,7 +85254,7 @@
           "low": 254.0,
           "change": 4.6875,
           "volume": 270700.0,
-          "count_green": 3,
+          "count_green": 2,
           "has_green_dot": true,
           "is_vip_audit": false,
           "timeframes": {
@@ -85270,11 +85302,12 @@
               "dot_close": 272,
               "gain_pct": -1.4705882352941175,
               "red_dot": {
-                "status": false,
+                "status": true,
                 "active": false,
-                "date": null,
-                "dt": null,
-                "dot_close": null
+                "date": "1 Okt 2026, 15:00 WIB",
+                "dt": "2026-10-01 15:00:00+07:00",
+                "dot_close": 370,
+                "drop_pct": -27.57
               },
               "donalt": {
                 "golden": null,
@@ -85321,16 +85354,17 @@
               }
             },
             "15": {
-              "status": true,
-              "date": "5 Okt 2026, 09:00 WIB",
-              "dot_close": 260,
+              "status": false,
+              "date": null,
+              "dot_close": 236,
               "gain_pct": 3.076923076923077,
               "red_dot": {
                 "status": true,
-                "active": false,
-                "date": "1 Okt 2026, 14:45 WIB",
-                "dt": "2026-10-01 14:45:00+07:00",
-                "dot_close": 370
+                "active": true,
+                "date": "20 Okt 2026, 11:15 WIB",
+                "dt": "2026-10-20 11:15:00+07:00",
+                "dot_close": 268,
+                "drop_pct": 0.0
               },
               "donalt": {
                 "golden": null,
@@ -99263,7 +99297,7 @@
         "low": 254.0,
         "change": 4.6875,
         "volume": 270700.0,
-        "count_green": 3,
+        "count_green": 2,
         "has_green_dot": true,
         "is_vip_audit": false,
         "timeframes": {
@@ -99309,13 +99343,14 @@
             "status": true,
             "date": "6 Okt 2026, 15:00 WIB",
             "dot_close": 272,
-            "gain_pct": -1.4705882352941175,
+            "gain_pct": -1.47,
             "red_dot": {
-              "status": false,
+              "status": true,
               "active": false,
-              "date": null,
-              "dt": null,
-              "dot_close": null
+              "date": "1 Okt 2026, 15:00 WIB",
+              "dt": "2026-10-01 15:00:00+07:00",
+              "dot_close": 370,
+              "drop_pct": -27.57
             },
             "donalt": {
               "golden": null,
@@ -99362,16 +99397,17 @@
             }
           },
           "15": {
-            "status": true,
-            "date": "5 Okt 2026, 09:00 WIB",
+            "status": false,
+            "date": null,
             "dot_close": 260,
-            "gain_pct": 3.076923076923077,
+            "gain_pct": null,
             "red_dot": {
               "status": true,
-              "active": false,
-              "date": "1 Okt 2026, 14:45 WIB",
-              "dt": "2026-10-01 14:45:00+07:00",
-              "dot_close": 370
+              "active": true,
+              "date": "20 Okt 2026, 11:15 WIB",
+              "dt": "2026-10-20 11:15:00+07:00",
+              "dot_close": 268,
+              "drop_pct": 0.0
             },
             "donalt": {
               "golden": null,
@@ -99456,12 +99492,12 @@
       "base_price": 230.0,
       "last_trigger_date": "2026-10-23",
       "last_trigger_date_display": "23 Oktober 2026",
-      "status": "ACTIVE",
-      "is_active": true,
-      "exit_reason": null,
-      "exit_date": "2026-10-23",
-      "exit_date_display": "23 Oktober 2026",
-      "exit_label": "🟢 Aktif Dipantau",
+      "status": "COMPLETED",
+      "is_active": false,
+      "exit_reason": "RED_DOT_15M",
+      "exit_date": "2026-10-20",
+      "exit_date_display": "20 Oktober 2026",
+      "exit_label": "🏁 Selesai / Take Profit",
       "entry_session": "SESI_SORE",
       "entry_session_label": "Penutupan Sore"
     },
@@ -103417,7 +103453,7 @@
       "base_price": 25.0,
       "status": "COMPLETED",
       "is_active": false,
-      "exit_reason": "RED_DOT_1H",
+      "exit_reason": "DOT_EXTINGUISHED",
       "exit_date": "2026-10-23",
       "exit_date_display": "23 Oktober 2026",
       "exit_label": "🏁 Selesai / Take Profit"
