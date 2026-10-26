@@ -595,7 +595,7 @@ def kirim_whatsapp(pesan):
 # ============================================================================
 # SISTEM ANTI-SPAM & ALERT INSTAN INTRADAY
 # ============================================================================
-ALERTED_SIGNALS_FILE = REPORTS_DIR / "alerted_signals_today.json"
+ALERTED_SIGNALS_FILE = Path("docs") / "data" / "alerted_signals.json"
 
 # Cache status pasar bursa hari ini berdasarkan detak jantung BBCA
 _CACHED_BBCA_MARKET_STATUS = {}
@@ -673,6 +673,16 @@ def check_bbca_market_status(now_wib=None):
                     _CACHED_BBCA_MARKET_STATUS[cache_key] = res
                     return res
                 else:
+                    # Hari kerja (Senin - Jumat) di menit-menit awal pembukaan (< 09:10 WIB):
+                    # Feed TradingView sering delay beberapa menit saat awal buka. Jangan langsung memvonis Libur Nasional (HOLIDAY)!
+                    if now_wib.time() < datetime.time(9, 10):
+                        print(f"⏳ [{now_wib.strftime('%H:%M:%S WIB')}] Feed TradingView BBCA masih proses update ({candle_dt}). Mengasumsikan bursa BUKA pada hari kerja...")
+                        return {
+                            "is_open": True,
+                            "session": "TRADING_DAY",
+                            "reason": "Bursa Buka (Hari Kerja, Sinkronisasi Feed Pembukaan Awal)",
+                            "trading_date": today_dt
+                        }
                     res = {
                         "is_open": False,
                         "session": "HOLIDAY",
@@ -726,7 +736,9 @@ def load_alerted_keys(now_wib):
             with open(target_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if data.get("date") == today_str:
-                    return set(data.get("alerted_keys", []))
+                    loaded = set(data.get("alerted_keys", []))
+                    print(f"🛡️ [ANTI-SPAM INTRADAY] Berhasil memuat {len(loaded)} riwayat sinyal sesi sebelumnya ({today_str}).")
+                    return loaded
                 else:
                     print(f"🔄 Sesi bursa baru ({today_str}). Mengosongkan riwayat alert anti-spam.")
                     return set()
@@ -736,7 +748,7 @@ def load_alerted_keys(now_wib):
     return set()
 
 def save_alerted_keys(alerted_keys, now_wib):
-    """Menyimpan daftar sinyal yang telah dikirim hari ini ke disk lokal (reports/)."""
+    """Menyimpan daftar sinyal yang telah dikirim hari ini ke disk (docs/data/alerted_signals.json)."""
     trading_date = get_latest_trading_date(now_wib)
     today_str = trading_date.strftime("%Y-%m-%d")
     data = {
@@ -751,6 +763,18 @@ def save_alerted_keys(alerted_keys, now_wib):
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"⚠️ Gagal menyimpan riwayat alert ke {ALERTED_SIGNALS_FILE}: {e}")
+
+def clear_alerted_keys():
+    """
+    Menghapus file riwayat alert intraday pada penutupan bursa sore hari.
+    Hal ini memastikan repositori tetap bersih dan esok hari dimulai dari lembaran baru (fresh start).
+    """
+    try:
+        if ALERTED_SIGNALS_FILE.exists():
+            ALERTED_SIGNALS_FILE.unlink()
+            print(f"🧹 [PENUTUPAN BURSA] Riwayat alert intraday ({ALERTED_SIGNALS_FILE}) berhasil dibersihkan untuk hari esok.")
+    except Exception as e:
+        print(f"⚠️ Gagal membersihkan riwayat alert: {e}")
 
 def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_to_disk=True):
     """
@@ -778,7 +802,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|DOT_GREEN|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 🟢 *Dot Green {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• 🟢 Dot Green {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🟢 Dot Green {tf_label}")
                     new_keys.append(key)
                     
     # 2. Cek Scalp BUY (Hanya jika belum dibalas oleh sinyal SELL setelahnya)
@@ -791,7 +815,8 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = b_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|SCALP_BUY|{tf_code}|{b_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else b_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• ⚔️ *Scalp BUY {tf_label}* (Pukul {t_str} WIB)")
+                    buy_lbl = "Scalp BUY" if tf_code == "15" else "Swing BUY"
+                    new_signals_text.append(f"• ⚔️ {buy_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ⚔️ {buy_lbl} {tf_label}")
                     new_keys.append(key)
 
     # 3. Cek Golden Cross (Hanya jika belum dibalas oleh Death Cross setelahnya)
@@ -804,7 +829,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = g_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|GOLDEN_CROSS|{tf_code}|{g_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else g_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• ✨ *Golden Cross {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• ✨ Golden Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ✨ Golden Cross {tf_label}")
                     new_keys.append(key)
 
     # 4. Cek MACD Bull (Hanya jika belum dibalas oleh Bearish Divergence setelahnya)
@@ -817,7 +842,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = m_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|MACD_BULL|{tf_code}|{m_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else m_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 🐂 *MACD Bullish Div {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• 🐂 MACD Bullish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐂 MACD Bullish Div {tf_label}")
                     new_keys.append(key)
 
     if not new_signals_text:
@@ -827,26 +852,18 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
     sup_val = smc.get("demand")
     res_val = smc.get("supply")
-    status_7d = smc.get("status_7d") or "⚪ Di Antara Demand & Supply"
     
-    sup_str = f"Rp {sup_val:.0f}" if sup_val else "-"
-    res_str = f"Rp {res_val:.0f}" if res_val else "-"
+    sup_str = f"{sup_val:,.0f}".replace(",", ".") if sup_val else "-"
+    res_str = f"{res_val:,.0f}".replace(",", ".") if res_val else "-"
     
     cur_price = stock.get("close", 0)
     chg_pct = stock.get("change", 0.0)
+    price_str = f"{cur_price:,.0f}".replace(",", ".")
     
     pesan_alert = (
-        f"🟢 *SINYAL ENTRY / BULLISH (INTRADAY)*\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"Emiten   : *{sym}*\n"
-        f"Harga    : Rp {cur_price:.0f} ({chg_pct:+.2f}%)\n"
-        f"Sinyal   :\n"
+        f"*BUY: {sym}* | *Rp {price_str} ({chg_pct:+.2f}%)*\n"
         + "\n".join(new_signals_text) + "\n"
-        f"SMC Area :\n"
-        f"• Support (Demand)  : {sup_str}\n"
-        f"• Resisten (Supply) : {res_str}\n"
-        f"• Status            : {status_7d}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
+        + f"SMC: Sup {sup_str} • Res {res_str}"
     )
     
     print(f"\n🟢 [BULLISH ALERT] Sinyal baru (Entry/Bullish) terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
@@ -883,7 +900,7 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|DOT_RED|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 🔴 *Dot Red {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• 🔴 Dot Red {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🔴 Dot Red {tf_label}")
                     new_keys.append(key)
                     
     # 2. Cek Death Cross (EMA + DonAlt Suite - Hanya jika belum dibalas Golden Cross setelahnya)
@@ -896,7 +913,7 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = d_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|DEATH_CROSS|{tf_code}|{d_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else d_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 💀 *Death Cross {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• 💀 Death Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 💀 Death Cross {tf_label}")
                     new_keys.append(key)
 
     # 3. Cek Scalp SELL (Scalping vs Swing Trading - Hanya jika belum dibalas BUY setelahnya)
@@ -909,7 +926,8 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = s_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|SCALP_SELL|{tf_code}|{s_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else s_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 🔴 *Scalp SELL {tf_label}* (Pukul {t_str} WIB)")
+                    sell_lbl = "Scalp SELL" if tf_code == "15" else "Swing SELL"
+                    new_signals_text.append(f"• 🛑 {sell_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🛑 {sell_lbl} {tf_label}")
                     new_keys.append(key)
 
     # 4. Cek MACD Bearish Divergence (Hanya jika belum dibalas Bullish Divergence setelahnya)
@@ -922,7 +940,7 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
                 t_str = br_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|MACD_BEAR|{tf_code}|{br_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else br_dt.strftime('%Y-%m-%d')}"
                 if key not in alerted_keys:
-                    new_signals_text.append(f"• 🐻 *MACD Bearish Div {tf_label}* (Pukul {t_str} WIB)")
+                    new_signals_text.append(f"• 🐻 MACD Bearish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐻 MACD Bearish Div {tf_label}")
                     new_keys.append(key)
 
     if not new_signals_text:
@@ -932,26 +950,18 @@ def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_
     smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
     sup_val = smc.get("demand")
     res_val = smc.get("supply")
-    status_7d = smc.get("status_7d") or "⚪ Di Antara Demand & Supply"
     
-    sup_str = f"Rp {sup_val:.0f}" if sup_val else "-"
-    res_str = f"Rp {res_val:.0f}" if res_val else "-"
+    sup_str = f"{sup_val:,.0f}".replace(",", ".") if sup_val else "-"
+    res_str = f"{res_val:,.0f}".replace(",", ".") if res_val else "-"
     
     cur_price = stock.get("close", 0)
     chg_pct = stock.get("change", 0.0)
+    price_str = f"{cur_price:,.0f}".replace(",", ".")
     
     pesan_alert = (
-        f"⚠️ *PERINGATAN EXIT / BEARISH (INTRADAY)*\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
-        f"Emiten   : *{sym}*\n"
-        f"Harga    : Rp {cur_price:.0f} ({chg_pct:+.2f}%)\n"
-        f"Sinyal   :\n"
+        f"*EXIT: {sym}* | *Rp {price_str} ({chg_pct:+.2f}%)*\n"
         + "\n".join(new_signals_text) + "\n"
-        f"SMC Area :\n"
-        f"• Support (Demand)  : {sup_str}\n"
-        f"• Resisten (Supply) : {res_str}\n"
-        f"• Status            : {status_7d}\n"
-        f"━━━━━━━━━━━━━━━━━━━━\n"
+        + f"SMC: Sup {sup_str} • Res {res_str}"
     )
     
     print(f"\n⚠️ [BEARISH ALERT] Sinyal exit/bearish terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
@@ -3022,6 +3032,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                     break
                 print("🌙 [DI LUAR JAM BURSA] Menjalankan 1x scan harian penuh & memperbarui database web...")
                 await run_daily_scan(send_wa=True, realtime_mode=False)
+                clear_alerted_keys()
                 print("🏁 Selesai scan di luar jam bursa. Keluar dari runner.")
                 break
             else:
@@ -3034,6 +3045,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
             if single_session:
                 print("🍽️ [JAM ISTIRAHAT BURSA] Menjalankan 1x scan snapshot Sesi Siang & memperbarui database web...")
                 await run_daily_scan(send_wa=True, realtime_mode=False)
+                save_alerted_keys(alerted_keys, now_wib)
                 print("🏁 Selesai scan snapshot istirahat siang. Keluar dari runner.")
                 break
             else:
@@ -3079,6 +3091,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                 print("📱 Mengirim Rangkuman Siang (Sesi I) ke WhatsApp...")
                 saham_hunter_midday = [item for item in hasil if not item.get("stock", {}).get("is_vip_audit", False)]
                 kirim_pesan_summary_wa(saham_hunter_midday, now_after, sesi_label="Istirahat Siang")
+                save_alerted_keys(alerted_keys, now_after)
                 if single_session:
                     print("🏁 Runner Sesi I selesai.")
                     break
@@ -3092,6 +3105,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                 simpan_database_json(hasil_closing, now_after, force_save=True)
                 saham_hunter_closing = [item for item in hasil_closing if not item.get("stock", {}).get("is_vip_audit", False)]
                 kirim_pesan_summary_wa(saham_hunter_closing, now_after, sesi_label="Penutupan Pasar")
+                clear_alerted_keys()
                 if single_session:
                     print("🏁 Runner Sesi II selesai.")
                     break
@@ -3251,6 +3265,9 @@ def main():
         else:
             print("[TEST MODE] Menjalankan scan langsung saat ini (tanpa kirim ke WhatsApp, tambahkan --wa untuk kirim ke WA)...")
         asyncio.run(run_daily_scan(send_wa=send_wa, target_date=target_date_cli))
+        now_check = datetime.datetime.now(WIB_TZ)
+        if now_check.time() >= datetime.time(15, 50):
+            clear_alerted_keys()
         return
 
     kirim_whatsapp(f"🤖 *BOT HUNTER RALLY GOD SIAP!*\nBot server standby dan akan otomatis melakukan scan setiap hari pukul {JAM_SCAN_WIB:02d}:{MENIT_SCAN_WIB:02d} WIB.")

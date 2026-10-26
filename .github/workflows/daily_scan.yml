@@ -1,6 +1,17 @@
 name: Bot Hunter IDX Screener & Real-Time Alert
 
 on:
+  schedule:
+    # Catatan: Waktu Cron GitHub Actions menggunakan format UTC (WIB = UTC+7)
+    # 1. Sesi I (Senin - Jumat 09:05 WIB -> 02:05 UTC)
+    - cron: '5 2 * * 1-5'
+    # 2. Sesi II (Senin - Kamis 13:30 WIB -> 06:30 UTC)
+    - cron: '30 6 * * 1-4'
+    # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
+    - cron: '0 7 * * 5'
+    # 4. Standby Penutupan Sore (Senin - Jumat 16:21 WIB -> 09:21 UTC)
+    - cron: '21 9 * * 1-5'
+
   workflow_dispatch:
     inputs:
       mode:
@@ -48,7 +59,10 @@ jobs:
           MODE="${{ github.event.inputs.mode || 'realtime' }}"
           LIMIT="${{ github.event.inputs.limit || '0' }}"
 
-          if [ "$MODE" = "once" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ]; then
+            echo "⏰ Trigger Otomatis Jadwal Bursa IDX. Menjalankan mode real-time intraday per sesi..."
+            python bot_hunter.py --realtime --session
+          elif [ "$MODE" = "once" ]; then
             if [ "$LIMIT" != "0" ] && [ -n "$LIMIT" ]; then
               echo "Menjalankan scan 1x dengan batas $LIMIT saham..."
               python bot_hunter.py --now --wa --limit "$LIMIT"
@@ -71,7 +85,8 @@ jobs:
         run: |
           git config --local user.email "oktovaaaaa@gmail.com"
           git config --local user.name "oktovaaaaa"
-          git add docs/data/history.json || true
+          git add docs/data/history.json docs/data/alerted_signals.json || true
+          git add -u docs/data/alerted_signals.json || true
           if git diff --staged --quiet; then
             echo "Tidak ada perubahan data JSON."
           else
