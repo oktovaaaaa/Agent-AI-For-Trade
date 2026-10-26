@@ -595,7 +595,7 @@ def kirim_whatsapp(pesan):
 # ============================================================================
 # SISTEM ANTI-SPAM & ALERT INSTAN INTRADAY
 # ============================================================================
-ALERTED_SIGNALS_FILE = Path("docs/data/alerted_signals.json")
+ALERTED_SIGNALS_FILE = REPORTS_DIR / "alerted_signals_today.json"
 
 # Cache status pasar bursa hari ini berdasarkan detak jantung BBCA
 _CACHED_BBCA_MARKET_STATUS = {}
@@ -720,10 +720,6 @@ def load_alerted_keys(now_wib):
     trading_date = get_latest_trading_date(now_wib)
     today_str = trading_date.strftime("%Y-%m-%d")
     target_file = ALERTED_SIGNALS_FILE
-    if not target_file.exists():
-        fallback = REPORTS_DIR / "alerted_signals_today.json"
-        if fallback.exists():
-            target_file = fallback
 
     if target_file.exists():
         try:
@@ -740,7 +736,7 @@ def load_alerted_keys(now_wib):
     return set()
 
 def save_alerted_keys(alerted_keys, now_wib):
-    """Menyimpan daftar sinyal yang telah dikirim hari ini ke disk."""
+    """Menyimpan daftar sinyal yang telah dikirim hari ini ke disk lokal (reports/)."""
     trading_date = get_latest_trading_date(now_wib)
     today_str = trading_date.strftime("%Y-%m-%d")
     data = {
@@ -749,13 +745,12 @@ def save_alerted_keys(alerted_keys, now_wib):
         "total_alerts": len(alerted_keys),
         "alerted_keys": sorted(list(alerted_keys))
     }
-    for p in [ALERTED_SIGNALS_FILE, REPORTS_DIR / "alerted_signals_today.json"]:
-        try:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            with open(p, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-        except Exception as e:
-            print(f"⚠️ Gagal menyimpan riwayat alert ke {p}: {e}")
+    try:
+        ALERTED_SIGNALS_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(ALERTED_SIGNALS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"⚠️ Gagal menyimpan riwayat alert ke {ALERTED_SIGNALS_FILE}: {e}")
 
 def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_to_disk=True):
     """

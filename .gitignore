@@ -1,9 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-reports/*.txt
-reports/*.png
-reports/screenshots/*.png
+reports/
 scan.log
 .env
 
