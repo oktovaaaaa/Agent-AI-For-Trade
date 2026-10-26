@@ -113,7 +113,7 @@ function renderSidebarHistory() {
   const availableDates = Object.keys(appData.daily_scans || {}).sort().reverse();
 
   if (availableDates.length === 0) {
-    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Menunggu scan 16:21 WIB</div>`;
+    container.innerHTML = `<div style="font-size:12px; color:var(--text-dim); padding:6px 10px;">Menunggu scan 16:05 WIB</div>`;
     return;
   }
 
@@ -974,16 +974,16 @@ function renderDailyView() {
 
   if (!scanData) {
     document.getElementById("activeDateDisplay").innerText = "Standby Scan Rutin";
-    document.getElementById("activeTimeDisplay").innerText = "16:21 WIB";
+    document.getElementById("activeTimeDisplay").innerText = "16:05 WIB";
     document.getElementById("filterResultCount").innerText = "Menunggu data scan";
     grid.innerHTML = `
       <div class="empty-state">
         <div class="empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
         </div>
-        <h3>Menunggu Jadwal Scan Saham Jam 16:21 WIB</h3>
+        <h3>Menunggu Jadwal Scan Saham Jam 16:05 WIB</h3>
         <p style="margin-top:6px; color:var(--text-muted); max-width:480px; margin-left:auto; margin-right:auto;">
-          Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:21 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
+          Bot Hunter AI otomatis aktif pasca penutupan bursa IDX jam 16:05 WIB untuk memindai seluruh saham dan memperbarui web secara real-time.
         </p>
       </div>
     `;
@@ -993,7 +993,7 @@ function renderDailyView() {
 
   if (!scanData.stocks || scanData.stocks.length === 0) {
     document.getElementById("activeDateDisplay").innerText = scanData.date_display || selectedDate;
-    document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:21 WIB";
+    document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:05 WIB";
     document.getElementById("filterResultCount").innerText = "0 saham terkonfirmasi";
     grid.innerHTML = `
       <div class="empty-state">
@@ -1012,7 +1012,7 @@ function renderDailyView() {
 
   // Active Date Bar Info
   document.getElementById("activeDateDisplay").innerText = scanData.date_display || selectedDate;
-  document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:21 WIB";
+  document.getElementById("activeTimeDisplay").innerText = scanData.time_display || "16:05 WIB";
 
   // Hitung jumlah sinyal spesifik
   let countGolden = 0;
@@ -1562,7 +1562,7 @@ function getGuidePageHTML() {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div class="guide-hl-text">
-              <h4>Scan Otomatis Jam 16:21 WIB</h4>
+              <h4>Scan Otomatis Jam 16:05 WIB</h4>
               <p>Bot Hunter AI otomatis aktif pasca penutupan bursa sesi 2 untuk memindai ratusan emiten dan memperbarui web setiap sore.</p>
             </div>
           </div>
@@ -1953,7 +1953,7 @@ function getGuidePageHTML() {
           <div class="guide-sop-card">
             <div style="display:flex; align-items:center; justify-content:space-between;">
               <span class="guide-sop-step-badge">1</span>
-              <span class="guide-sop-time">16:21 WIB (Sore)</span>
+              <span class="guide-sop-time">16:05 WIB (Sore)</span>
             </div>
             <h4>Buka Hasil Scan Harian</h4>
             <p>Buka web Aranter segera setelah bursa tutup sesi 2. Masuk ke menu <b>Rekomendasi Aranter</b> untuk melihat saham 5 konfluensi tertinggi, atau menu <b>Screener</b> untuk melihat seluruh emiten lolos filter.</p>

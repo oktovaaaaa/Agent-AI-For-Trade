@@ -9,8 +9,8 @@ on:
     - cron: '30 6 * * 1-4'
     # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
     - cron: '0 7 * * 5'
-    # 4. Standby Penutupan Sore (Senin - Jumat 16:21 WIB -> 09:21 UTC)
-    - cron: '21 9 * * 1-5'
+    # 4. Standby Penutupan Sore (Senin - Jumat 16:05 WIB -> 09:05 UTC)
+    - cron: '5 9 * * 1-5'
 
   workflow_dispatch:
     inputs:

@@ -13,7 +13,7 @@ services:
       - TZ=Asia/Jakarta
       - MODE=realtime
       - JAM_SCAN_WIB=16
-      - MENIT_SCAN_WIB=21
+      - MENIT_SCAN_WIB=5
     volumes:
       # Simpan cache data internal (opsional)
       - ./reports:/app/reports:z

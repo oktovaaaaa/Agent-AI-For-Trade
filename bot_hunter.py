@@ -43,9 +43,9 @@ TRADINGVIEW_SESSIONIDS = [s.strip() for s in TRADINGVIEW_SESSIONIDS_RAW.split(",
 # URL Layout Chart TradingView Anda tempat indikator (人•ᴗ•)RallyGood terpasang
 CHART_LAYOUT_URL = "https://www.tradingview.com/chart/6B2fiCnc/"
 
-# Jadwal & Parameter Analisis (Default: Pukul 16.21 WIB / 04:21 Sore pasca tutup bursa)
+# Jadwal & Parameter Analisis (Default: Pukul 16.05 WIB / 04:05 Sore pasca tutup bursa 16:00)
 JAM_SCAN_WIB = int(os.environ.get("JAM_SCAN_WIB", 16))
-MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 21))
+MENIT_SCAN_WIB = int(os.environ.get("MENIT_SCAN_WIB", 5))
 LOOKBACK_DAYS = 30              # Cek sinyal 1 bulan terakhir (30 hari)
 LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Ambil seluruh saham lolos screener tanpa batas (bisa diatur misal 20, 50, atau 0 untuk semua)
 DEFAULT_WORKERS = len(TRADINGVIEW_SESSIONIDS) if TRADINGVIEW_SESSIONIDS else 5
@@ -1062,7 +1062,7 @@ def get_current_idx_session(now_wib):
             }
         
     t_0900 = datetime.time(9, 0)
-    t_1550 = datetime.time(15, 50)
+    t_1605 = datetime.time(16, 5)  # Pasar tutup 16:00 WIB, analisa penutupan dimulai tepat 16:05 WIB
     
     # Hari Jumat
     if weekday == 4:
@@ -1083,12 +1083,12 @@ def get_current_idx_session(now_wib):
                 "name": "Istirahat Sholat Jumat (11:30 - 14:00 WIB)",
                 "resume_time": t_1400
             }
-        elif t_1400 <= cur_time < t_1550:
+        elif t_1400 <= cur_time < t_1605:
             return {
                 "status": "OPEN",
                 "session": "SESI_2",
-                "name": "Sesi II Jumat (14:00 - 15:50 WIB)",
-                "end_time": t_1550
+                "name": "Sesi II Jumat (14:00 - 16:00 WIB)",
+                "end_time": t_1605
             }
         else:
             return {
@@ -1116,12 +1116,12 @@ def get_current_idx_session(now_wib):
                 "name": "Istirahat Siang (12:00 - 13:30 WIB)",
                 "resume_time": t_1330
             }
-        elif t_1330 <= cur_time < t_1550:
+        elif t_1330 <= cur_time < t_1605:
             return {
                 "status": "OPEN",
                 "session": "SESI_2",
-                "name": "Sesi II (13:30 - 15:50 WIB)",
-                "end_time": t_1550
+                "name": "Sesi II (13:30 - 16:00 WIB)",
+                "end_time": t_1605
             }
         else:
             return {
@@ -3279,7 +3279,7 @@ def main():
             now_wib = datetime.datetime.now(WIB_TZ)
             hari_ini = now_wib.date()
             
-            # Cek jadwal: Sabtu pukul 19:08 WIB, Senin-Jumat pukul 16:21 WIB
+            # Cek jadwal: Sabtu pukul 19:08 WIB, Senin-Jumat pukul 16:05 WIB
             is_saturday = (now_wib.weekday() == 5)
             target_jam = 19 if is_saturday else JAM_SCAN_WIB
             target_menit = 8 if is_saturday else MENIT_SCAN_WIB
