@@ -798,13 +798,13 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         if tf_data.get("status"):
             dt = tf_data.get("dt")
             if dt and dt.date() == today_date:
-                t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                t_str = f"{dt.strftime('%H:%M')} WIB" if tf_code != "D" else f"Tanggal {format_tanggal_id(dt)} (Hari Ini)"
                 key = f"{sym}|DOT_GREEN|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
                 today_signals.append({
                     "type": "DOT_GREEN",
                     "tf": tf_code,
                     "tf_label": tf_label,
-                    "text": f"• 🟢 Dot Green {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🟢 Dot Green {tf_label}",
+                    "text": f"• 🟢 Dot Green {tf_label}: {t_str}" if tf_code != "D" else f"• 🟢 Dot Green Daily (TF ke-3): {t_str}",
                     "key": key
                 })
                 
@@ -815,14 +815,14 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         if buy and not buy.get("reversed"):
             b_dt = buy.get("dt")
             if b_dt and b_dt.date() == today_date:
-                t_str = b_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                t_str = f"{b_dt.strftime('%H:%M')} WIB" if tf_code != "D" else f"Tanggal {format_tanggal_id(b_dt)} (Hari Ini)"
                 key = f"{sym}|SCALP_BUY|{tf_code}|{b_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else b_dt.strftime('%Y-%m-%d')}"
                 buy_lbl = "Scalp BUY" if tf_code == "15" else "Swing BUY"
                 today_signals.append({
                     "type": "SCALP_BUY",
                     "tf": tf_code,
                     "tf_label": tf_label,
-                    "text": f"• ⚔️ {buy_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ⚔️ {buy_lbl} {tf_label}",
+                    "text": f"• ⚔️ {buy_lbl} {tf_label}: {t_str}" if tf_code != "D" else f"• ⚔️ Swing BUY Daily (TF ke-3): {t_str}",
                     "key": key
                 })
 
@@ -833,13 +833,13 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         if g and not g.get("reversed"):
             g_dt = g.get("dt")
             if g_dt and g_dt.date() == today_date:
-                t_str = g_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                t_str = f"{g_dt.strftime('%H:%M')} WIB" if tf_code != "D" else f"Tanggal {format_tanggal_id(g_dt)} (Hari Ini)"
                 key = f"{sym}|GOLDEN_CROSS|{tf_code}|{g_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else g_dt.strftime('%Y-%m-%d')}"
                 today_signals.append({
                     "type": "GOLDEN_CROSS",
                     "tf": tf_code,
                     "tf_label": tf_label,
-                    "text": f"• ✨ Golden Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ✨ Golden Cross {tf_label}",
+                    "text": f"• ✨ Golden Cross {tf_label}: {t_str}" if tf_code != "D" else f"• ✨ Golden Cross Daily (TF ke-3): {t_str}",
                     "key": key
                 })
 
@@ -850,13 +850,13 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         if bull and not bull.get("reversed"):
             m_dt = bull.get("dt")
             if m_dt and m_dt.date() == today_date:
-                t_str = m_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
+                t_str = f"{m_dt.strftime('%H:%M')} WIB" if tf_code != "D" else f"Tanggal {format_tanggal_id(m_dt)} (Hari Ini)"
                 key = f"{sym}|MACD_BULL|{tf_code}|{m_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else m_dt.strftime('%Y-%m-%d')}"
                 today_signals.append({
                     "type": "MACD_BULL",
                     "tf": tf_code,
                     "tf_label": tf_label,
-                    "text": f"• 🐂 MACD Bullish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐂 MACD Bullish Div {tf_label}",
+                    "text": f"• 🐂 MACD Bullish Div {tf_label}: {t_str}" if tf_code != "D" else f"• 🐂 MACD Bullish Div Daily (TF ke-3): {t_str}",
                     "key": key
                 })
 
@@ -869,51 +869,59 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     if not unalerted_signals:
         return False
 
-    # Koleksi sinyal konfirmasi Daily (1D) dari hari sebelumnya (dalam 30 hari & belum ada sinyal lawan)
+    # Koleksi sinyal konfirmasi Daily (1D / Timeframe ke-3) dari hari sebelumnya (dalam 30 hari & belum ada sinyal lawan)
     daily_past_signals = []
     
-    # 1. Dot Green Daily masa lalu
+    # 1. Dot Green Daily (Timeframe ke-3)
     d_tf = tf_results.get("D", {})
     if d_tf.get("status"):
         d_dt = d_tf.get("dt")
         if d_dt and cutoff_past_date <= d_dt.date() < today_date:
-            d_str = d_dt.strftime("%d %b")
+            d_str = format_tanggal_id(d_dt)
             daily_past_signals.append({
                 "type": "DOT_GREEN",
-                "text": f"• 🟢 Dot Green Daily (Konfirmasi sejak {d_str})"
+                "tf": "D",
+                "tf_label": "Daily",
+                "text": f"• 🟢 Dot Green Daily (TF ke-3): Tanggal {d_str}"
             })
             
-    # 2. Scalp / Swing BUY Daily masa lalu
+    # 2. Scalp / Swing BUY Daily (Timeframe ke-3)
     d_sc = d_tf.get("scalping", {}).get("buy")
     if d_sc and not d_sc.get("reversed"):
         b_dt = d_sc.get("dt")
         if b_dt and cutoff_past_date <= b_dt.date() < today_date:
-            d_str = b_dt.strftime("%d %b")
+            d_str = format_tanggal_id(b_dt)
             daily_past_signals.append({
                 "type": "SCALP_BUY",
-                "text": f"• ⚔️ Swing BUY Daily (Aktif sejak {d_str})"
+                "tf": "D",
+                "tf_label": "Daily",
+                "text": f"• ⚔️ Swing BUY Daily (TF ke-3): Tanggal {d_str}"
             })
 
-    # 3. Golden Cross Daily masa lalu
+    # 3. Golden Cross Daily (Timeframe ke-3)
     d_g = d_tf.get("donalt", {}).get("golden")
     if d_g and not d_g.get("reversed"):
         g_dt = d_g.get("dt")
         if g_dt and cutoff_past_date <= g_dt.date() < today_date:
-            d_str = g_dt.strftime("%d %b")
+            d_str = format_tanggal_id(g_dt)
             daily_past_signals.append({
                 "type": "GOLDEN_CROSS",
-                "text": f"• ✨ Golden Cross Daily (Aktif sejak {d_str})"
+                "tf": "D",
+                "tf_label": "Daily",
+                "text": f"• ✨ Golden Cross Daily (TF ke-3): Tanggal {d_str}"
             })
 
-    # 4. MACD Bullish Div Daily masa lalu
+    # 4. MACD Bullish Div Daily (Timeframe ke-3)
     d_m = d_tf.get("macd", {}).get("bull")
     if d_m and not d_m.get("reversed"):
         m_dt = d_m.get("dt")
         if m_dt and cutoff_past_date <= m_dt.date() < today_date:
-            d_str = m_dt.strftime("%d %b")
+            d_str = format_tanggal_id(m_dt)
             daily_past_signals.append({
                 "type": "MACD_BULL",
-                "text": f"• 🐂 MACD Bullish Div Daily (Aktif sejak {d_str})"
+                "tf": "D",
+                "tf_label": "Daily",
+                "text": f"• 🐂 MACD Bullish Div Daily (TF ke-3): Tanggal {d_str}"
             })
 
     # Hitung total dot green (hari ini + daily masa lalu)
@@ -931,17 +939,13 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     else:
         headline = f"⚡ *KONFLUENSI {total_all_confluence} SINYAL POSITIF*"
 
-    # Format isi pesan
+    # Format isi pesan rapi dan terpadu
     body_lines = [headline, ""]
-    body_lines.append("*Sinyal Baru Hari Ini:*")
+    body_lines.append("*Detail Sinyal Terkonfirmasi:*")
     for s in today_signals:
         body_lines.append(s["text"])
-        
-    if daily_past_signals:
-        body_lines.append("")
-        body_lines.append("*Latar Belakang Daily (1D):*")
-        for s in daily_past_signals:
-            body_lines.append(s["text"])
+    for s in daily_past_signals:
+        body_lines.append(s["text"])
 
     # Info Support & Resisten SMC
     smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
