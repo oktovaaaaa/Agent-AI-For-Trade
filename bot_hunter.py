@@ -29,7 +29,7 @@ if sys.platform == "win32":
 # ============================================================================
 # KONFIGURASI BOT, TOKEN & AKUN TRADINGVIEW
 # ============================================================================
-FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "7ci6H1WRqTDsJUAoFzq5")
+FONNTE_TOKEN = os.environ.get("FONNTE_TOKEN", "")
 NOMOR_WHATSAPP_TUJUAN = os.environ.get("NOMOR_WHATSAPP_TUJUAN", "120363430125223310@g.us")
 
 # Session Cookie TradingView (Mendukung multi-akun dipisah tanda koma)

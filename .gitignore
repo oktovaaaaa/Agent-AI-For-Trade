@@ -9,3 +9,8 @@ scan.log
 .antigravity/
 .vscode/
 .idea/
+
+# Scratch & Temporary local files
+scratch/
+*.tmp
+

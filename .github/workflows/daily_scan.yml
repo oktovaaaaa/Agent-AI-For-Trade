@@ -9,8 +9,6 @@ on:
     - cron: '30 6 * * 1-4'
     # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
     - cron: '0 7 * * 5'
-    # 4. Standby Penutupan Sore (Senin - Jumat 16:05 WIB -> 09:05 UTC)
-    - cron: '5 9 * * 1-5'
 
   workflow_dispatch:
     inputs:
@@ -22,6 +20,10 @@ on:
         description: "Batas jumlah saham untuk dianalisis (0 = semua saham lolos screener)"
         required: false
         default: "0"
+
+concurrency:
+  group: bot-hunter-session
+  cancel-in-progress: false
 
 jobs:
   run-scan:
@@ -35,6 +37,8 @@ jobs:
     steps:
       - name: Checkout Kode
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT || github.token }}
 
       - name: Setup Python 3.10
         uses: actions/setup-python@v5
@@ -50,7 +54,7 @@ jobs:
 
       - name: Jalankan Bot Hunter
         env:
-          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN || '7ci6H1WRqTDsJUAoFzq5' }}
+          FONNTE_TOKEN: ${{ secrets.FONNTE_TOKEN }}
           NOMOR_WHATSAPP_TUJUAN: ${{ secrets.NOMOR_WHATSAPP_TUJUAN || '120363430125223310@g.us' }}
           TRADINGVIEW_SESSIONID: ${{ secrets.TRADINGVIEW_SESSIONID || '999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1' }}
           NUM_WORKERS: "5"
@@ -92,6 +96,7 @@ jobs:
           else
             git commit -m "Auto-update database scan saham & rotasi data 1 bulan [skip ci]"
             git checkout -- . || true
-            git pull --rebase --autostash origin main
-            git push origin main
+            for i in 1 2 3; do
+              git pull --rebase --autostash origin main && git push origin main && break || sleep 3
+            done
           fi

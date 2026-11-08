@@ -6,7 +6,7 @@ services:
     container_name: agent_trading_hunter
     restart: always
     environment:
-      - FONNTE_TOKEN=7ci6H1WRqTDsJUAoFzq5
+      - FONNTE_TOKEN=${FONNTE_TOKEN}
       - NOMOR_WHATSAPP_TUJUAN=120363430125223310@g.us
       - NUM_WORKERS=5
       - TRADINGVIEW_SESSIONID=999m9aq36s5hhqv7yw2vfubqvqhxbmj9,7ev2mzm8hgnx5zmu898kaa8g2nuzfc2i,yx4cryfynruplr29eryqu7qooc05mlex,kp2dfxh2grqbjsbjal140l3b9sgj9zl2,yblqlk1na0odzz71mu3y8il6igu229u1
