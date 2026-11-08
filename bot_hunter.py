@@ -778,22 +778,21 @@ def clear_alerted_keys():
 
 def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_to_disk=True):
     """
-    Mengecek apakah saham ini memiliki sinyal BARU HARI INI:
-    - Dot Green (15M, 1H, 1D)
-    - Scalp BUY (15M, 1H, 1D)
-    - Golden Cross EMA (15M, 1H, 1D)
-    - MACD Bullish Divergence (15M, 1H, 1D)
-    
-    Jika ada sinyal hari ini yang belum pernah dikirim (belum ada di alerted_keys),
-    seketika kirim pesan WhatsApp khusus emiten ini dan catat ke alerted_keys.
+    Mengecek apakah saham ini memiliki sinyal BULLISH / ENTRY BARU HARI INI:
+    - Aturan Baru: Wajib memiliki MINIMAL 2 SINYAL POSITIF BARU HARI INI
+      (misal: 2 Dot Green [15M & 1H], 2 Golden Cross, 2 Scalp BUY, 2 MACD Bull, atau kombinasinya).
+    - Jika syarat minimal 2 sinyal hari ini terpenuhi, cek juga sinyal konfirmasi dari timeframe Daily (1D)
+      di hari sebelumnya (dalam 30 hari terakhir & belum dibalas sinyal lawan). Jika ada, gabungkan menjadi
+      konfluensi lengkap (misal: 3 Dot Green).
+    - Alert Bearish / Exit dinonaktifkan sepenuhnya.
     """
     sym = stock.get("symbol")
     today_date = get_latest_trading_date(now_wib)
+    cutoff_past_date = today_date - datetime.timedelta(days=30)
     
-    new_signals_text = []
-    new_keys = []
+    today_signals = []
     
-    # 1. Cek Dot Green
+    # 1. Dot Green Hari Ini
     for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
         tf_data = tf_results.get(tf_code, {})
         if tf_data.get("status"):
@@ -801,11 +800,15 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             if dt and dt.date() == today_date:
                 t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|DOT_GREEN|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• 🟢 Dot Green {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🟢 Dot Green {tf_label}")
-                    new_keys.append(key)
-                    
-    # 2. Cek Scalp BUY (Hanya jika belum dibalas oleh sinyal SELL setelahnya)
+                today_signals.append({
+                    "type": "DOT_GREEN",
+                    "tf": tf_code,
+                    "tf_label": tf_label,
+                    "text": f"• 🟢 Dot Green {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🟢 Dot Green {tf_label}",
+                    "key": key
+                })
+                
+    # 2. Scalp / Swing BUY Hari Ini (Hanya jika belum dibalas oleh sinyal SELL setelahnya)
     for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
         sc = tf_results.get(tf_code, {}).get("scalping", {})
         buy = sc.get("buy")
@@ -814,12 +817,16 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             if b_dt and b_dt.date() == today_date:
                 t_str = b_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|SCALP_BUY|{tf_code}|{b_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else b_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    buy_lbl = "Scalp BUY" if tf_code == "15" else "Swing BUY"
-                    new_signals_text.append(f"• ⚔️ {buy_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ⚔️ {buy_lbl} {tf_label}")
-                    new_keys.append(key)
+                buy_lbl = "Scalp BUY" if tf_code == "15" else "Swing BUY"
+                today_signals.append({
+                    "type": "SCALP_BUY",
+                    "tf": tf_code,
+                    "tf_label": tf_label,
+                    "text": f"• ⚔️ {buy_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ⚔️ {buy_lbl} {tf_label}",
+                    "key": key
+                })
 
-    # 3. Cek Golden Cross (Hanya jika belum dibalas oleh Death Cross setelahnya)
+    # 3. Golden Cross Hari Ini (Hanya jika belum dibalas oleh Death Cross setelahnya)
     for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
         donalt = tf_results.get(tf_code, {}).get("donalt", {})
         g = donalt.get("golden")
@@ -828,11 +835,15 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             if g_dt and g_dt.date() == today_date:
                 t_str = g_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|GOLDEN_CROSS|{tf_code}|{g_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else g_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• ✨ Golden Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ✨ Golden Cross {tf_label}")
-                    new_keys.append(key)
+                today_signals.append({
+                    "type": "GOLDEN_CROSS",
+                    "tf": tf_code,
+                    "tf_label": tf_label,
+                    "text": f"• ✨ Golden Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• ✨ Golden Cross {tf_label}",
+                    "key": key
+                })
 
-    # 4. Cek MACD Bull (Hanya jika belum dibalas oleh Bearish Divergence setelahnya)
+    # 4. MACD Bullish Divergence Hari Ini (Hanya jika belum dibalas oleh Bearish Divergence setelahnya)
     for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
         m = tf_results.get(tf_code, {}).get("macd", {})
         bull = m.get("bull")
@@ -841,134 +852,121 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             if m_dt and m_dt.date() == today_date:
                 t_str = m_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
                 key = f"{sym}|MACD_BULL|{tf_code}|{m_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else m_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• 🐂 MACD Bullish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐂 MACD Bullish Div {tf_label}")
-                    new_keys.append(key)
+                today_signals.append({
+                    "type": "MACD_BULL",
+                    "tf": tf_code,
+                    "tf_label": tf_label,
+                    "text": f"• 🐂 MACD Bullish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐂 MACD Bullish Div {tf_label}",
+                    "key": key
+                })
 
-    if not new_signals_text:
+    # Syarat Mutlak: Wajib ada minimal 2 sinyal positif HARI INI
+    if len(today_signals) < 2:
         return False
         
-    # Ambil info Support & Resisten SMC (cari dari 1H, 15M, atau 1D yang punya nilai)
+    # Cek apakah ada sinyal hari ini yang belum pernah dikirim
+    unalerted_signals = [s for s in today_signals if s["key"] not in alerted_keys]
+    if not unalerted_signals:
+        return False
+
+    # Koleksi sinyal konfirmasi Daily (1D) dari hari sebelumnya (dalam 30 hari & belum ada sinyal lawan)
+    daily_past_signals = []
+    
+    # 1. Dot Green Daily masa lalu
+    d_tf = tf_results.get("D", {})
+    if d_tf.get("status"):
+        d_dt = d_tf.get("dt")
+        if d_dt and cutoff_past_date <= d_dt.date() < today_date:
+            d_str = d_dt.strftime("%d %b")
+            daily_past_signals.append({
+                "type": "DOT_GREEN",
+                "text": f"• 🟢 Dot Green Daily (Konfirmasi sejak {d_str})"
+            })
+            
+    # 2. Scalp / Swing BUY Daily masa lalu
+    d_sc = d_tf.get("scalping", {}).get("buy")
+    if d_sc and not d_sc.get("reversed"):
+        b_dt = d_sc.get("dt")
+        if b_dt and cutoff_past_date <= b_dt.date() < today_date:
+            d_str = b_dt.strftime("%d %b")
+            daily_past_signals.append({
+                "type": "SCALP_BUY",
+                "text": f"• ⚔️ Swing BUY Daily (Aktif sejak {d_str})"
+            })
+
+    # 3. Golden Cross Daily masa lalu
+    d_g = d_tf.get("donalt", {}).get("golden")
+    if d_g and not d_g.get("reversed"):
+        g_dt = d_g.get("dt")
+        if g_dt and cutoff_past_date <= g_dt.date() < today_date:
+            d_str = g_dt.strftime("%d %b")
+            daily_past_signals.append({
+                "type": "GOLDEN_CROSS",
+                "text": f"• ✨ Golden Cross Daily (Aktif sejak {d_str})"
+            })
+
+    # 4. MACD Bullish Div Daily masa lalu
+    d_m = d_tf.get("macd", {}).get("bull")
+    if d_m and not d_m.get("reversed"):
+        m_dt = d_m.get("dt")
+        if m_dt and cutoff_past_date <= m_dt.date() < today_date:
+            d_str = m_dt.strftime("%d %b")
+            daily_past_signals.append({
+                "type": "MACD_BULL",
+                "text": f"• 🐂 MACD Bullish Div Daily (Aktif sejak {d_str})"
+            })
+
+    # Hitung total dot green (hari ini + daily masa lalu)
+    total_dot_green = sum(1 for s in today_signals if s["type"] == "DOT_GREEN") + sum(1 for s in daily_past_signals if s["type"] == "DOT_GREEN")
+    total_golden = sum(1 for s in today_signals if s["type"] == "GOLDEN_CROSS") + sum(1 for s in daily_past_signals if s["type"] == "GOLDEN_CROSS")
+    total_all_confluence = len(today_signals) + len(daily_past_signals)
+
+    # Label headline konfluensi
+    if total_dot_green >= 3:
+        headline = "🔥 *3-DOT GREEN (SUPER BULLISH)*"
+    elif total_dot_green == 2:
+        headline = "🟢 *DOUBLE DOT GREEN CONFIRMED*"
+    elif total_golden >= 2:
+        headline = "✨ *DOUBLE GOLDEN CROSS CONFIRMED*"
+    else:
+        headline = f"⚡ *KONFLUENSI {total_all_confluence} SINYAL POSITIF*"
+
+    # Format isi pesan
+    body_lines = [headline, ""]
+    body_lines.append("*Sinyal Baru Hari Ini:*")
+    for s in today_signals:
+        body_lines.append(s["text"])
+        
+    if daily_past_signals:
+        body_lines.append("")
+        body_lines.append("*Latar Belakang Daily (1D):*")
+        for s in daily_past_signals:
+            body_lines.append(s["text"])
+
+    # Info Support & Resisten SMC
     smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
     sup_val = smc.get("demand")
     res_val = smc.get("supply")
-    
     sup_str = f"{sup_val:,.0f}".replace(",", ".") if sup_val else "-"
     res_str = f"{res_val:,.0f}".replace(",", ".") if res_val else "-"
     
     cur_price = stock.get("close", 0)
     chg_pct = stock.get("change", 0.0)
     price_str = f"{cur_price:,.0f}".replace(",", ".")
-    
+
+    body_lines.append("")
+    body_lines.append(f"SMC: Sup {sup_str} • Res {res_str}")
+
     pesan_alert = (
         f"*BUY: {sym}* | *Rp {price_str} ({chg_pct:+.2f}%)*\n"
-        + "\n".join(new_signals_text) + "\n"
-        + f"SMC: Sup {sup_str} • Res {res_str}"
+        + "\n".join(body_lines)
     )
-    
-    print(f"\n🟢 [BULLISH ALERT] Sinyal baru (Entry/Bullish) terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
+
+    print(f"\n🟢 [BULLISH ALERT] Sinyal konfluensi ({len(today_signals)} sinyal hari ini + {len(daily_past_signals)} daily) terdeteksi untuk {sym}. Mengirim WhatsApp...")
     sent = kirim_whatsapp(pesan_alert)
     if sent:
-        for k in new_keys:
-            alerted_keys.add(k)
-        if save_to_disk:
-            save_alerted_keys(alerted_keys, now_wib)
-    return sent
-
-def check_and_send_bearish_alert(stock, tf_results, alerted_keys, now_wib, save_to_disk=True):
-    """
-    Mengecek apakah saham ini memiliki sinyal BEARISH / EXIT BARU HARI INI:
-    - Dot Red RallyGood (15M, 1H, 1D)
-    - Death Cross EMA + DonAlt Suite (15M, 1H, 1D)
-    
-    Jika ada sinyal hari ini yang belum pernah dikirim (belum ada di alerted_keys),
-    seketika kirim pesan WhatsApp khusus emiten ini dan catat ke alerted_keys.
-    """
-    sym = stock.get("symbol")
-    today_date = get_latest_trading_date(now_wib)
-    
-    new_signals_text = []
-    new_keys = []
-    
-    # 1. Cek Dot Red (RallyGood)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
-        tf_data = tf_results.get(tf_code, {})
-        red_info = tf_data.get("red_dot", {})
-        if red_info.get("status") and red_info.get("active"):
-            dt = red_info.get("dt")
-            if dt and dt.date() == today_date:
-                t_str = dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
-                key = f"{sym}|DOT_RED|{tf_code}|{dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• 🔴 Dot Red {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🔴 Dot Red {tf_label}")
-                    new_keys.append(key)
-                    
-    # 2. Cek Death Cross (EMA + DonAlt Suite - Hanya jika belum dibalas Golden Cross setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
-        donalt = tf_results.get(tf_code, {}).get("donalt", {})
-        death = donalt.get("death")
-        if death and not death.get("reversed"):
-            d_dt = death.get("dt")
-            if d_dt and d_dt.date() == today_date:
-                t_str = d_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
-                key = f"{sym}|DEATH_CROSS|{tf_code}|{d_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else d_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• 💀 Death Cross {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 💀 Death Cross {tf_label}")
-                    new_keys.append(key)
-
-    # 3. Cek Scalp SELL (Scalping vs Swing Trading - Hanya jika belum dibalas BUY setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
-        sc = tf_results.get(tf_code, {}).get("scalping", {})
-        sell = sc.get("sell")
-        if sell and not sell.get("reversed"):
-            s_dt = sell.get("dt")
-            if s_dt and s_dt.date() == today_date:
-                t_str = s_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
-                key = f"{sym}|SCALP_SELL|{tf_code}|{s_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else s_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    sell_lbl = "Scalp SELL" if tf_code == "15" else "Swing SELL"
-                    new_signals_text.append(f"• 🛑 {sell_lbl} {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🛑 {sell_lbl} {tf_label}")
-                    new_keys.append(key)
-
-    # 4. Cek MACD Bearish Divergence (Hanya jika belum dibalas Bullish Divergence setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
-        m = tf_results.get(tf_code, {}).get("macd", {})
-        bear = m.get("bear")
-        if bear and not bear.get("reversed"):
-            br_dt = bear.get("dt")
-            if br_dt and br_dt.date() == today_date:
-                t_str = br_dt.strftime("%H:%M") if tf_code != "D" else "Hari Ini"
-                key = f"{sym}|MACD_BEAR|{tf_code}|{br_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else br_dt.strftime('%Y-%m-%d')}"
-                if key not in alerted_keys:
-                    new_signals_text.append(f"• 🐻 MACD Bearish Div {tf_label} ({t_str} WIB)" if tf_code != "D" else f"• 🐻 MACD Bearish Div {tf_label}")
-                    new_keys.append(key)
-
-    if not new_signals_text:
-        return False
-        
-    # Ambil info Support & Resisten SMC (cari dari 1H, 15M, atau 1D yang punya nilai)
-    smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
-    sup_val = smc.get("demand")
-    res_val = smc.get("supply")
-    
-    sup_str = f"{sup_val:,.0f}".replace(",", ".") if sup_val else "-"
-    res_str = f"{res_val:,.0f}".replace(",", ".") if res_val else "-"
-    
-    cur_price = stock.get("close", 0)
-    chg_pct = stock.get("change", 0.0)
-    price_str = f"{cur_price:,.0f}".replace(",", ".")
-    
-    pesan_alert = (
-        f"*EXIT: {sym}* | *Rp {price_str} ({chg_pct:+.2f}%)*\n"
-        + "\n".join(new_signals_text) + "\n"
-        + f"SMC: Sup {sup_str} • Res {res_str}"
-    )
-    
-    print(f"\n⚠️ [BEARISH ALERT] Sinyal exit/bearish terdeteksi untuk {sym} ({len(new_keys)} sinyal). Mengirim WhatsApp...")
-    sent = kirim_whatsapp(pesan_alert)
-    if sent:
-        for k in new_keys:
-            alerted_keys.add(k)
+        for s in today_signals:
+            alerted_keys.add(s["key"])
         if save_to_disk:
             save_alerted_keys(alerted_keys, now_wib)
     return sent
@@ -2673,7 +2671,6 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                                 })
                                 if realtime_mode and alerted_keys is not None:
                                     await asyncio.to_thread(check_and_send_instant_alert, stock, tf_results, alerted_keys, now_wib)
-                                    await asyncio.to_thread(check_and_send_bearish_alert, stock, tf_results, alerted_keys, now_wib)
                             print(f"⏱️ [{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Selesai {sym} dalam {dur_saham:.1f} detik.")
                             break
                         except Exception as err_saham:
@@ -3118,39 +3115,26 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                 await asyncio.sleep(sisa_jeda)
 
 def test_send_sample_alert():
-    """Menguji format pengiriman alert instan (Bullish & Bearish) ke WhatsApp tujuan dengan simulasi jam bursa."""
+    """Menguji format pengiriman alert instan konfluensi Bullish (minimal 2 sinyal hari ini + daily background)."""
     now_wib = datetime.datetime.now(WIB_TZ)
     trading_date = get_latest_trading_date(now_wib)
-    # Gunakan timestamp jam bursa aktif pada sesi bursa aktif (trading_date)
-    sample_candle_bull = datetime.datetime.combine(trading_date, datetime.time(10, 30), tzinfo=WIB_TZ)
-    sample_candle_bear = datetime.datetime.combine(trading_date, datetime.time(14, 15), tzinfo=WIB_TZ)
+    past_d_date = trading_date - datetime.timedelta(days=5)
+    
+    sample_candle_15m = datetime.datetime.combine(trading_date, datetime.time(10, 15), tzinfo=WIB_TZ)
+    sample_candle_1h = datetime.datetime.combine(trading_date, datetime.time(11, 0), tzinfo=WIB_TZ)
+    sample_candle_d = datetime.datetime.combine(past_d_date, datetime.time(16, 0), tzinfo=WIB_TZ)
 
     sample_stock = {"symbol": "SIMULASI-TES", "close": 1500, "change": 5.25}
     sample_tf = {
         "15": {
             "status": True,
-            "dt": sample_candle_bull,
-            "date": sample_candle_bull.strftime("%d %b %Y, %H:%M WIB"),
-            "donalt": {
-                "golden": {
-                    "dt": sample_candle_bull,
-                    "date": sample_candle_bull.strftime("%d %b %Y, %H:%M WIB"),
-                    "price": 1450,
-                    "gain_pct": 3.45
-                }
-            },
+            "dt": sample_candle_15m,
+            "date": sample_candle_15m.strftime("%d %b %Y, %H:%M WIB"),
             "scalping": {
                 "buy": {
-                    "dt": sample_candle_bull,
-                    "date": sample_candle_bull.strftime("%d %b %Y, %H:%M WIB"),
-                    "gain_pct": 9.09
-                }
-            },
-            "macd": {
-                "bull": {
-                    "dt": sample_candle_bull,
-                    "date": sample_candle_bull.strftime("%d %b %Y, %H:%M WIB"),
-                    "price": 1450
+                    "dt": sample_candle_15m,
+                    "date": sample_candle_15m.strftime("%d %b %Y, %H:%M WIB"),
+                    "gain_pct": 5.25
                 }
             },
             "smc": {
@@ -3158,54 +3142,29 @@ def test_send_sample_alert():
                 "supply": 1680,
                 "status_7d": "⚪ Di Antara Demand & Supply"
             }
-        }
-    }
-    dummy_keys = set()
-    print("🧪 Mengirim contoh alert instan (Bullish) ke WhatsApp...")
-    res1 = check_and_send_instant_alert(sample_stock, sample_tf, dummy_keys, now_wib, save_to_disk=False)
-    print(f"Hasil pengiriman Bullish: {'Berhasil ✅' if res1 else 'Gagal ❌'}")
-
-    sample_bearish_tf = {
+        },
         "60": {
-            "status": False,
-            "red_dot": {
-                "status": True,
-                "active": True,
-                "dt": sample_candle_bear,
-                "date": sample_candle_bear.strftime("%d %b %Y, %H:%M WIB")
-            },
+            "status": True,
+            "dt": sample_candle_1h,
+            "date": sample_candle_1h.strftime("%d %b %Y, %H:%M WIB")
+        },
+        "D": {
+            "status": True,
+            "dt": sample_candle_d,
+            "date": sample_candle_d.strftime("%d %b %Y"),
             "donalt": {
-                "death": {
-                    "dt": sample_candle_bear,
-                    "date": sample_candle_bear.strftime("%d %b %Y, %H:%M WIB"),
-                    "price": 1530
+                "golden": {
+                    "dt": sample_candle_d,
+                    "date": sample_candle_d.strftime("%d %b %Y"),
+                    "price": 1450
                 }
-            },
-            "scalping": {
-                "sell": {
-                    "dt": sample_candle_bear,
-                    "date": sample_candle_bear.strftime("%d %b %Y, %H:%M WIB"),
-                    "price": 1530
-                }
-            },
-            "macd": {
-                "bear": {
-                    "dt": sample_candle_bear,
-                    "date": sample_candle_bear.strftime("%d %b %Y, %H:%M WIB"),
-                    "price": 1530
-                }
-            },
-            "smc": {
-                "demand": 1420,
-                "supply": 1680,
-                "status_7d": "🔴 Breakdown Demand Area"
             }
         }
     }
-    dummy_bearish_keys = set()
-    print("🧪 Mengirim contoh alert instan (Bearish / Exit) ke WhatsApp...")
-    res2 = check_and_send_bearish_alert(sample_stock, sample_bearish_tf, dummy_bearish_keys, now_wib, save_to_disk=False)
-    print(f"Hasil pengiriman Bearish: {'Berhasil ✅' if res2 else 'Gagal ❌'}")
+    dummy_keys = set()
+    print("🧪 Menguji pengiriman contoh alert instan konfluensi (Bullish 3-Dot Green) ke WhatsApp...")
+    res = check_and_send_instant_alert(sample_stock, sample_tf, dummy_keys, now_wib, save_to_disk=False)
+    print(f"Hasil pengiriman Bullish: {'Berhasil ✅' if res else 'Gagal ❌'}")
 
 # ============================================================================
 # MAIN LOOP SCHEDULER: JALAN SETIAP HARI PUKUL 16.21 WIB
