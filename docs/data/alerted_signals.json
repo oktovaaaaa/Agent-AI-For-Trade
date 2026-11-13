@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-13",
+  "updated_at": "2026-11-13 10:00:01 WIB",
+  "total_alerts": 8,
+  "alerted_keys": [
+    "BELI|SCALP_BUY|15|2026-11-13 09:00",
+    "BELI|SCALP_BUY|60|2026-11-13 09:00",
+    "INPP|SCALP_BUY|15|2026-11-13 09:30",
+    "INPP|SCALP_BUY|60|2026-11-13 09:00",
+    "KKGI|DOT_GREEN|15|2026-11-13 09:30",
+    "KKGI|SCALP_BUY|60|2026-11-13 09:00",
+    "KOPI|MACD_BULL|D|2026-11-13",
+    "KOPI|SCALP_BUY|15|2026-11-13 09:00"
+  ]
+}
