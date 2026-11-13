@@ -51,11 +51,11 @@ LIMIT_SAHAM_SCAN = int(os.environ.get("LIMIT_SAHAM_SCAN", 0))           # 0 = Am
 DEFAULT_WORKERS = len(TRADINGVIEW_SESSIONIDS) if TRADINGVIEW_SESSIONIDS else 5
 NUM_WORKERS = int(os.environ.get("NUM_WORKERS", DEFAULT_WORKERS))                    # Jumlah worker tab paralel (1 worker per akun untuk stabilitas maksimal)
 
-# Timeframe yang dicek sesuai permintaan (1D, 1H, 15M)
+# Timeframe yang dicek sesuai permintaan (1D, 1H, 45M)
 TIMEFRAMES = [
     {"code": "D", "name": "Daily (1D)", "interval": "D"},
     {"code": "60", "name": "1 Jam (1H)", "interval": "60"},
-    {"code": "15", "name": "15 Menit (15M)", "interval": "15"}
+    {"code": "45", "name": "45 Menit (45M)", "interval": "45"}
 ]
 
 # Folder Penyimpanan Laporan (Opsional)
@@ -284,12 +284,12 @@ def parse_real_smc_levels(smc_data, cur_close, recent_bars=None):
 def format_donalt_wa(tf_results):
     """
     Format sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
-    untuk 3 timeframe (1D, 1H, 15M) di WhatsApp.
+    untuk 3 timeframe (1D, 1H, 45M) di WhatsApp.
     Hanya menamai Golden atau Death (tanpa dot green agar tidak dobel).
     Menandai tanggal kemunculan dalam rentang 30 hari terakhir.
     """
     lines = []
-    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    tf_order = [("D", "1D"), ("60", "1H"), ("45", "45M")]
     has_any = False
     sub_lines = []
     
@@ -324,7 +324,7 @@ def format_donalt_wa(tf_results):
 def format_donalt_notepad(tf_results):
     """Format sinyal Golden Cross & Death Cross untuk laporan Notepad."""
     lines = []
-    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("45", "45 Mnt (45M)")]
     for code, label in tf_order:
         tf_data = tf_results.get(code, {})
         donalt = tf_data.get("donalt", {})
@@ -353,10 +353,10 @@ def format_donalt_notepad(tf_results):
 def format_macd_wa(tf_results):
     """
     Format sinyal Bull & Bear (MACD Divergences)
-    untuk 3 timeframe (1D, 1H, 15M) di WhatsApp (30 hari terakhir).
+    untuk 3 timeframe (1D, 1H, 45M) di WhatsApp (30 hari terakhir).
     """
     lines = []
-    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    tf_order = [("D", "1D"), ("60", "1H"), ("45", "45M")]
     sub_lines = []
     
     for code, label in tf_order:
@@ -383,7 +383,7 @@ def format_macd_wa(tf_results):
 def format_macd_notepad(tf_results):
     """Format sinyal MACD Divergences (Bull & Bear) untuk laporan Notepad."""
     lines = []
-    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("45", "45 Mnt (45M)")]
     for code, label in tf_order:
         tf_data = tf_results.get(code, {})
         macd = tf_data.get("macd", {})
@@ -407,10 +407,10 @@ def format_macd_notepad(tf_results):
 def format_scalping_wa(tf_results):
     """
     Format sinyal BUY & SELL serta status Trend dari indikator
-    ( ͡° ͜ʖ ͡°) Scalping vs Swing Trading untuk 3 timeframe (1D, 1H, 15M) di WhatsApp.
+    ( ͡° ͜ʖ ͡°) Scalping vs Swing Trading untuk 3 timeframe (1D, 1H, 45M) di WhatsApp.
     """
     lines = []
-    tf_order = [("D", "1D"), ("60", "1H"), ("15", "15M")]
+    tf_order = [("D", "1D"), ("60", "1H"), ("45", "45M")]
     sub_lines = []
     
     for code, label in tf_order:
@@ -445,7 +445,7 @@ def format_scalping_wa(tf_results):
 def format_scalping_notepad(tf_results):
     """Format sinyal Scalping vs Swing Trading untuk laporan Notepad."""
     lines = []
-    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("15", "15 Mnt (15M)")]
+    tf_order = [("D", "Daily (1D)  "), ("60", "1 Jam (1H)  "), ("45", "45 Mnt (45M)")]
     for code, label in tf_order:
         tf_data = tf_results.get(code, {})
         sc = tf_data.get("scalping", {})
@@ -780,7 +780,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     """
     Mengecek apakah saham ini memiliki sinyal BULLISH / ENTRY BARU HARI INI:
     - Aturan Baru: Wajib memiliki MINIMAL 2 SINYAL POSITIF BARU HARI INI
-      (misal: 2 Dot Green [15M & 1H], 2 Golden Cross, 2 Scalp BUY, 2 MACD Bull, atau kombinasinya).
+      (misal: 2 Dot Green [45M & 1H], 2 Golden Cross, 2 Scalp BUY, 2 MACD Bull, atau kombinasinya).
     - Jika syarat minimal 2 sinyal hari ini terpenuhi, cek juga sinyal konfirmasi dari timeframe Daily (1D)
       di hari sebelumnya (dalam 30 hari terakhir & belum dibalas sinyal lawan). Jika ada, gabungkan menjadi
       konfluensi lengkap (misal: 3 Dot Green).
@@ -793,7 +793,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     today_signals = []
     
     # 1. Dot Green Hari Ini
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+    for tf_code, tf_label in [("45", "45M"), ("60", "1H"), ("D", "Daily")]:
         tf_data = tf_results.get(tf_code, {})
         if tf_data.get("status"):
             dt = tf_data.get("dt")
@@ -809,7 +809,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 })
                 
     # 2. Scalp / Swing BUY Hari Ini (Hanya jika belum dibalas oleh sinyal SELL setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+    for tf_code, tf_label in [("45", "45M"), ("60", "1H"), ("D", "Daily")]:
         sc = tf_results.get(tf_code, {}).get("scalping", {})
         buy = sc.get("buy")
         if buy and not buy.get("reversed"):
@@ -817,7 +817,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
             if b_dt and b_dt.date() == today_date:
                 t_str = f"{b_dt.strftime('%H:%M')} WIB" if tf_code != "D" else f"Tanggal {format_tanggal_id(b_dt)} (Hari Ini)"
                 key = f"{sym}|SCALP_BUY|{tf_code}|{b_dt.strftime('%Y-%m-%d %H:%M') if tf_code != 'D' else b_dt.strftime('%Y-%m-%d')}"
-                buy_lbl = "Scalp BUY" if tf_code == "15" else "Swing BUY"
+                buy_lbl = "Scalp BUY" if tf_code == "45" else "Swing BUY"
                 today_signals.append({
                     "type": "SCALP_BUY",
                     "tf": tf_code,
@@ -827,7 +827,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 })
 
     # 3. Golden Cross Hari Ini (Hanya jika belum dibalas oleh Death Cross setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+    for tf_code, tf_label in [("45", "45M"), ("60", "1H"), ("D", "Daily")]:
         donalt = tf_results.get(tf_code, {}).get("donalt", {})
         g = donalt.get("golden")
         if g and not g.get("reversed"):
@@ -844,7 +844,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
                 })
 
     # 4. MACD Bullish Divergence Hari Ini (Hanya jika belum dibalas oleh Bearish Divergence setelahnya)
-    for tf_code, tf_label in [("15", "15M"), ("60", "1H"), ("D", "Daily")]:
+    for tf_code, tf_label in [("45", "45M"), ("60", "1H"), ("D", "Daily")]:
         m = tf_results.get(tf_code, {}).get("macd", {})
         bull = m.get("bull")
         if bull and not bull.get("reversed"):
@@ -948,7 +948,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
         body_lines.append(s["text"])
 
     # Info Support & Resisten SMC
-    smc = tf_results.get("60", {}).get("smc") or tf_results.get("15", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
+    smc = tf_results.get("60", {}).get("smc") or tf_results.get("45", {}).get("smc") or tf_results.get("D", {}).get("smc") or {}
     sup_val = smc.get("demand")
     res_val = smc.get("supply")
     sup_str = f"{sup_val:,.0f}".replace(",", ".") if sup_val else "-"
@@ -981,7 +981,7 @@ def kirim_pesan_summary_wa(hasil_deteksi, now_wib, sesi_label=None):
 
     for item in hasil_deteksi:
         tf = item.get("timeframes", {})
-        item["count_green"] = sum(1 for tf_key in ['D', '60', '15'] if tf.get(tf_key, {}).get('status'))
+        item["count_green"] = sum(1 for tf_key in ['D', '60', '45'] if tf.get(tf_key, {}).get('status'))
 
     saham_3_dot = [item for item in hasil_deteksi if item.get("count_green", 0) == 3]
     saham_2_dot = [item for item in hasil_deteksi if item.get("count_green", 0) == 2]
@@ -1020,7 +1020,7 @@ def kirim_pesan_summary_wa(hasil_deteksi, now_wib, sesi_label=None):
         f"Untuk keputusan entry yang lebih akurat, sangat direkomendasikan melihat detail teknikal setiap saham langsung di website resmi:\n"
         f"👉 https://aranter.web.id/\n\n"
         f"Di website Anda dapat memeriksa:\n"
-        f"• Waktu kemunculan Dot Green (Daily, 1H, 15M) & persen kenaikannya\n"
+        f"• Waktu kemunculan Dot Green (Daily, 1H, 45M) & persen kenaikannya\n"
         f"• Zona Demand & Supply SMC (area pantul & batas risiko entry)\n"
         f"• Sinyal Scalping BUY/SELL, Golden Cross EMA & MACD Divergence\n"
         f"• Pantauan riwayat 30 hari bursa saham 3-Dot Green\n\n"
@@ -1226,7 +1226,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
             print(f" {w_tag}⚠️ Kendala navigasi chart {symbol}: {e}")
             return results
     
-    # 2. Cek setiap timeframe (D, 60, 15)
+    # 2. Cek setiap timeframe (D, 60, 45)
     for tf in TIMEFRAMES:
         tf_code = tf['code']
         tf_name = tf['name']
@@ -1687,7 +1687,7 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                 red_status = True
 
             # Evaluasi pertentangan Dot Red vs Dot Green:
-            # Di SEMUA timeframe (Daily, 1H, 15M):
+            # Di SEMUA timeframe (Daily, 1H, 45M):
             # Sinyal yang paling akhir muncul (terbaru) adalah sinyal aktif yang menang / valid.
             # Jika Red Dot muncul SETELAH Green Dot (latest_red > latest_dot):
             #   Green Dot gugur/dibatalkan (active_green = False), dan Red Dot aktif (active_red = True).
@@ -1832,9 +1832,9 @@ async def scan_stock_rallygood(page, stock_info, worker_id=None):
                 "trend": scalping_raw.get('trend')
             }
             
-            # 4. Olah Ultimate SMC Suite (Supply & Demand, Status 7D) untuk Daily (1D), 1 Jam (1H), dan 15 Menit (15M)
+            # 4. Olah Ultimate SMC Suite (Supply & Demand, Status 7D) untuk Daily (1D), 1 Jam (1H), dan 45 Menit (45M)
             smc_res = None
-            if tf_code in ['D', '60', '15']:
+            if tf_code in ['D', '60', '45']:
                 smc_res = parse_real_smc_levels(smc_raw, cur_close, recent_bars)
 
             # 5. Olah MACD Divergences (Bull & Bear Divergence - 30 hari terakhir)
@@ -2013,7 +2013,7 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False, target_date=N
 
             tf = item.get('timeframes', {})
             clean_tf = {}
-            for tf_k in ['D', '60', '15']:
+            for tf_k in ['D', '60', '45']:
                 tf_v = tf.get(tf_k, {})
                 clean_tf[tf_k] = {
                     "status": bool(tf_v.get("status", False)),
@@ -2028,7 +2028,7 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False, target_date=N
                 }
             
             c_val = float(st.get("close", 0))
-            cg = sum(1 for tf_k in ['D', '60', '15'] if clean_tf[tf_k]["status"])
+            cg = sum(1 for tf_k in ['D', '60', '45'] if clean_tf[tf_k]["status"])
             clean_stocks.append({
                 "symbol": sym,
                 "name": st.get("name", sym),
@@ -2155,10 +2155,10 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False, target_date=N
                     rd_60 = tf_60.get("red_dot") or {}
                     if rd_60.get("active"):
                         rd_reasons.append("RED_DOT_1H")
-                    tf_15 = cur_tf.get("15") or {}
-                    rd_15 = tf_15.get("red_dot") or {}
-                    if rd_15.get("active"):
-                        rd_reasons.append("RED_DOT_15M")
+                    tf_45 = cur_tf.get("45") or {}
+                    rd_45 = tf_45.get("red_dot") or {}
+                    if rd_45.get("active"):
+                        rd_reasons.append("RED_DOT_45M")
                     
                     if rd_reasons:
                         h["exit_reason"] = "_".join(rd_reasons)
@@ -2469,7 +2469,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             f"📊 *Jumlah Saham Terdeteksi di Screener*: *{len(hunter_stocks)} Saham*\n"
             f"⚡ *Multi-Worker Parallel*: *{min(NUM_WORKERS, len(hunter_stocks))} Worker Aktif*\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
-            f"⏳ Bot sedang menganalisis chart multi-timeframe (Daily, 1H, 15M) di TradingView...\n\n"
+            f"⏳ Bot sedang menganalisis chart multi-timeframe (Daily, 1H, 45M) di TradingView...\n\n"
             f"Laporan lengkap akan dikirimkan otomatis setelah pemindaian selesai."
         )
         kirim_whatsapp(pesan_mulai)
@@ -2775,7 +2775,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
     # Hitung jumlah timeframe dengan Dot Green untuk setiap saham
     for item in hasil_deteksi:
         tf = item["timeframes"]
-        item["count_green"] = sum(1 for tf_key in ['D', '60', '15'] if tf.get(tf_key, {}).get('status'))
+        item["count_green"] = sum(1 for tf_key in ['D', '60', '45'] if tf.get(tf_key, {}).get('status'))
 
     # Pisahkan saham screener hunter murni vs saham audit VIP untuk laporan teks & WhatsApp
     saham_hunter_only = [item for item in hasil_deteksi if not item.get("stock", {}).get("is_vip_audit", False)]
@@ -2830,7 +2830,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             g_1h = f" (Kenaikan: {tf['60']['gain_pct']:+.2f}%)" if tf.get('60', {}).get('gain_pct') is not None else ""
             konten_laporan.append(f"   - Daily (1D)  : [ADA DOT GREEN] (Muncul: {tf['D']['date']}{g_1d})")
             konten_laporan.append(f"   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: {tf['60']['date']}{g_1h})")
-            konten_laporan.append(f"   - 15 Menit    : [ADA DOT GREEN] (Muncul: {tf['15']['date']})")
+            konten_laporan.append(f"   - 45 Menit    : [ADA DOT GREEN] (Muncul: {tf['45']['date']})")
             # Tambahkan sinyal Golden Cross & Death Cross (EMA + DonAlt Suite)
             notepad_donalt_lines = format_donalt_notepad(tf)
             konten_laporan.extend(notepad_donalt_lines)
@@ -2863,8 +2863,8 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             if tf.get('60', {}).get('status'):
                 g_1h = f" (Kenaikan: {tf['60']['gain_pct']:+.2f}%)" if tf.get('60', {}).get('gain_pct') is not None else ""
                 konten_laporan.append(f"   - 1 Jam (1H)  : [ADA DOT GREEN] (Muncul: {tf['60']['date']}{g_1h})")
-            if tf.get('15', {}).get('status'):
-                konten_laporan.append(f"   - 15 Menit    : [ADA DOT GREEN] (Muncul: {tf['15']['date']})")
+            if tf.get('45', {}).get('status'):
+                konten_laporan.append(f"   - 45 Menit    : [ADA DOT GREEN] (Muncul: {tf['45']['date']})")
             notepad_donalt_lines = format_donalt_notepad(tf)
             konten_laporan.extend(notepad_donalt_lines)
             notepad_scalping_lines = format_scalping_notepad(tf)
@@ -2888,11 +2888,11 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             active_tf = []
             if tf.get('D', {}).get('status'): active_tf.append(f"1D ({tf['D']['date']})")
             if tf.get('60', {}).get('status'): active_tf.append(f"1H ({tf['60']['date']})")
-            if tf.get('15', {}).get('status'): active_tf.append(f"15M ({tf['15']['date']})")
+            if tf.get('45', {}).get('status'): active_tf.append(f"45M ({tf['45']['date']})")
             tf_str = ", ".join(active_tf)
             
             donalt_tags = []
-            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
                 g = tf.get(code, {}).get("donalt", {}).get("golden")
                 if g:
                     rev_s = " s/d Death" if g.get('reversed') else ""
@@ -2901,7 +2901,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             donalt_note = f" | EMA: {', '.join(donalt_tags)}" if donalt_tags else ""
             
             scalp_tags = []
-            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
                 sc = tf.get(code, {}).get("scalping", {})
                 b = sc.get("buy")
                 s = sc.get("sell")
@@ -2923,7 +2923,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
             smc_note = f" | SMC: {', '.join(smc_notes)}" if smc_notes else ""
 
             macd_tags = []
-            for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+            for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
                 m = tf.get(code, {}).get("macd", {})
                 b = m.get("bull")
                 br = m.get("bear")
@@ -2946,13 +2946,13 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
         k_dot = item.get("count_green", 0)
         status_text = f"🟢 {k_dot} TIMEFRAME" if k_dot > 0 else "⚪ Netral"
         g_tfs = []
-        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
             if item["timeframes"].get(code, {}).get("donalt", {}).get("golden"):
                 g_tfs.append(lbl)
         golden_str = f" [Golden Cross: {', '.join(g_tfs)}]" if g_tfs else ""
         
         sc_tfs = []
-        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
             sc = item["timeframes"].get(code, {}).get("scalping", {})
             if sc.get("buy"):
                 sc_tfs.append(f"BUY {lbl}")
@@ -2961,7 +2961,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
         scalp_str = f" [Scalp: {', '.join(sc_tfs)}]" if sc_tfs else ""
 
         m_tfs = []
-        for code, lbl in [("D", "1D"), ("60", "1H"), ("15", "15M")]:
+        for code, lbl in [("D", "1D"), ("60", "1H"), ("45", "45M")]:
             m = item["timeframes"].get(code, {}).get("macd", {})
             if m.get("bull"):
                 m_tfs.append(f"Bull {lbl}")
@@ -3124,20 +3124,20 @@ def test_send_sample_alert():
     trading_date = get_latest_trading_date(now_wib)
     past_d_date = trading_date - datetime.timedelta(days=5)
     
-    sample_candle_15m = datetime.datetime.combine(trading_date, datetime.time(10, 15), tzinfo=WIB_TZ)
+    sample_candle_45m = datetime.datetime.combine(trading_date, datetime.time(10, 30), tzinfo=WIB_TZ)
     sample_candle_1h = datetime.datetime.combine(trading_date, datetime.time(11, 0), tzinfo=WIB_TZ)
     sample_candle_d = datetime.datetime.combine(past_d_date, datetime.time(16, 0), tzinfo=WIB_TZ)
 
     sample_stock = {"symbol": "SIMULASI-TES", "close": 1500, "change": 5.25}
     sample_tf = {
-        "15": {
+        "45": {
             "status": True,
-            "dt": sample_candle_15m,
-            "date": sample_candle_15m.strftime("%d %b %Y, %H:%M WIB"),
+            "dt": sample_candle_45m,
+            "date": sample_candle_45m.strftime("%d %b %Y, %H:%M WIB"),
             "scalping": {
                 "buy": {
-                    "dt": sample_candle_15m,
-                    "date": sample_candle_15m.strftime("%d %b %Y, %H:%M WIB"),
+                    "dt": sample_candle_45m,
+                    "date": sample_candle_45m.strftime("%d %b %Y, %H:%M WIB"),
                     "gain_pct": 5.25
                 }
             },

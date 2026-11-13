@@ -4257,7 +4257,7 @@ body.mode-guide .action-bar {
             <div class="metric-number" id="statVipCount">-</div>
             <div class="metric-meta" id="statVipMeta">
               <span class="metric-title" id="statVipTitle">Full Rally Good</span>
-              <span class="metric-detail" id="statVipDetail">Konfirmasi Daily + 1H + 15M</span>
+              <span class="metric-detail" id="statVipDetail">Konfirmasi Daily + 1H + 45M</span>
             </div>
           </div>
 
@@ -4787,16 +4787,29 @@ function renderMainView() {
   }
 }
 
+// Helper: Deteksi dinamis timeframe intraday (45M baru vs 15M riwayat lama)
+function resolveIntradayTf(tf) {
+  if (!tf) return { key: '45', label: '45M', data: {} };
+  if (tf['45']) return { key: '45', label: '45M', data: tf['45'] };
+  if (tf['15']) return { key: '15', label: '15M', data: tf['15'] };
+  return { key: '45', label: '45M', data: {} };
+}
+
+function getStockTfKeys(s) {
+  const tf = s?.timeframes || {};
+  return ['D', '60', tf['45'] ? '45' : '15'];
+}
+
 // Helper Deteksi DonAlt Golden Cross
 function checkHasGolden(s) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => s.timeframes[tf]?.donalt?.golden);
+  return getStockTfKeys(s).some(tf => s.timeframes[tf]?.donalt?.golden);
 }
 
 // Helper Deteksi SMC Breakout Supply (BOS, CHoCH, Breakout Supply, atau Menguji Resisten)
 function checkHasSmcBreakout(s) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => {
+  return getStockTfKeys(s).some(tf => {
     const smc = s.timeframes[tf]?.smc;
     const st = smc?.status_7d || "";
     return st.includes("BREAKOUT") || 
@@ -4809,7 +4822,7 @@ function checkHasSmcBreakout(s) {
 // Helper Deteksi Scalping BUY (Bullish Trend atau histori sinyal BUY dari riwayat)
 function checkHasScalpBuy(s, isVipMode = false) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => {
+  return getStockTfKeys(s).some(tf => {
     const sc = s.timeframes[tf]?.scalping;
     if (!sc) return false;
     const trend = sc.trend || "";
@@ -4922,7 +4935,7 @@ function parseIndoDate(dateStr) {
 // Helper: Cek Harga di Sekitar atau Condong ke Demand / Support
 function checkIsNearOrLeaningDemand(s) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => {
+  return getStockTfKeys(s).some(tf => {
     const smc = s.timeframes[tf]?.smc;
     if (!smc) return false;
     const st = smc.status_7d || "";
@@ -4944,7 +4957,7 @@ function checkIsNearOrLeaningDemand(s) {
 // Helper: Cek Sinyal Swing atau Scalping Minimal 1 BUY
 function checkHasScalpSwingBuy(s) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => {
+  return getStockTfKeys(s).some(tf => {
     const sc = s.timeframes[tf]?.scalping;
     if (!sc) return false;
     const trend = sc.trend || "";
@@ -4957,7 +4970,7 @@ function checkHasScalpSwingBuy(s) {
 // Helper: Cek MACD Divergences Minimal 1 BUY (Bullish Divergence)
 function checkHasMacdBuy(s) {
   if (!s || !s.timeframes) return false;
-  return ['D', '60', '15'].some(tf => {
+  return getStockTfKeys(s).some(tf => {
     const mb = s.timeframes[tf]?.macd?.bull;
     return mb != null && Boolean(mb.date || mb.price);
   });
@@ -4966,11 +4979,12 @@ function checkHasMacdBuy(s) {
 // Helper: Hitung Skor Rekomendasi Aranter & Prioritas Kebaruan Indikator (Recency Score)
 function calculateAranterScore(s, refDate) {
   const tf = s.timeframes || {};
+  const tfKeys = getStockTfKeys(s);
   const indicatorDates = {};
 
   // 1. Golden Cross
   let latestGolden = null;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const dStr = tf[tfKey]?.donalt?.golden?.date;
     const d = parseIndoDate(dStr);
     if (d && (!latestGolden || d > latestGolden)) latestGolden = d;
@@ -4979,7 +4993,7 @@ function calculateAranterScore(s, refDate) {
 
   // 2. Dot Green
   let latestDot = null;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const dStr = tf[tfKey]?.date;
     const d = parseIndoDate(dStr);
     if (d && (!latestDot || d > latestDot)) latestDot = d;
@@ -4988,7 +5002,7 @@ function calculateAranterScore(s, refDate) {
 
   // 3. Scalping / Swing BUY
   let latestScalp = null;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const dStr = tf[tfKey]?.scalping?.buy?.date;
     const d = parseIndoDate(dStr);
     if (d && (!latestScalp || d > latestScalp)) latestScalp = d;
@@ -4997,7 +5011,7 @@ function calculateAranterScore(s, refDate) {
 
   // 4. MACD Bull Divergence
   let latestMacd = null;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const dStr = tf[tfKey]?.macd?.bull?.date;
     const d = parseIndoDate(dStr);
     if (d && (!latestMacd || d > latestMacd)) latestMacd = d;
@@ -5018,7 +5032,7 @@ function calculateAranterScore(s, refDate) {
 
   // Bonus konfluensi BOS / CHoCH Breakout
   let hasBOS = false;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const st = tf[tfKey]?.smc?.status_7d || "";
     if (st.includes("BOS") || st.includes("CHoCH") || st.includes("BREAKOUT")) hasBOS = true;
   });
@@ -5026,7 +5040,7 @@ function calculateAranterScore(s, refDate) {
 
   // Bonus harga sangat dekat demand (<= 5%)
   let isVeryCloseDemand = false;
-  ['D', '60', '15'].forEach(tfKey => {
+  tfKeys.forEach(tfKey => {
     const pDem = tf[tfKey]?.smc?.pct_to_demand;
     if (pDem != null && Math.abs(pDem) <= 5) isVeryCloseDemand = true;
   });
@@ -5066,7 +5080,7 @@ function checkHasActiveRedDot(s, sym = null) {
 
   // 2. Cek di seluruh timeframe objek saham: jika ada sinyal red_dot aktif (active === true)
   if (s.timeframes) {
-    for (const tf of ['D', '60', '15']) {
+    for (const tf of getStockTfKeys(s)) {
       const rd = s.timeframes[tf]?.red_dot;
       if (rd && rd.active) return true;
     }
@@ -5913,7 +5927,7 @@ function getGuidePageHTML() {
             </div>
             <div class="guide-hl-text">
               <h4>Multi-Timeframe Alignment</h4>
-              <p>Mengonfirmasi tren bullish secara serempak di Daily (1D), 1 Jam (1H), dan 15 Menit (15M) untuk menghindari sinyal palsu (<i>fakeout</i>).</p>
+              <p>Mengonfirmasi tren bullish secara serempak di Daily (1D), 1 Jam (1H), dan 45 Menit (45M) untuk menghindari sinyal palsu (<i>fakeout</i>).</p>
             </div>
           </div>
 
@@ -6086,12 +6100,12 @@ function getGuidePageHTML() {
               <span class="badge-chip chip-golden" style="font-size:10px;">3-DOT &amp; 2-DOT</span>
             </div>
             <p class="guide-ind-desc">
-              Sinyal titik hijau konfirmasi tren bullish multi-timeframe. Jika 3/3 timeframe (Daily, 1H, 15M) aktif, saham diklasifikasikan sebagai <b>VVIP 3-DOT</b>. Jika 2/3 aktif, masuk <b>RADAR POTENSIAL</b>.
+              Sinyal titik hijau konfirmasi tren bullish multi-timeframe. Jika 3/3 timeframe (Daily, 1H, 45M) aktif, saham diklasifikasikan sebagai <b>VVIP 3-DOT</b>. Jika 2/3 aktif, masuk <b>RADAR POTENSIAL</b>.
             </p>
             <div class="guide-ind-chips">
               <span class="badge-chip chip-neutral" style="font-size:10.5px;">1D: Daily Trend</span>
               <span class="badge-chip chip-neutral" style="font-size:10.5px;">1H: Hourly Swing</span>
-              <span class="badge-chip chip-neutral" style="font-size:10.5px;">15M: Intraday Momentum</span>
+              <span class="badge-chip chip-neutral" style="font-size:10.5px;">45M: Intraday Momentum</span>
             </div>
           </div>
 
@@ -6130,7 +6144,7 @@ function getGuidePageHTML() {
               <span class="badge-chip chip-scalp-buy" style="font-size:10px;">ACTION SIGNAL</span>
             </div>
             <p class="guide-ind-desc">
-              Indikator momentum aksi cepat. <b>BUY (Green)</b> memberi sinyal bahwa saham siap dieksekusi baik untuk trading kilat (scalping 15M) maupun swing mingguan (1H). Menampilkan harga beli acuan (@ Rp ...).
+              Indikator momentum aksi cepat. <b>BUY (Green)</b> memberi sinyal bahwa saham siap dieksekusi baik untuk trading kilat (scalping 45M) maupun swing mingguan (1H). Menampilkan harga beli acuan (@ Rp ...).
             </p>
             <div class="guide-ind-chips">
               <span class="badge-chip chip-scalp-buy" style="font-size:10.5px;">BUY (1H) @ Rp ...</span>
@@ -6147,7 +6161,7 @@ function getGuidePageHTML() {
               Pola divergensi bullish: Grafik harga saham membentuk titik terendah lebih rendah (<i>lower low</i>), tetapi osilator MACD justru membentuk titik terendah lebih tinggi (<i>higher low</i>). Tanda bandar sedang akumulasi di harga bawah!
             </p>
             <div class="guide-ind-chips">
-              <span class="badge-chip chip-macd-buy" style="font-size:10.5px;">Bullish Div (15M) @ Rp ...</span>
+              <span class="badge-chip chip-macd-buy" style="font-size:10.5px;">Bullish Div (45M) @ Rp ...</span>
               <span class="badge-chip chip-macd-buy" style="font-size:10.5px;">Bullish Div (1H)</span>
             </div>
           </div>
@@ -6221,7 +6235,7 @@ function getGuidePageHTML() {
                     <div style="font-size:8.5px; color:var(--text-muted); margin-top:2px;">20 Okt 2026</div>
                   </div>
                   <div style="background:rgba(16,185,129,0.12); padding:5px; border-radius:6px;">
-                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; font-weight:700; color:var(--text-primary);"><span>15M</span><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981;"></span></div>
+                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; font-weight:700; color:var(--text-primary);"><span>45M</span><span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 6px #10B981;"></span></div>
                     <div style="font-size:8.5px; color:var(--text-muted); margin-top:2px;">20 Okt 2026</div>
                   </div>
                 </div>
@@ -6232,7 +6246,7 @@ function getGuidePageHTML() {
             <div style="position:relative; display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
               <span class="guide-marker" style="position:absolute; top:-6px; right:-6px; z-index:2;">3</span>
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed var(--border-light);">
-                <span style="color:var(--text-muted);">DonAlt EMA (15M):</span>
+                <span style="color:var(--text-muted);">DonAlt EMA (45M):</span>
                 <span class="badge-chip chip-golden" style="font-size:10px;">Golden Cross (+4.0%)</span>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0; border-bottom:1px dashed var(--border-light);">
@@ -6244,7 +6258,7 @@ function getGuidePageHTML() {
                 <span class="badge-chip chip-scalp-buy" style="font-size:10px;">BUY (1H) @ Rp 60</span>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; padding:4px 0;">
-                <span style="color:var(--text-muted);">MACD Div (15M):</span>
+                <span style="color:var(--text-muted);">MACD Div (45M):</span>
                 <span class="badge-chip chip-macd-buy" style="font-size:10px;">Bullish Div @ Rp 66</span>
               </div>
             </div>
@@ -6279,7 +6293,7 @@ function getGuidePageHTML() {
               <span class="guide-marker">2</span>
               <div class="guide-point-content">
                 <h4>RallyGood Multi-Timeframe Dot Matrix</h4>
-                <p>Menampilkan status titik hijau pada 3 timeframe penting: <b>Daily (1D)</b> untuk tren besar harian, <b>Hourly (1H)</b> untuk swing mingguan, dan <b>15 Menit (15M)</b> untuk momentum intraday. Dilengkapi tanggal deteksi sinyal.</p>
+                <p>Menampilkan status titik hijau pada 3 timeframe penting: <b>Daily (1D)</b> untuk tren besar harian, <b>Hourly (1H)</b> untuk swing mingguan, dan <b>45 Menit (45M)</b> untuk momentum intraday. Dilengkapi tanggal deteksi sinyal.</p>
               </div>
             </div>
 
@@ -6895,7 +6909,7 @@ function updateTopMetrics(vipCount, potCount, p3, p4, hideTotalMeta = false) {
   const hideMeta = typeof p4 === "boolean" ? p4 : hideTotalMeta;
 
   applyGridCardMode("daily");
-  updateMetricCard(0, "VVIP", "tag-gold", vipCount, "Full Rally Good", "Konfirmasi Daily + 1H + 15M");
+  updateMetricCard(0, "VVIP", "tag-gold", vipCount, "Full Rally Good", "Konfirmasi Daily + 1H + 45M");
   updateMetricCard(1, "RADAR POTENSIAL", "tag-cyan", potCount, "2 Rally good", "Siap pantau untuk konfirmasi ke-3");
   updateMetricCard(3, "SAHAM PILIHAN", "tag-slate", totalCount, "Lolos Seleksi Sinyal", "Kualifikasi 2 Rally Good", hideMeta);
   renderScreenerTrendSparkline();
@@ -6929,10 +6943,13 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
     volFormatted = (volVal / 1000000).toFixed(1) + " Juta lbr";
   }
 
-  // Timeframe Status
+  // Timeframe Status (dinamis: 45M untuk data baru, 15M untuk riwayat lama)
   const tfD = tf.D || {};
   const tf60 = tf['60'] || {};
-  const tf15 = tf['15'] || {};
+  const intra = resolveIntradayTf(tf);
+  const tfIntra = intra.data;
+  const intraKey = intra.key;
+  const intraLabel = intra.label;
 
   // TradingView Link
   const tvUrl = `${CHART_BASE_URL}?symbol=IDX%3A${stock.symbol}&interval=D`;
@@ -6942,18 +6959,18 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   let goldenCross = null;
   let deathCross = null;
 
-  if (tf15.donalt?.golden) {
-    goldenCross = tf15.donalt.golden;
-    donaltTfLabel = "15M";
+  if (tfIntra.donalt?.golden) {
+    goldenCross = tfIntra.donalt.golden;
+    donaltTfLabel = intraLabel;
   } else if (tf60.donalt?.golden) {
     goldenCross = tf60.donalt.golden;
     donaltTfLabel = "1H";
   } else if (tfD.donalt?.golden) {
     goldenCross = tfD.donalt.golden;
     donaltTfLabel = "1D";
-  } else if (tf15.donalt?.death) {
-    deathCross = tf15.donalt.death;
-    donaltTfLabel = "15M";
+  } else if (tfIntra.donalt?.death) {
+    deathCross = tfIntra.donalt.death;
+    donaltTfLabel = intraLabel;
   } else if (tf60.donalt?.death) {
     deathCross = tf60.donalt.death;
     donaltTfLabel = "1H";
@@ -6975,9 +6992,9 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   let smcStatus = tfD.smc?.status_7d || "";
   let breakoutEvent = null;
 
-  // Prioritaskan mencari Breakout (BOS, CHoCH, Breakout Supply) di 1D, 1H, atau 15M
-  for (const tfKey of ['D', '60', '15']) {
-    const tfCode = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+  // Prioritaskan mencari Breakout (BOS, CHoCH, Breakout Supply) di 1D, 1H, atau Intraday (45M/15M)
+  for (const tfKey of ['D', '60', intraKey]) {
+    const tfCode = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : intraLabel);
     const bo = extractBreakoutInfo(tf[tfKey]?.smc, tfCode);
     if (bo && (bo.type === 'BOS' || bo.type === 'CHoCH' || bo.type === 'Breakout Supply')) {
       breakoutEvent = bo;
@@ -6995,9 +7012,9 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
     if (!smcStatus && tf60.smc?.status_7d) {
       smcStatus = tf60.smc.status_7d;
       smcTfLabel = "1H";
-    } else if (!smcStatus && tf15.smc?.status_7d) {
-      smcStatus = tf15.smc.status_7d;
-      smcTfLabel = "15M";
+    } else if (!smcStatus && tfIntra.smc?.status_7d) {
+      smcStatus = tfIntra.smc.status_7d;
+      smcTfLabel = intraLabel;
     }
     smcRowTitle = `SMC Area (${smcTfLabel}):`;
     if (smcStatus) {
@@ -7016,10 +7033,10 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   let scalpTrend = tf60.scalping?.trend || "";
   let scalpBuyObj = tf60.scalping?.buy || null;
 
-  if (!scalpTrend && tf15.scalping?.trend) {
-    scalpTrend = tf15.scalping.trend;
-    scalpBuyObj = tf15.scalping?.buy || null;
-    scalpTfLabel = "15M";
+  if (!scalpTrend && tfIntra.scalping?.trend) {
+    scalpTrend = tfIntra.scalping.trend;
+    scalpBuyObj = tfIntra.scalping?.buy || null;
+    scalpTfLabel = intraLabel;
   } else if (!scalpTrend && tfD.scalping?.trend) {
     scalpTrend = tfD.scalping.trend;
     scalpBuyObj = tfD.scalping?.buy || null;
@@ -7027,10 +7044,10 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   }
 
   if (!scalpBuyObj) {
-    for (const tfKey of ['15', '60', 'D']) {
+    for (const tfKey of [intraKey, '60', 'D']) {
       if (tf[tfKey]?.scalping?.buy) {
         scalpBuyObj = tf[tfKey].scalping.buy;
-        scalpTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+        scalpTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : intraLabel);
         break;
       }
     }
@@ -7048,10 +7065,10 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
   // Sinyal MACD Divergence (Bullish BUY)
   let macdTfLabel = "";
   let macdBullObj = null;
-  for (const tfKey of ['15', '60', 'D']) {
+  for (const tfKey of [intraKey, '60', 'D']) {
     if (tf[tfKey]?.macd?.bull && (tf[tfKey]?.macd?.bull?.date || tf[tfKey]?.macd?.bull?.price)) {
       macdBullObj = tf[tfKey].macd.bull;
-      macdTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : '15M');
+      macdTfLabel = tfKey === 'D' ? '1D' : (tfKey === '60' ? '1H' : intraLabel);
       break;
     }
   }
@@ -7119,7 +7136,7 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
         </div>
       </div>
 
-      <!-- Timeframe Dot Green Status (1D, 1H, 15M) -->
+      <!-- Timeframe Dot Green Status (1D, 1H, 45M/15M) -->
       <div class="timeframe-dots-box">
         <div class="dots-label-row">
           <span>RALLYGOOD DOT GREEN</span>
@@ -7145,13 +7162,13 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
             <span class="tf-date" title="${tf60.date || '-'}">${tf60.date ? tf60.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
           </div>
 
-          <!-- 15M -->
-          <div class="tf-item ${tf15.status ? 'active' : ''}">
+          <!-- Intraday (45M / 15M riwayat lama) -->
+          <div class="tf-item ${tfIntra.status ? 'active' : ''}">
             <div class="tf-header">
-              <span class="tf-name">15M</span>
+              <span class="tf-name">${intraLabel}</span>
               <span class="tf-dot"></span>
             </div>
-            <span class="tf-date" title="${tf15.date || '-'}">${tf15.date ? tf15.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
+            <span class="tf-date" title="${tfIntra.date || '-'}">${tfIntra.date ? tfIntra.date.split(',')[0].replace(' (Kenaikan:', '') : '-'}</span>
           </div>
         </div>
       </div>
@@ -7172,7 +7189,7 @@ function createStockCardHTML(stock, vipDateLabel = null, trackRecordInfo = null)
         </div>
         ${macdBullObj || currentMode === "recommendation" ? `
         <div class="indicator-row">
-          <span class="indicator-title">MACD Div (${macdTfLabel || '15M'}):</span>
+          <span class="indicator-title">MACD Div (${macdTfLabel || intraLabel}):</span>
           <div class="indicator-val">${macdChip}</div>
         </div>
         ` : ''}
@@ -7269,7 +7286,9 @@ function openStockDetail(symbol) {
   const tf = stock.timeframes || {};
   const tfD = tf.D || {};
   const tf60 = tf['60'] || {};
-  const tf15 = tf['15'] || {};
+  const intra = resolveIntradayTf(tf);
+  const tfIntra = intra.data;
+  const intraLabel = intra.label;
   const isVip = stock.count_green === 3;
 
   // Format Harga & Kenaikan
@@ -7518,35 +7537,35 @@ function openStockDetail(symbol) {
   // Evaluasi DonAlt EMA Suite
   const donaltD = tfD.donalt || {};
   const donalt60 = tf60.donalt || {};
-  const donalt15 = tf15.donalt || {};
+  const donaltIntra = tfIntra.donalt || {};
 
-  const hasGolden = (donaltD.golden || donalt60.golden || donalt15.golden);
-  const hasDeath = (donaltD.death || donalt60.death || donalt15.death);
+  const hasGolden = (donaltD.golden || donalt60.golden || donaltIntra.golden);
+  const hasDeath = (donaltD.death || donalt60.death || donaltIntra.death);
 
   // Evaluasi Scalping Signal
   const scalpD = tfD.scalping || {};
   const scalp60 = tf60.scalping || {};
-  const scalp15 = tf15.scalping || {};
+  const scalpIntra = tfIntra.scalping || {};
 
-  const scalpTrend = scalp60.trend || scalp15.trend || scalpD.trend || "Netral";
+  const scalpTrend = scalp60.trend || scalpIntra.trend || scalpD.trend || "Netral";
   const isScalpBuy = scalpTrend.includes("BUY") || scalpTrend.includes("Green");
 
   // Evaluasi SMC
   const smcD = tfD.smc || {};
   const smc60 = tf60.smc || {};
-  const smc15 = tf15.smc || {};
+  const smcIntra = tfIntra.smc || {};
 
   // Evaluasi MACD
   const macdD = tfD.macd || {};
   const macd60 = tf60.macd || {};
-  const macd15 = tf15.macd || {};
+  const macdIntra = tfIntra.macd || {};
 
-  // Evaluasi Breakout di seluruh TF (1D, 1H, 15M)
+  // Evaluasi Breakout di seluruh TF (1D, 1H, Intraday 45M/15M)
   const allBreakouts = [];
   [
     { tf: '1D', smc: smcD },
     { tf: '1H', smc: smc60 },
-    { tf: '15M', smc: smc15 }
+    { tf: intraLabel, smc: smcIntra }
   ].forEach(item => {
     const b = extractBreakoutInfo(item.smc, item.tf);
     if (b && (b.type === 'BOS' || b.type === 'CHoCH' || b.type === 'Breakout Supply')) {
@@ -7590,9 +7609,9 @@ function openStockDetail(symbol) {
     // 1. METRIK OPSI 1: Kenaikan Setelah Dot Green (TradingView)
     let dotClosePrice = null;
     let dotDateDisplay = null;
-    if (tf15.dot_close) {
-      dotClosePrice = Number(tf15.dot_close);
-      dotDateDisplay = cleanDate(tf15.date);
+    if (tfIntra.dot_close) {
+      dotClosePrice = Number(tfIntra.dot_close);
+      dotDateDisplay = cleanDate(tfIntra.date);
     } else if (tf60.dot_close) {
       dotClosePrice = Number(tf60.dot_close);
       dotDateDisplay = cleanDate(tf60.date);
@@ -8135,7 +8154,7 @@ function openStockDetail(symbol) {
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           <div>
             <b>Keterangan Status Sinyal:</b><br/>
-            • <b>🟢 3-Dot Terdeteksi / Aktif:</b> Ketiga timeframe (Daily, 1H, 15M) aktif memunculkan sinyal Rally Good Dot Green.<br/>
+            • <b>🟢 3-Dot Terdeteksi / Aktif:</b> Ketiga timeframe (Daily, 1H, ${intraLabel}) aktif memunculkan sinyal Rally Good Dot Green.<br/>
             • <b>⚪ Masa Pantau:</b> Dot green padam di timeframe intraday, namun saham tetap aktif dipantau & diperbarui harganya selama 30 hari bursa.<br/>
             • <i>Jika saham memicu 3-Dot Green baru, siklus deteksi awal dan masa kedaluwarsa 30 hari akan di-reset otomatis.</i>
           </div>
@@ -8204,7 +8223,7 @@ function openStockDetail(symbol) {
 
         ${breakoutBannerHtml}
 
-        <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 15M) -->
+        <!-- SECTION 1: RALLYGOOD DOT GREEN PER TIMEFRAME (1D, 1H, 45M/15M) -->
         <div class="modal-section">
           <div class="modal-sec-title">
             <span>Sinyal RallyGood Dot Green & Kenaikan Harga</span>
@@ -8212,7 +8231,7 @@ function openStockDetail(symbol) {
           <div class="modal-tf-grid">
             ${renderTfDetailCard("1D", tfD)}
             ${renderTfDetailCard("1H", tf60)}
-            ${renderTfDetailCard("15M", tf15)}
+            ${renderTfDetailCard(intraLabel, tfIntra)}
           </div>
           ${miniKpiHtml}
         </div>
@@ -8220,7 +8239,7 @@ function openStockDetail(symbol) {
         <!-- SECTION 2 & 3: DONALT EMA + SCALPING SIGNAL -->
         <div class="detail-box-grid">
           
-          <!-- DonAlt EMA Suite (1D, 1H, 15M) -->
+          <!-- DonAlt EMA Suite (1D, 1H, 45M/15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>DonAlt EMA Golden & Death Cross</span>
@@ -8236,12 +8255,12 @@ function openStockDetail(symbol) {
               <span class="detail-info-value">${formatDonaltPerTf(donalt60)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">DonAlt (15M):</span>
-              <span class="detail-info-value">${formatDonaltPerTf(donalt15)}</span>
+              <span class="detail-info-label">DonAlt (${intraLabel}):</span>
+              <span class="detail-info-value">${formatDonaltPerTf(donaltIntra)}</span>
             </div>
           </div>
 
-          <!-- Scalp & Swing Trading Signal (1D, 1H, 15M) -->
+          <!-- Scalp & Swing Trading Signal (1D, 1H, 45M/15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>Scalp & Swing Trading</span>
@@ -8265,8 +8284,8 @@ function openStockDetail(symbol) {
               <span class="detail-info-value">${formatScalpPerTf(scalp60)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">Scalping (15M):</span>
-              <span class="detail-info-value">${formatScalpPerTf(scalp15)}</span>
+              <span class="detail-info-label">Scalping (${intraLabel}):</span>
+              <span class="detail-info-value">${formatScalpPerTf(scalpIntra)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Volume Transaksi:</span>
@@ -8279,7 +8298,7 @@ function openStockDetail(symbol) {
         <!-- SECTION 4 & 5: SMART MONEY CONCEPTS (SMC) & MACD DIVERGENCE -->
         <div class="detail-box-grid">
           
-          <!-- Smart Money Concepts (1D, 1H, 15M) -->
+          <!-- Smart Money Concepts (1D, 1H, 45M/15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>Smart Money Concepts (SMC)</span>
@@ -8295,16 +8314,16 @@ function openStockDetail(symbol) {
               <span class="detail-info-value">${formatSmcPerTf(smc60, stock.close, '1H')}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">SMC (15M):</span>
-              <span class="detail-info-value">${formatSmcPerTf(smc15, stock.close, '15M')}</span>
+              <span class="detail-info-label">SMC (${intraLabel}):</span>
+              <span class="detail-info-value">${formatSmcPerTf(smcIntra, stock.close, intraLabel)}</span>
             </div>
           </div>
 
-          <!-- MACD Divergences (1D, 1H, 15M) -->
+          <!-- MACD Divergences (1D, 1H, 45M/15M) -->
           <div class="detail-info-card">
             <div class="detail-info-head">
               <span>MACD Divergences</span>
-              <span class="badge-mini">1D • 1H • 15M</span>
+              <span class="badge-mini">1D • 1H • ${intraLabel}</span>
             </div>
 
             <div class="detail-info-row">
@@ -8316,8 +8335,8 @@ function openStockDetail(symbol) {
               <span class="detail-info-value">${formatMacdPerTf(macd60)}</span>
             </div>
             <div class="detail-info-row">
-              <span class="detail-info-label">MACD (15M):</span>
-              <span class="detail-info-value">${formatMacdPerTf(macd15)}</span>
+              <span class="detail-info-label">MACD (${intraLabel}):</span>
+              <span class="detail-info-value">${formatMacdPerTf(macdIntra)}</span>
             </div>
             <div class="detail-info-row">
               <span class="detail-info-label">Keterangan:</span>
