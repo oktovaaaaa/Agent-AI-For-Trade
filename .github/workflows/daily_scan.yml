@@ -1,14 +1,15 @@
 name: Bot Hunter IDX Screener & Real-Time Alert
 
 on:
-  schedule:
-    # Catatan: Waktu Cron GitHub Actions menggunakan format UTC (WIB = UTC+7)
-    # 1. Sesi I (Senin - Jumat 09:05 WIB -> 02:05 UTC)
-    - cron: '5 2 * * 1-5'
-    # 2. Sesi II (Senin - Kamis 13:30 WIB -> 06:30 UTC)
-    - cron: '30 6 * * 1-4'
-    # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
-    - cron: '0 7 * * 5'
+  # Catatan: Waktu Cron GitHub Actions dinonaktifkan karena sering tertahan antrean runner hingga tengah malam.
+  # Trigger otomatis sekarang sepenuhnya mengandalkan cronjob eksternal via workflow_dispatch.
+  # schedule:
+  #   # 1. Sesi I (Senin - Jumat 09:05 WIB -> 02:05 UTC)
+  #   - cron: '5 2 * * 1-5'
+  #   # 2. Sesi II (Senin - Kamis 13:30 WIB -> 06:30 UTC)
+  #   - cron: '30 6 * * 1-4'
+  #   # 3. Sesi II (Jumat 14:00 WIB -> 07:00 UTC)
+  #   - cron: '0 7 * * 5'
 
   workflow_dispatch:
     inputs:

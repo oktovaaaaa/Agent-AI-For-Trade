@@ -3031,6 +3031,11 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
                     print(f"🛑 [BURSA LIBUR] Hari ini tidak ada sesi perdagangan aktif bursa IDX ({session_name}).")
                     print("🏁 Runner selesai dengan aman tanpa mengubah database web.")
                     break
+                cur_t = now_wib.time()
+                if cur_t >= datetime.time(18, 0) or cur_t < datetime.time(8, 30):
+                    print(f"🛑 [{now_wib.strftime('%H:%M:%S WIB')}] Pemicu sesi di luar jam operasional wajar IDX (Malam/Dini Hari).")
+                    print("🏁 Scan otomatis dibatalkan untuk mencegah notifikasi tengah malam.")
+                    break
                 print("🌙 [DI LUAR JAM BURSA] Menjalankan 1x scan harian penuh & memperbarui database web...")
                 await run_daily_scan(send_wa=True, realtime_mode=False)
                 clear_alerted_keys()
