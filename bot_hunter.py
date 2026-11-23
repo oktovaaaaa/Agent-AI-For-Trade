@@ -13,6 +13,12 @@ from PIL import Image
 import pytz
 from tradingview_screener import Query, Column
 from playwright.async_api import async_playwright
+try:  # live feed ke kantor 3D Aranter (tidak aktif tanpa LIVE_PUSH_URL & LIVE_TOKEN)
+    from live_feed import emit as live_emit, flush as live_flush, stock_entry as live_entry
+except Exception:  # noqa: BLE001
+    def live_emit(*a, **k): pass
+    def live_flush(*a, **k): pass
+    def live_entry(stock, tf): return {"symbol": stock.get("symbol")}
 try:
     import psutil
 except ImportError:
@@ -969,6 +975,7 @@ def check_and_send_instant_alert(stock, tf_results, alerted_keys, now_wib, save_
     print(f"\n🟢 [BULLISH ALERT] Sinyal konfluensi ({len(today_signals)} sinyal hari ini + {len(daily_past_signals)} daily) terdeteksi untuk {sym}. Mengirim WhatsApp...")
     sent = kirim_whatsapp(pesan_alert)
     if sent:
+        live_emit("alert", symbol=sym, signals=len(today_signals))
         for s in today_signals:
             alerted_keys.add(s["key"])
         if save_to_disk:
@@ -2354,6 +2361,7 @@ def simpan_database_json(hasil_deteksi, now_wib, force_save=False, target_date=N
             json.dump(history, f, ensure_ascii=False, indent=2, default=str)
             
         print(f"💾 [DATABASE WEB] Berhasil menyimpan data scan & riwayat 1 bulan (30 hari rolling) di {history_file}")
+        live_emit("saved", last_updated=history.get("last_updated"))
     except Exception as e:
         print(f"⚠️ [DATABASE WEB ERROR] Gagal menyimpan data JSON: {e}")
 
@@ -2476,6 +2484,8 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
         
     hasil_deteksi = []
     t_start_total = time.time()
+    live_emit("cycle_start", total=len(stocks_to_scan), realtime=bool(realtime_mode),
+              screener=len(hunter_stocks), symbols=[s_.get("symbol") for s_ in stocks_to_scan])
     async with async_playwright() as pw:
         browser_args = [
             "--no-sandbox",
@@ -2676,6 +2686,8 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                                 if realtime_mode and alerted_keys is not None:
                                     await asyncio.to_thread(check_and_send_instant_alert, stock, tf_results, alerted_keys, now_wib)
                             print(f"⏱️ [{idx}/{total_stocks}] [Worker {worker_id} | Akun {account_num}] Selesai {sym} dalam {dur_saham:.1f} detik.")
+                            live_emit("stock", worker=worker_id, idx=idx, total=total_stocks, dur=round(dur_saham, 1),
+                                      stock=live_entry(stock, tf_results))
                             break
                         except Exception as err_saham:
                             if attempt < MAX_RETRIES:
@@ -2734,6 +2746,7 @@ async def run_daily_scan(send_wa=True, realtime_mode=False, alerted_keys=None, a
                 await asyncio.sleep(2.0)
 
         await asyncio.gather(*tasks)
+        live_emit("cycle_done", count=len(hasil_deteksi), secs=round(time.time() - t_start_total, 1))
         hw_stats = hw_mon.stop()
         hw_task.cancel()
         await browser.close()
@@ -3023,6 +3036,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
         session_info = get_current_idx_session(now_wib)
         status = session_info["status"]
         session_name = session_info["name"]
+        live_emit("session", status=status, name=session_name, session=session_info.get("session"))
 
         if status == "CLOSED":
             print(f"🛑 [{now_wib.strftime('%H:%M:%S WIB')}] {session_name}.")
@@ -3223,6 +3237,8 @@ def main():
         single_sess = ("--session" in sys.argv) or bool(os.environ.get("GITHUB_ACTIONS"))
         test_mode = ("--now" in sys.argv)
         asyncio.run(run_realtime_market_session(single_session=single_sess, test_mode=test_mode))
+        live_emit("session", status="ENDED", name="Runner selesai")
+        live_flush()
         return
 
     # Argumen --now untuk pengujian scan harian langsung 1x
