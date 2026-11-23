@@ -3095,6 +3095,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
             # Transisi akhir Sesi 1 (Jam Istirahat Siang / Sholat Jumat)
             if cur_session_type == "SESI_1" and (new_session["session"] != "SESI_1" or now_after.time() >= end_time):
                 print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI I TELAH BERAKHIR (JAM ISTIRAHAT).")
+                live_emit("session", status="BREAK", name="Istirahat siang · snapshot Sesi I", session="BREAK")
                 
                 # Audit Saham VIP yang sepi saat istirahat siang
                 vip_audit_stocks = get_missing_vip_stocks(hasil)
@@ -3119,6 +3120,7 @@ async def run_realtime_market_session(single_session=False, test_mode=False):
             # Transisi akhir Sesi 2 (Penutupan Perdagangan / Closing)
             elif cur_session_type == "SESI_2" and (new_session["session"] != "SESI_2" or now_after.time() >= end_time):
                 print(f"\n🔔 [{now_after.strftime('%H:%M:%S WIB')}] SESI II TELAH BERAKHIR (PENUTUPAN PASAR).")
+                live_emit("session", status="CLOSING", name="Pasar tutup · audit penutupan", session="CLOSING")
                 print("🔍 Menjalankan Audit & Perbaikan Saham VIP 3-Dot di penutupan pasar...")
                 hasil_closing = await run_daily_scan(send_wa=False, realtime_mode=False, alerted_keys=alerted_keys, audit_vip=True)
                 print("💾 Memperbarui database web penutupan & mengirim Rangkuman Penutupan WhatsApp...")
